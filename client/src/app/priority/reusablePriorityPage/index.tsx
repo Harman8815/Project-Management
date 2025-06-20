@@ -78,7 +78,8 @@ const ReusablePriorityPage = ({ priority }: Props) => {
   const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false);
 
   const { data: currentUser } = useGetAuthUserQuery({});
-  const userId = currentUser?.userDetails?.userId ?? null;
+  // const userId = currentUser?.userDetails?.userId ?? null;
+  const userId = 3
   const {
     data: tasks,
     isLoading,
@@ -88,12 +89,21 @@ const ReusablePriorityPage = ({ priority }: Props) => {
   });
 
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
-
+  // console.log("isDarkMode", tasks);
   const filteredTasks = tasks?.filter(
     (task: Task) => task.priority === priority,
   );
+  // console.log("priority", priority);
+  // console.log("filteredTasks", filteredTasks);
 
-  if (isTasksError || !tasks) return <div>Error fetching tasks</div>;
+  if (isTasksError || !tasks || filteredTasks.length === 0)
+  return (
+    <div className="flex h-64 w-full items-center justify-center rounded-md border border-dashed border-gray-300 bg-gray-50 dark:border-gray-700 dark:bg-black/20">
+      <p className="text-sm font-medium text-gray-500 dark:text-gray-300">
+        No data available
+      </p>
+    </div>
+  );
 
   return (
     <div className="m-5 p-4">
