@@ -10,6 +10,8 @@ import taskRoutes from "./routes/taskRoutes";
 import searchRoutes from "./routes/searchRoutes";
 import userRoutes from "./routes/userRoutes";
 import teamRoutes from "./routes/teamRoutes";
+// import seeder from "./routes/seeder";
+// import { main } from "../prisma/seed";
 
 /* CONFIGURATIONS */
 dotenv.config();
@@ -27,6 +29,8 @@ app.get("/", (req, res) => {
   res.send("This is home route");
 });
 
+// app.use("/seeder", seeder);
+// main()
 app.use("/projects", projectRoutes);
 app.use("/tasks", taskRoutes);
 app.use("/search", searchRoutes);
