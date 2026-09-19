@@ -2,8 +2,12 @@
 server/node_modules/
 server/dist/
 server/.env
+server/.env.test
 server/prisma/dev.db
 server/prisma/*.db
+server/prisma/test.db*
+server/test.db
+server/test.db*
 
 # Client
 client/node_modules/
