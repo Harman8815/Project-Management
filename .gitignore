@@ -11,6 +11,4 @@ client/dist/
 client/.next/
 client/.env
 
-# Documentation (not tracked)
-docs/
 Phase_information.md

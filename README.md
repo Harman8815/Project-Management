@@ -1,6 +1,6 @@
 # ProjeX - Project Management System
 
-A full-stack project management application built with Next.js (frontend) and Express.js + Prisma + PostgreSQL (backend). The application helps teams manage projects, tasks, teams, and users with priority-based task tracking, board/list/table/timeline views, and AWS Cognito authentication.
+A full-stack project management application built with Next.js (frontend) and Express.js + Prisma (backend). Supports SQLite for local development and PostgreSQL for production. The application helps teams manage projects, tasks, teams, and users with priority-based task tracking, board/list/table/timeline views, and AWS Cognito authentication.
 
 ## Features
 
@@ -11,7 +11,7 @@ A full-stack project management application built with Next.js (frontend) and Ex
 - **Search**: Search across tasks, projects, and users
 - **Authentication**: AWS Cognito based authentication
 - **State Management**: Redux Toolkit with RTK Query for API calls and redux-persist for state persistence
-- **Database**: PostgreSQL via Prisma ORM
+- **Database**: SQLite (local dev) / PostgreSQL (production) via Prisma ORM
 - **Responsive UI**: Tailwind CSS + Material-UI components
 
 ## Tech Stack
@@ -28,9 +28,9 @@ A full-stack project management application built with Next.js (frontend) and Ex
 - **recharts** for charts
 
 ### Backend (Server)
-- **Express.js** REST API
-- **TypeScript**
-- **Prisma ORM** with PostgreSQL
+   - **Express.js** REST API
+   - **TypeScript**
+   - **Prisma ORM** with SQLite (local) / PostgreSQL (production)
 - **JWT/Cognito** authentication via AWS Amplify
 - **helmet**, **cors**, **morgan** for security and logging
 
@@ -76,13 +76,13 @@ A full-stack project management application built with Next.js (frontend) and Ex
 
 3. Set up environment variables. Create a `.env` file in the `server` directory:
    ```env
-   DATABASE_URL="postgresql://user:password@host:port/database"
-   PORT=3000
+   DATABASE_URL="file:./dev.db"
+   PORT=8000
    ```
 
 4. Set up the database and run migrations:
    ```bash
-   npx prisma migrate deploy
+   npx prisma migrate dev --name init
    ```
 
 5. Seed the database with sample data:
