@@ -24,7 +24,7 @@ export const getTeams = async (req: Request, res: Response): Promise<void> => {
           productOwnerUsername: productOwner?.username,
           projectManagerUsername: projectManager?.username,
         };
-      })
+      }),
     );
 
     res.json(teamsWithUsernames);

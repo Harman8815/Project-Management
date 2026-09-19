@@ -16,9 +16,7 @@ import { errorHandler } from "./middleware/errorHandler";
 dotenv.config();
 
 const requiredEnvVars = ["DATABASE_URL"];
-const missingEnvVars = requiredEnvVars.filter(
-  (envVar) => !process.env[envVar],
-);
+const missingEnvVars = requiredEnvVars.filter((envVar) => !process.env[envVar]);
 
 if (missingEnvVars.length > 0) {
   const errorMsg = `Missing required environment variables: ${missingEnvVars.join(", ")}`;
@@ -33,7 +31,8 @@ if (missingEnvVars.length > 0) {
 const app = express();
 
 app.use((req, res, next) => {
-  req.headers["x-request-id"] = req.headers["x-request-id"] || crypto.randomUUID();
+  req.headers["x-request-id"] =
+    req.headers["x-request-id"] || crypto.randomUUID();
   next();
 });
 

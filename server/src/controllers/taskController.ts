@@ -27,7 +27,7 @@ export const getTasks = async (req: Request, res: Response): Promise<void> => {
 
 export const createTask = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const {
     title,
@@ -68,7 +68,7 @@ export const createTask = async (
 
 export const updateTaskStatus = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const { taskId } = req.params;
   const { status } = req.body;
@@ -89,7 +89,7 @@ export const updateTaskStatus = async (
 
 export const getUserTasks = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const { userId } = req.params;
   try {

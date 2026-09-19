@@ -100,8 +100,7 @@ describe("API Regression Tests", () => {
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
       const hasTask = res.body.some(
-        (task: any) =>
-          task.authorUserId === 1 || task.assignedUserId === 1
+        (task: any) => task.authorUserId === 1 || task.assignedUserId === 1,
       );
       expect(hasTask).toBe(true);
     });
@@ -127,7 +126,7 @@ describe("API Regression Tests", () => {
   describe("GET /users/:cognitoId", () => {
     it("should return a user by cognitoId", async () => {
       const res = await request(app).get(
-        "/users/123e4567-e89b-12d3-a456-426614174001"
+        "/users/123e4567-e89b-12d3-a456-426614174001",
       );
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty("username");

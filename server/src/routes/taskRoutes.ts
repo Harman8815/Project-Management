@@ -6,7 +6,11 @@ import {
   updateTaskStatus,
 } from "../controllers/taskController";
 import { validate } from "../middleware/validation";
-import { CreateTaskSchema, GetTasksQuerySchema, UpdateTaskStatusSchema } from "../dtos";
+import {
+  CreateTaskSchema,
+  GetTasksQuerySchema,
+  UpdateTaskStatusSchema,
+} from "../dtos";
 
 const router = Router();
 
