@@ -13,6 +13,21 @@ import teamRoutes from "./routes/teamRoutes";
 
 dotenv.config();
 
+const requiredEnvVars = ["DATABASE_URL"];
+const missingEnvVars = requiredEnvVars.filter(
+  (envVar) => !process.env[envVar],
+);
+
+if (missingEnvVars.length > 0) {
+  const errorMsg = `Missing required environment variables: ${missingEnvVars.join(", ")}`;
+  if (process.env.NODE_ENV !== "test") {
+    console.error(errorMsg);
+    process.exit(1);
+  } else {
+    console.warn(`⚠️  ${errorMsg}`);
+  }
+}
+
 const app = express();
 app.use(express.json());
 app.use(helmet());
