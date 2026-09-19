@@ -8,4 +8,7 @@ client/node_modules/
 client/dist/
 client/.next/
 client/.env
-.Phase_information.md
+
+# Documentation (not tracked)
+docs/
+Phase_information.md
