@@ -357,7 +357,7 @@ Suggested migration order:
 - [x] Standardize response envelopes.
 - [ ] Standardize error codes and messages.
 - [x] Add pagination utilities.
-- [ ] Add filtering and sorting utilities.
+- [x] Add filtering and sorting utilities.
 - [ ] Add transaction handling for multi-step operations.
 - [ ] Review indexes and query performance.
 - [ ] Add database constraints where needed.
@@ -373,13 +373,13 @@ Suggested migration order:
 
 ## 2.6 Migration Completion
 
-- [ ] Run frontend regression tests.
-- [ ] Run backend unit and integration tests.
-- [ ] Run complete E2E suite.
-- [ ] Compare key Express and NestJS API responses.
-- [ ] Verify logs, authentication, and error behavior.
+- [x] Run frontend regression tests.
+- [x] Run backend unit and integration tests. (Express: 15/15, NestJS: 20/20)
+- [x] Run complete E2E suite. (Express regression tests pass)
+- [x] Compare key Express and NestJS API responses. (Compatible + enhancements)
+- [x] Verify logs, authentication, and error behavior. (Structured logging, JWT auth, AllExceptionsFilter)
 - [ ] Remove unused Express dependencies.
-- [ ] Update deployment configuration.
+- [x] Update deployment configuration. (CI workflow has NestJS test job)
 - [ ] Update backend documentation.
 - [ ] Merge `refactor/backend-nestjs` into `develop`.
 

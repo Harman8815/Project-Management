@@ -3,6 +3,7 @@ import { PrismaService } from "../../prisma/prisma.service";
 import { CreateTaskDto } from "./dto/create-task.dto";
 import { UpdateTaskDto } from "./dto/update-task.dto";
 import { UpdateTaskStatusDto } from "./dto/update-task-status.dto";
+import { FilterSortDto } from "../../common/dto/filter-sort.dto";
 
 @Injectable()
 export class TasksService {
@@ -30,9 +31,32 @@ export class TasksService {
     });
   }
 
-  async findAll(projectId: number) {
+  async findAll(projectId: number, filterDto?: FilterSortDto) {
+    const where: any = { projectId };
+
+    if (filterDto?.status) {
+      where.status = filterDto.status;
+    }
+
+    if (filterDto?.priority) {
+      where.priority = filterDto.priority;
+    }
+
+    if (filterDto?.search) {
+      where.OR = [
+        { title: { contains: filterDto.search } },
+        { description: { contains: filterDto.search } },
+      ];
+    }
+
+    const orderBy: any = {};
+    if (filterDto?.sortBy) {
+      orderBy[filterDto.sortBy] = filterDto.sortOrder || "asc";
+    }
+
     return this.prisma.task.findMany({
-      where: { projectId },
+      where,
+      orderBy,
       include: {
         author: true,
         assignee: true,

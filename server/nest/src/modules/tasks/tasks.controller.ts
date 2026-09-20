@@ -13,6 +13,7 @@ import { TasksService } from "./tasks.service";
 import { CreateTaskDto } from "./dto/create-task.dto";
 import { UpdateTaskDto } from "./dto/update-task.dto";
 import { UpdateTaskStatusDto } from "./dto/update-task-status.dto";
+import { FilterSortDto } from "../../common/dto/filter-sort.dto";
 
 @ApiTags("tasks")
 @ApiBearerAuth()
@@ -26,9 +27,15 @@ export class TasksController {
   }
 
   @ApiQuery({ name: "projectId", required: true })
+  @ApiQuery({ name: "status", required: false })
+  @ApiQuery({ name: "priority", required: false })
+  @ApiQuery({ name: "search", required: false })
   @Get()
-  async findAll(@Query("projectId") projectId: number) {
-    return this.tasksService.findAll(projectId);
+  async findAll(
+    @Query("projectId") projectId: number,
+    @Query() filterDto: FilterSortDto,
+  ) {
+    return this.tasksService.findAll(projectId, filterDto);
   }
 
   @Get("user/:userId")

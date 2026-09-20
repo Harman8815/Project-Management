@@ -81,7 +81,7 @@ describe("TasksController", () => {
 
       mockPrismaService.task.findMany.mockResolvedValue(expectedResult);
 
-      const result = await controller.findAll(1);
+      const result = await controller.findAll(1, {});
 
       expect(result).toEqual(expectedResult);
     });
