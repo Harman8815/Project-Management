@@ -14,7 +14,9 @@ import { SearchModule } from "./modules/search/search.module";
 import { TeamsModule } from "./modules/teams/teams.module";
 import { ProjectMembershipsModule } from "./modules/project-memberships/project-memberships.module";
 import { ProjectTemplatesModule } from "./modules/project-templates/project-templates.module";
- 
+import { MilestonesModule } from "./modules/milestones/milestones.module";
+import { SprintsModule } from "./modules/sprints/sprints.module";
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -29,6 +31,8 @@ import { ProjectTemplatesModule } from "./modules/project-templates/project-temp
     TeamsModule,
     ProjectMembershipsModule,
     ProjectTemplatesModule,
+    MilestonesModule,
+    SprintsModule,
   ],
   providers: [
     PrismaService,

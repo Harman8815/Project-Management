@@ -32,6 +32,8 @@ model User {
   createdTemplates   ProjectTemplate[]
   taskWatchers       TaskWatcher[]
   taskHistoryChanges TaskHistory[]
+  ownedMilestones    Milestone[]
+  ownedSprints       Sprint[]
 }
 
 model Team {
@@ -59,6 +61,8 @@ model Project {
   tasks       Task[]
   projectTeams ProjectTeam[]
   members     ProjectMembership[]
+  milestones  Milestone[]
+  sprints     Sprint[]
 }
 
 model ProjectTeam {
@@ -118,6 +122,8 @@ model Task {
   authorUserId   Int
   assignedUserId Int?
   parentId       Int?
+  milestoneId    Int?
+  sprintId       Int?
 
   project         Project          @relation(fields: [projectId], references: [id])
   author          User             @relation("TaskAuthor", fields: [authorUserId], references: [userId])
@@ -131,6 +137,43 @@ model Task {
   taskDependenciesAsBlocker TaskDependency[] @relation("BlockerTask")
   watchers        TaskWatcher[]
   history         TaskHistory[]
+  milestone       Milestone?       @relation(fields: [milestoneId], references: [id])
+  sprint          Sprint?          @relation("SprintTasks", fields: [sprintId], references: [id])
+}
+
+model Milestone {
+  id           Int      @id @default(autoincrement())
+  name         String
+  description  String?
+  projectId    Int
+  startDate    DateTime?
+  dueDate      DateTime?
+  status       String   @default("PLANNED")
+  ownerId      Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  project      Project  @relation(fields: [projectId], references: [id])
+  owner        User?    @relation(fields: [ownerId], references: [userId])
+  tasks        Task[]
+}
+
+model Sprint {
+  id            Int      @id @default(autoincrement())
+  name          String
+  projectId     Int
+  goal          String?
+  startDate     DateTime?
+  endDate       DateTime?
+  status        String   @default("PLANNED")
+  capacity      Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  project       Project  @relation(fields: [projectId], references: [id])
+  sprintTasks   Task[]   @relation("SprintTasks")
+  owner         User?    @relation(fields: [ownerId], references: [userId])
+  ownerId       Int?
 }
 
 model TaskAssignment {

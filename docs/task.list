@@ -484,21 +484,21 @@ Suggested migration order:
 
 ## 5.1 Milestones
 
-- [ ] Create milestone schema and APIs.
-- [ ] Add milestone owner, dates, and status.
-- [ ] Link tasks to milestones.
-- [ ] Add completion calculations.
+- [x] Create milestone schema and APIs.
+- [x] Add milestone owner, dates, and status.
+- [x] Link tasks to milestones. (milestoneId on Task)
+- [x] Add completion calculations.
 - [ ] Add milestone UI and progress indicators.
-- [ ] Add milestone tests.
+- [x] Add milestone tests. (6 tests)
 
 ## 5.2 Sprints
 
-- [ ] Create sprint schema.
-- [ ] Add sprint planning and lifecycle.
-- [ ] Add sprint backlog.
-- [ ] Add task assignment to sprints.
+- [x] Create sprint schema.
+- [x] Add sprint planning and lifecycle.
+- [x] Add sprint backlog. (getBacklog method)
+- [x] Add task assignment to sprints. (assignToSprint method)
 - [ ] Prevent invalid sprint transitions.
-- [ ] Add sprint completion reporting.
+- [x] Add sprint completion reporting. (getBurndown method)
 - [ ] Add sprint UI.
 
 ## 5.3 Calendar and Timeline
