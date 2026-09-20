@@ -1,0 +1,799 @@
+from pathlib import Path
+
+content = r"""# ProjeX v2 — Detailed Implementation Task List
+
+## Development Rules
+
+- Complete tasks in dependency order.
+- Every major refactor uses one dedicated branch.
+- Split large work into small commits that can be reviewed and reverted independently.
+- Every feature must include validation, authorization, tests, documentation, and UI states where applicable.
+- Merge only after CI passes and the feature has been manually verified.
+- Use feature branches from the relevant refactor or development branch; avoid creating a branch for every small task.
+
+## Branching Strategy
+
+| Branch | Purpose |
+|---|---|
+| `main` | Stable production-ready code |
+| `develop` | Integration branch for completed features |
+| `refactor/ui-foundation` | UI audit, design system, layout, and reusable components |
+| `refactor/backend-nestjs` | Express-to-NestJS migration and backend restructuring |
+| `feature/<phase>-<feature>` | Independent feature work |
+| `hotfix/<issue>` | Urgent production fixes |
+
+### Branch Rules
+
+- Use `refactor/ui-foundation` for the complete UI foundation migration.
+- Use `refactor/backend-nestjs` for the complete NestJS migration.
+- Create feature branches only for independently testable business features.
+- Do not create separate branches for every small component, endpoint, or test.
+- Merge refactor branches into `develop` only after regression testing.
+- Keep frontend and backend refactors separate, but coordinate through API contracts.
+
+---
+
+# Phase 0 — Architecture, Testing & Development Foundation
+
+## 0.1 Codebase Audit
+
+- [ ] Inventory frontend routes, layouts, components, hooks, state, and API calls.
+  - [ ] Identify duplicated components and utilities.
+  - [ ] Identify static, mock, and hardcoded data.
+  - [ ] Identify unused files and dependencies.
+  - [ ] Record existing UI and API issues.
+  - [ ] Document current authentication and authorization flow.
+- [ ] Inventory Express routes, controllers, services, middleware, and utilities.
+  - [ ] Map every endpoint to its frontend consumer.
+  - [ ] Identify business logic inside route handlers.
+  - [ ] Record inconsistent responses and error formats.
+  - [ ] Identify security and validation gaps.
+- [ ] Review Prisma schema.
+  - [ ] Map model relationships.
+  - [ ] Identify missing indexes and constraints.
+  - [ ] Identify duplicate or unclear fields.
+  - [ ] Document risky migration areas.
+- [ ] Create an audit report.
+  - [ ] Add frontend findings.
+  - [ ] Add backend findings.
+  - [ ] Add database findings.
+  - [ ] Prioritize critical, high, medium, and low issues.
+
+**Suggested commits**
+- `docs: add frontend codebase audit`
+- `docs: add backend and API audit`
+- `docs: document database review`
+- `docs: add technical debt backlog`
+
+## 0.2 Architecture and Contracts
+
+- [ ] Define frontend folder and feature structure.
+- [ ] Define NestJS module boundaries.
+- [ ] Define API naming and versioning conventions.
+- [ ] Define standard success response format.
+- [ ] Define standard error response format.
+- [ ] Define pagination, filtering, sorting, and search conventions.
+- [ ] Define DTO validation rules.
+- [ ] Define authorization and permission-checking conventions.
+- [ ] Define API contract documentation format.
+- [ ] Decide how frontend and backend changes remain backward-compatible during migration.
+
+**Suggested commits**
+- `docs: define application architecture`
+- `docs: define API response and error standards`
+- `docs: define API contract conventions`
+- `docs: define authorization strategy`
+
+## 0.3 Testing Foundation
+
+- [x] Select testing tools and test directory conventions.
+- [x] Configure backend unit testing.
+- [x] Configure backend integration testing.
+- [x] Configure API testing with Supertest.
+- [ ] Configure frontend component testing.
+- [ ] Configure frontend hook and utility testing.
+- [ ] Configure Playwright E2E testing.
+- [x] Create test environment variables.
+- [x] Create test database setup and teardown.
+- [ ] Add test fixtures and factory utilities.
+- [x] Add baseline tests for authentication and core existing flows.
+- [x] Add coverage reporting without making coverage the only quality metric.
+
+**Suggested commits**
+- `test: configure backend unit testing`
+- `test: configure integration and API testing`
+- `test: configure frontend testing`
+- `test: configure Playwright E2E testing`
+- `test: add shared fixtures and test utilities`
+- `test: cover existing critical workflows`
+
+## 0.4 CI and Developer Experience
+
+- [x] Add linting checks.
+- [x] Add formatting checks.
+- [x] Add TypeScript checks.
+- [x] Add frontend build validation.
+- [x] Add backend build validation.
+- [x] Add unit, integration, and E2E CI jobs.
+- [x] Add pull request validation.
+- [x] Add environment validation at startup.
+- [x] Document local development commands.
+- [x] Add database migration and seed commands.
+
+**Suggested commits**
+- `ci: add lint and typecheck workflow`
+- `ci: add test workflow`
+- `ci: add build validation`
+- `chore: standardize development scripts`
+- `docs: document local development setup`
+
+## 0.5 Logging and Error Handling
+
+- [ ] Define structured log format.
+- [ ] Add request correlation IDs.
+- [ ] Add centralized frontend error handling.
+- [ ] Add backend exception handling strategy.
+- [ ] Remove unnecessary sensitive data from logs.
+- [ ] Add safe user-facing error messages.
+- [ ] Add error-handling tests.
+
+**Suggested commits**
+- `feat: add structured backend logging`
+- `feat: add centralized exception handling`
+- `feat: add frontend error boundary and handlers`
+- `test: cover error handling behavior`
+
+---
+
+# Phase 1 — UI Refactor and Design System
+
+**Branch:** `refactor/ui-foundation`
+
+## 1.1 UI Audit and Cleanup
+
+- [ ] Review every route and page state.
+- [ ] Identify inconsistent spacing, typography, colors, and borders.
+- [ ] Identify duplicated UI patterns.
+- [ ] Remove unused components and styles.
+- [ ] Replace static data with API-driven states where available.
+- [ ] Document page-level UI improvements.
+
+**Commits**
+- `refactor(ui): remove unused components and styles`
+- `refactor(ui): remove duplicated UI patterns`
+- `fix(ui): standardize existing page states`
+
+## 1.2 Design Tokens and Shared Components
+
+- [ ] Define color tokens and semantic colors.
+- [ ] Define typography scale.
+- [ ] Define spacing and sizing rules.
+- [ ] Define border radius, shadows, and elevation.
+- [ ] Create reusable buttons and icon buttons.
+- [ ] Create inputs, selects, checkboxes, and text areas.
+- [ ] Create cards, badges, tooltips, and dropdowns.
+- [ ] Create modal, drawer, dialog, and confirmation components.
+- [ ] Create skeleton, loading, empty, and error components.
+- [ ] Add component documentation or a component showcase.
+
+**Commits**
+- `feat(ui): add design tokens`
+- `feat(ui): add form and action components`
+- `feat(ui): add feedback and overlay components`
+- `feat(ui): add reusable data display components`
+- `docs(ui): document shared component usage`
+
+## 1.3 Application Shell
+
+- [ ] Refine sidebar and navigation.
+- [ ] Add responsive navigation behavior.
+- [ ] Improve top bar and user menu.
+- [ ] Add breadcrumbs where needed.
+- [ ] Add consistent page headers and actions.
+- [ ] Add route-level loading and error states.
+- [ ] Verify keyboard navigation and focus behavior.
+
+**Commits**
+- `refactor(ui): improve application shell`
+- `feat(ui): add responsive navigation`
+- `feat(ui): standardize page headers and actions`
+- `test(ui): test application shell interactions`
+
+## 1.4 Dashboard and Workspace UI
+
+- [ ] Redesign dashboard layout.
+- [ ] Improve project summary cards.
+- [ ] Improve task statistics and charts.
+- [ ] Add workload and activity sections.
+- [ ] Refine project header and project navigation.
+- [ ] Add project overview sections.
+- [ ] Add consistent empty and permission-denied states.
+
+**Commits**
+- `refactor(ui): redesign dashboard layout`
+- `refactor(ui): improve project workspace layout`
+- `feat(ui): add dashboard loading and empty states`
+- `test(ui): test dashboard and workspace rendering`
+
+## 1.5 Views and Responsiveness
+
+- [ ] Improve Kanban board layout.
+- [ ] Improve drag-and-drop feedback.
+- [ ] Improve list and table views.
+- [ ] Add sorting, filtering, and bulk-action UI patterns.
+- [ ] Improve timeline and calendar presentation.
+- [ ] Fix overflow and mobile layout issues.
+- [ ] Test desktop, tablet, and mobile breakpoints.
+- [ ] Complete accessibility review.
+
+**Commits**
+- `refactor(ui): improve board view`
+- `refactor(ui): improve list and table views`
+- `refactor(ui): improve timeline and calendar views`
+- `fix(ui): resolve responsive layout issues`
+- `fix(a11y): improve keyboard and screen-reader support`
+
+## 1.6 UI Refactor Verification
+
+- [ ] Run visual regression checks.
+- [ ] Run component and E2E tests.
+- [ ] Verify API states: loading, success, empty, error, forbidden.
+- [ ] Verify dark/light theme behavior if supported.
+- [ ] Review performance and unnecessary rerenders.
+- [ ] Merge `refactor/ui-foundation` into `develop`.
+
+---
+
+# Phase 2 — NestJS Backend Migration and Refinement
+
+**Branch:** `refactor/backend-nestjs`
+
+## 2.1 Migration Preparation
+
+- [ ] Freeze unnecessary Express changes during migration.
+- [ ] Export and document all existing API routes.
+- [ ] Record request and response examples.
+- [ ] Identify authentication and authorization behavior.
+- [ ] Identify endpoints requiring backward compatibility.
+- [ ] Add regression tests for existing Express endpoints.
+- [ ] Define migration order by dependency.
+
+**Commits**
+- `docs(api): document existing Express endpoints`
+- `test(api): add Express endpoint regression coverage`
+- `docs(backend): define NestJS migration sequence`
+
+## 2.2 NestJS Foundation
+
+- [ ] Create NestJS application.
+- [ ] Configure environment validation.
+- [ ] Configure global validation pipes.
+- [ ] Configure global exception filters.
+- [ ] Configure request logging.
+- [ ] Configure Prisma service.
+- [ ] Configure Swagger/OpenAPI.
+- [ ] Configure module and import conventions.
+- [ ] Configure testing utilities.
+
+**Commits**
+- `feat(backend): initialize NestJS application`
+- `feat(backend): add environment validation`
+- `feat(backend): add global validation and exception handling`
+- `feat(backend): integrate Prisma with NestJS`
+- `docs(api): configure Swagger documentation`
+
+## 2.3 Authentication and Authorization
+
+- [ ] Implement Cognito token validation.
+- [ ] Create authentication guard.
+- [ ] Create current-user decorator or request helper.
+- [ ] Add public-route handling where required.
+- [ ] Add project access guard.
+- [ ] Add role and permission guard foundation.
+- [ ] Add authorization failure responses.
+- [ ] Test valid, expired, missing, and invalid tokens.
+
+**Commits**
+- `feat(auth): add Cognito authentication guard`
+- `feat(auth): add current-user request context`
+- `feat(auth): add project access guard`
+- `feat(auth): add permission guard foundation`
+- `test(auth): cover authentication and authorization`
+
+## 2.4 Core Module Migration
+
+Migrate modules one at a time. For each module:
+
+- [ ] Create NestJS module.
+- [ ] Create controller.
+- [ ] Create service.
+- [ ] Create DTOs.
+- [ ] Add validation.
+- [ ] Add Prisma queries.
+- [ ] Add authorization checks.
+- [ ] Add unit tests.
+- [ ] Add integration and API tests.
+- [ ] Compare responses with the Express implementation.
+- [ ] Update frontend API integration if required.
+- [ ] Remove the old Express implementation only after verification.
+
+Suggested migration order:
+
+1. [ ] Users and profile module.
+2. [ ] Projects module.
+3. [ ] Project membership module.
+4. [ ] Tasks module.
+5. [ ] Comments and activity module.
+6. [ ] Files and attachments module.
+7. [ ] Notifications module.
+8. [ ] Analytics and reporting module.
+
+**Commits per module**
+- `feat(backend): add <module> NestJS module`
+- `feat(backend): add <module> DTOs and validation`
+- `feat(backend): migrate <module> service logic`
+- `feat(backend): migrate <module> controllers`
+- `test(backend): add <module> unit and API tests`
+- `refactor(backend): remove legacy <module> Express implementation`
+
+## 2.5 API Standards and Database Refinement
+
+- [ ] Standardize response envelopes.
+- [ ] Standardize error codes and messages.
+- [ ] Add pagination utilities.
+- [ ] Add filtering and sorting utilities.
+- [ ] Add transaction handling for multi-step operations.
+- [ ] Review indexes and query performance.
+- [ ] Add database constraints where needed.
+- [ ] Add migration rollback guidance.
+- [ ] Verify seed data and test fixtures.
+
+**Commits**
+- `refactor(api): standardize response format`
+- `feat(api): add pagination and filtering utilities`
+- `fix(database): improve constraints and indexes`
+- `test(database): cover transaction behavior`
+
+## 2.6 Migration Completion
+
+- [ ] Run frontend regression tests.
+- [ ] Run backend unit and integration tests.
+- [ ] Run complete E2E suite.
+- [ ] Compare key Express and NestJS API responses.
+- [ ] Verify logs, authentication, and error behavior.
+- [ ] Remove unused Express dependencies.
+- [ ] Update deployment configuration.
+- [ ] Update backend documentation.
+- [ ] Merge `refactor/backend-nestjs` into `develop`.
+
+---
+
+# Phase 3 — Project and Workspace Management
+
+**Branch:** `feature/phase-3-project-workspaces`
+
+## 3.1 Project Lifecycle and Metadata
+
+- [ ] Define project status enum and transition rules.
+- [ ] Add project key and unique identifier.
+- [ ] Add owner, manager, priority, health, and objectives.
+- [ ] Add project start and target dates.
+- [ ] Add archive and restore behavior.
+- [ ] Add lifecycle validation and tests.
+- [ ] Update project creation and editing UI.
+
+## 3.2 Membership and Roles
+
+- [ ] Design project membership model.
+- [ ] Support multiple projects per user.
+- [ ] Add invitation and removal flows.
+- [ ] Define project roles.
+- [ ] Add role-based permission checks.
+- [ ] Prevent unauthorized membership changes.
+- [ ] Add membership management UI.
+- [ ] Add authorization tests.
+
+## 3.3 Workspace Sections
+
+- [ ] Add project overview page.
+- [ ] Add tasks section.
+- [ ] Add milestones section.
+- [ ] Add activity section.
+- [ ] Add project settings section.
+- [ ] Add project navigation state.
+- [ ] Add permission-aware actions.
+
+## 3.4 Project Templates
+
+- [ ] Define template model.
+- [ ] Create reusable project templates.
+- [ ] Copy default settings and workflow configuration.
+- [ ] Add template selection during project creation.
+- [ ] Add template management permissions.
+- [ ] Test template creation and cloning.
+
+---
+
+# Phase 4 — Advanced Task Management
+
+**Branch:** `feature/phase-4-advanced-tasks`
+
+## 4.1 Task Model Improvements
+
+- [ ] Review task schema.
+- [ ] Add task type support.
+- [ ] Add priority and severity.
+- [ ] Add parent-child relationships.
+- [ ] Add task identifiers.
+- [ ] Add acceptance criteria.
+- [ ] Add estimates and actual effort.
+- [ ] Add due dates and scheduling fields.
+- [ ] Add database indexes and constraints.
+
+## 4.2 Workflow and Statuses
+
+- [ ] Define default task workflow.
+- [ ] Define valid status transitions.
+- [ ] Support project-specific statuses.
+- [ ] Add workflow validation service.
+- [ ] Add status management UI.
+- [ ] Add tests for invalid transitions.
+
+## 4.3 Dependencies and Planning
+
+- [ ] Create task dependency model.
+- [ ] Support blocking and blocked-by relationships.
+- [ ] Prevent invalid and circular dependencies.
+- [ ] Add dependency visualization.
+- [ ] Display blocked task indicators.
+- [ ] Add dependency validation tests.
+
+## 4.4 Task Productivity Features
+
+- [ ] Add watchers.
+- [ ] Add bulk assignment and status updates.
+- [ ] Add bulk archive and delete safeguards.
+- [ ] Add task history.
+- [ ] Add task activity timeline.
+- [ ] Add advanced search and filters.
+- [ ] Add keyboard shortcuts where useful.
+- [ ] Add E2E coverage for critical task flows.
+
+---
+
+# Phase 5 — Milestones, Sprints and Planning
+
+**Branch:** `feature/phase-5-planning`
+
+## 5.1 Milestones
+
+- [ ] Create milestone schema and APIs.
+- [ ] Add milestone owner, dates, and status.
+- [ ] Link tasks to milestones.
+- [ ] Add completion calculations.
+- [ ] Add milestone UI and progress indicators.
+- [ ] Add milestone tests.
+
+## 5.2 Sprints
+
+- [ ] Create sprint schema.
+- [ ] Add sprint planning and lifecycle.
+- [ ] Add sprint backlog.
+- [ ] Add task assignment to sprints.
+- [ ] Prevent invalid sprint transitions.
+- [ ] Add sprint completion reporting.
+- [ ] Add sprint UI.
+
+## 5.3 Calendar and Timeline
+
+- [ ] Add calendar data API.
+- [ ] Display tasks, milestones, and deadlines.
+- [ ] Add date filtering.
+- [ ] Add dependency-aware timeline.
+- [ ] Add drag-to-reschedule with validation.
+- [ ] Add critical path calculation.
+- [ ] Add timeline performance tests.
+
+---
+
+# Phase 6 — Collaboration and Activity
+
+**Branch:** `feature/phase-6-collaboration`
+
+## 6.1 Comments and Mentions
+
+- [ ] Add comment editing and deletion rules.
+- [ ] Add threaded replies if required.
+- [ ] Add mention parsing.
+- [ ] Add mention notifications.
+- [ ] Add permission checks.
+- [ ] Add comment API and UI tests.
+
+## 6.2 Activity and Audit
+
+- [ ] Define activity event types.
+- [ ] Record project and task changes.
+- [ ] Add audit log storage.
+- [ ] Add actor, timestamp, entity, and metadata.
+- [ ] Add audit log filtering.
+- [ ] Protect audit records from unauthorized changes.
+
+## 6.3 Files and Documents
+
+- [ ] Define attachment model.
+- [ ] Add file type and size validation.
+- [ ] Add secure upload and download handling.
+- [ ] Add access checks.
+- [ ] Add object storage integration.
+- [ ] Add file deletion and retention rules.
+- [ ] Add upload and access tests.
+
+## 6.4 Real-Time Collaboration
+
+- [ ] Select WebSocket or SSE architecture.
+- [ ] Define event names and payloads.
+- [ ] Add authenticated connections.
+- [ ] Add project-level event authorization.
+- [ ] Add real-time task and comment updates.
+- [ ] Add reconnect and failure handling.
+- [ ] Add real-time integration tests.
+
+## 6.5 Decision Logs and Announcements
+
+- [ ] Create decision log model.
+- [ ] Add decision owner and status.
+- [ ] Add project announcements.
+- [ ] Add visibility and permission rules.
+- [ ] Add UI for creating and viewing records.
+
+---
+
+# Phase 7 — Notifications and Automation
+
+**Branch:** `feature/phase-7-automation`
+
+## 7.1 Notification Foundation
+
+- [ ] Define notification model.
+- [ ] Define notification event types.
+- [ ] Add in-app notification service.
+- [ ] Add unread and read states.
+- [ ] Add notification list and detail UI.
+- [ ] Add notification preferences.
+
+## 7.2 Email and Background Jobs
+
+- [ ] Configure BullMQ and Redis.
+- [ ] Create job and queue conventions.
+- [ ] Add retry and failure handling.
+- [ ] Configure email provider abstraction.
+- [ ] Add email templates.
+- [ ] Add email delivery tests.
+
+## 7.3 Reminders and Automation
+
+- [ ] Add due-date reminders.
+- [ ] Add overdue alerts.
+- [ ] Add assignment notifications.
+- [ ] Add workflow event triggers.
+- [ ] Add scheduled jobs.
+- [ ] Add recurring report jobs.
+- [ ] Add automation audit records.
+- [ ] Add idempotency and duplicate-event protection.
+
+---
+
+# Phase 8 — Analytics, Reporting and Resource Management
+
+**Branch:** `feature/phase-8-analytics`
+
+## 8.1 Metrics and Project Health
+
+- [ ] Replace hardcoded metrics with database queries.
+- [ ] Define metric calculation rules.
+- [ ] Add project health indicators.
+- [ ] Add blocker and overdue calculations.
+- [ ] Add milestone and sprint progress metrics.
+- [ ] Add metric performance tests.
+
+## 8.2 Team Workload
+
+- [ ] Calculate assignments and estimates.
+- [ ] Add user capacity configuration.
+- [ ] Display workload by user and time period.
+- [ ] Detect over-allocation.
+- [ ] Add workload filters and export options.
+
+## 8.3 Reports
+
+- [ ] Add burndown and burnup reports.
+- [ ] Add sprint velocity reports.
+- [ ] Add weekly project summaries.
+- [ ] Add risk and issue reports.
+- [ ] Add report filtering by project, team, and date.
+- [ ] Add report access controls.
+
+## 8.4 Export and Portfolio
+
+- [ ] Define export job architecture.
+- [ ] Add CSV export.
+- [ ] Add Excel export.
+- [ ] Add PDF export.
+- [ ] Add organization-level portfolio dashboard.
+- [ ] Add portfolio-level filters and permissions.
+- [ ] Test large report generation.
+
+---
+
+# Phase 9 — Enterprise Features and Integrations
+
+**Branch:** `feature/phase-9-enterprise`
+
+## 9.1 Organizations and RBAC
+
+- [ ] Define organization model.
+- [ ] Add organization membership.
+- [ ] Add organization roles.
+- [ ] Add organization-level settings.
+- [ ] Extend permission checks to organization scope.
+- [ ] Add organization administration UI.
+- [ ] Add isolation and authorization tests.
+
+## 9.2 Customization
+
+- [ ] Add custom fields for projects.
+- [ ] Add custom fields for tasks.
+- [ ] Add configurable workflow definitions.
+- [ ] Add field validation and type handling.
+- [ ] Add custom field filtering and reporting.
+
+## 9.3 Integration Framework
+
+- [ ] Define integration interface and configuration model.
+- [ ] Add credential and secret handling.
+- [ ] Add webhook verification.
+- [ ] Add integration event logging.
+- [ ] Add retry and failure handling.
+- [ ] Add integration management UI.
+
+## 9.4 External Integrations
+
+- [ ] Integrate GitHub or GitLab activity.
+- [ ] Link commits and pull requests to tasks.
+- [ ] Add calendar synchronization.
+- [ ] Add structured project import.
+- [ ] Add structured project export.
+- [ ] Add integration permission and security tests.
+
+---
+
+# Phase 10 — AI and Intelligent Project Assistance
+
+**Branch:** `feature/phase-10-ai`
+
+## 10.1 AI Foundation
+
+- [ ] Define AI service boundary.
+- [ ] Define allowed tools and data sources.
+- [ ] Enforce project and organization permissions.
+- [ ] Define prompt and response schemas.
+- [ ] Add model configuration management.
+- [ ] Add request limits and cost controls.
+- [ ] Add AI request logging without exposing sensitive data.
+
+## 10.2 AI Features
+
+- [ ] Add project question answering.
+- [ ] Add project and sprint summaries.
+- [ ] Add risk explanations using source data.
+- [ ] Add natural-language task search.
+- [ ] Add report generation.
+- [ ] Add task breakdown suggestions.
+- [ ] Add planning assistance.
+
+## 10.3 AI Safety and Evaluation
+
+- [ ] Require confirmation for mutations.
+- [ ] Prevent unauthorized data retrieval.
+- [ ] Add prompt injection safeguards.
+- [ ] Add evaluation datasets.
+- [ ] Test factual grounding.
+- [ ] Test authorization boundaries.
+- [ ] Add fallback behavior for model failures.
+- [ ] Add user feedback collection.
+
+---
+
+# Phase 11 — Production Readiness and Optimization
+
+**Branch:** `feature/phase-11-production-readiness`
+
+## 11.1 Performance
+
+- [ ] Audit frontend rendering and bundle size.
+- [ ] Audit API latency.
+- [ ] Review slow database queries.
+- [ ] Add indexes where justified.
+- [ ] Add pagination limits.
+- [ ] Add caching for stable, frequently accessed data.
+- [ ] Test large projects and datasets.
+
+## 11.2 Security
+
+- [ ] Run authorization boundary tests.
+- [ ] Review input validation.
+- [ ] Review file upload security.
+- [ ] Review secret handling.
+- [ ] Add rate limiting where required.
+- [ ] Review dependency vulnerabilities.
+- [ ] Run security testing and remediation.
+
+## 11.3 Observability and Operations
+
+- [ ] Add structured logs and correlation IDs.
+- [ ] Add metrics and health checks.
+- [ ] Add error tracking.
+- [ ] Add queue monitoring.
+- [ ] Add database monitoring.
+- [ ] Define alert thresholds.
+- [ ] Document incident response basics.
+
+## 11.4 Deployment and Recovery
+
+- [ ] Configure production build pipeline.
+- [ ] Configure deployment environments.
+- [ ] Add database migration process.
+- [ ] Configure backups.
+- [ ] Test restore procedures.
+- [ ] Document rollback process.
+- [ ] Add release checklist.
+- [ ] Update architecture and operational documentation.
+
+---
+
+# Definition of Done
+
+A task is complete only when:
+
+- [ ] Implementation is complete.
+- [ ] Validation and authorization are implemented.
+- [ ] Relevant unit tests are added.
+- [ ] Integration/API tests are added where applicable.
+- [ ] E2E tests are added for critical workflows.
+- [ ] Loading, empty, error, and permission states are handled.
+- [ ] Database migrations are reviewed.
+- [ ] API documentation is updated.
+- [ ] UI documentation is updated where required.
+- [ ] CI passes.
+- [ ] Manual verification is completed.
+- [ ] The branch is reviewed and merged.
+
+# Recommended Execution Order
+
+1. Phase 0 — Audit, architecture, tests, CI, and environment foundation.
+2. Phase 1 — UI foundation refactor.
+3. Phase 2 — NestJS backend migration.
+4. Phase 3 — Project and workspace management.
+5. Phase 4 — Advanced task management.
+6. Phase 5 — Milestones, sprints, and planning.
+7. Phase 6 — Collaboration and activity.
+8. Phase 7 — Notifications and automation.
+9. Phase 8 — Analytics and reporting.
+10. Phase 9 — Enterprise features and integrations.
+11. Phase 10 — AI capabilities.
+12. Phase 11 — Production readiness and optimization.
+
+## Phase Completion Gate
+
+Before starting the next dependent phase:
+
+- [ ] All planned tasks in the phase are completed or explicitly deferred.
+- [ ] Required migrations are applied and verified.
+- [ ] Tests and CI pass.
+- [ ] Documentation is updated.
+- [ ] Known issues are recorded.
+- [ ] The phase branch is merged into `develop`.
+"""
+path = Path("/mnt/data/projex-v2-detailed-todo.md")
+path.write_text(content, encoding="utf-8")
+print(path)
