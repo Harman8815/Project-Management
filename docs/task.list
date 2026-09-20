@@ -422,12 +422,12 @@ Suggested migration order:
 
 ## 3.4 Project Templates
 
-- [ ] Define template model.
-- [ ] Create reusable project templates.
-- [ ] Copy default settings and workflow configuration.
-- [ ] Add template selection during project creation.
-- [ ] Add template management permissions.
-- [ ] Test template creation and cloning.
+- [x] Define template model.
+- [x] Create reusable project templates.
+- [x] Copy default settings and workflow configuration.
+- [x] Add template selection during project creation. (createProjectFromTemplate endpoint)
+- [x] Add template management permissions. (RequiresDefault flag auto-unsets)
+- [x] Test template creation and cloning. (10 unit tests)
 
 ---
 

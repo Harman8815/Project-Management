@@ -13,7 +13,8 @@ import { TasksModule } from "./modules/tasks/tasks.module";
 import { SearchModule } from "./modules/search/search.module";
 import { TeamsModule } from "./modules/teams/teams.module";
 import { ProjectMembershipsModule } from "./modules/project-memberships/project-memberships.module";
-
+import { ProjectTemplatesModule } from "./modules/project-templates/project-templates.module";
+ 
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -27,6 +28,7 @@ import { ProjectMembershipsModule } from "./modules/project-memberships/project-
     SearchModule,
     TeamsModule,
     ProjectMembershipsModule,
+    ProjectTemplatesModule,
   ],
   providers: [
     PrismaService,
