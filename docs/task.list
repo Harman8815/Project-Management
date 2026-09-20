@@ -279,8 +279,8 @@ These commits have been implemented on `develop`.
 - [x] Add public-route handling where required.
 - [ ] Add project access guard.
 - [ ] Add role and permission guard foundation.
-- [ ] Add authorization failure responses.
-- [ ] Test valid, expired, missing, and invalid tokens.
+- [x] Add authorization failure responses.
+- [x] Test valid, expired, missing, and invalid tokens.
 
 **Commits**
 - `feat(backend): add CORS and security configuration`
@@ -350,11 +350,11 @@ Suggested migration order:
 - Search module: DONE
 - Teams module: DONE (with pagination)
 - Project memberships module: DONE
-- NestJS tests: 18 tests passing (AppController + 3 module controllers)
+- NestJS tests: 20 tests passing (AppController + 3 module controllers + auth guard)
 
 ## 2.5 API Standards and Database Refinement
 
-- [ ] Standardize response envelopes.
+- [x] Standardize response envelopes.
 - [ ] Standardize error codes and messages.
 - [x] Add pagination utilities.
 - [ ] Add filtering and sorting utilities.
