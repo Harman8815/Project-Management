@@ -49,4 +49,14 @@ export class ProjectsController {
   async remove(@Param("id") id: string) {
     return this.projectsService.remove(Number(id));
   }
+
+  @Patch(":id/archive")
+  async archive(@Param("id") id: string) {
+    return this.projectsService.archive(Number(id));
+  }
+
+  @Patch(":id/restore")
+  async restore(@Param("id") id: string) {
+    return this.projectsService.restore(Number(id));
+  }
 }

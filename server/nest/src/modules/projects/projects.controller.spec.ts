@@ -15,6 +15,9 @@ describe("ProjectsController", () => {
       delete: jest.fn(),
       count: jest.fn(),
     },
+    projectMembership: {
+      findFirst: jest.fn(),
+    },
   };
 
   beforeEach(async () => {
@@ -112,6 +115,58 @@ describe("ProjectsController", () => {
           projectTeams: true,
         },
       });
+    });
+  });
+
+  describe("archive", () => {
+    it("should archive a project", async () => {
+      const mockProject = { id: 1, name: "Project 1" };
+      const expectedResult = { ...mockProject, archived: true, status: "ARCHIVED" };
+
+      mockPrismaService.project.findUnique.mockResolvedValue(mockProject);
+      mockPrismaService.project.update.mockResolvedValue(expectedResult);
+
+      const result = await controller.archive("1");
+
+      expect(result).toEqual(expectedResult);
+      expect(mockPrismaService.project.update).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: { archived: true, status: "ARCHIVED" },
+      });
+    });
+
+    it("should throw NotFoundException when project does not exist", async () => {
+      mockPrismaService.project.findUnique.mockResolvedValue(null);
+
+      await expect(controller.archive("999")).rejects.toThrow(
+        "Project with id 999 not found",
+      );
+    });
+  });
+
+  describe("restore", () => {
+    it("should restore an archived project", async () => {
+      const mockProject = { id: 1, archived: true, status: "ARCHIVED" };
+      const expectedResult = { ...mockProject, archived: false, status: "ACTIVE" };
+
+      mockPrismaService.project.findUnique.mockResolvedValue(mockProject);
+      mockPrismaService.project.update.mockResolvedValue(expectedResult);
+
+      const result = await controller.restore("1");
+
+      expect(result).toEqual(expectedResult);
+      expect(mockPrismaService.project.update).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: { archived: false, status: "ACTIVE" },
+      });
+    });
+
+    it("should throw NotFoundException when archived project does not exist", async () => {
+      mockPrismaService.project.findUnique.mockResolvedValue(null);
+
+      await expect(controller.restore("999")).rejects.toThrow(
+        "Archived project with id 999 not found",
+      );
     });
   });
 });

@@ -12,6 +12,10 @@ export const PROJECT_ACCESS_KEY = "projectAccess";
 export const RequireProjectAccess = (projectIdParam: string = "id") =>
   SetMetadata(PROJECT_ACCESS_KEY, projectIdParam);
 
+export const PROJECT_ROLE_KEY = "projectRole";
+export const RequireProjectRole = (...roles: string[]) =>
+  SetMetadata(PROJECT_ROLE_KEY, roles);
+
 @Injectable()
 export class ProjectAccessGuard implements CanActivate {
   constructor(
@@ -20,7 +24,10 @@ export class ProjectAccessGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const projectIdParam = this.reflector.get<string>(PROJECT_ACCESS_KEY, context.getHandler());
+    const projectIdParam = this.reflector.get<string>(
+      PROJECT_ACCESS_KEY,
+      context.getHandler(),
+    );
 
     if (!projectIdParam) {
       return true;
@@ -39,25 +46,35 @@ export class ProjectAccessGuard implements CanActivate {
       return true;
     }
 
-    const hasAccess = await this.prisma.projectTeam.findFirst({
+    const userId = user.userId || user.sub;
+    const membership = await this.prisma.projectMembership.findFirst({
       where: {
         projectId: projectId,
-        team: {
-          user: {
-            some: {
-              cognitoId: user.cognitoId || user.username,
-            },
-          },
-        },
+        userId: userId,
+        status: "ACTIVE",
       },
     });
 
-    if (!hasAccess) {
+    if (!membership) {
       throw new ForbiddenException(
         "You do not have access to this project",
       );
     }
 
+    const requiredRoles = this.reflector.get<string[]>(
+      PROJECT_ROLE_KEY,
+      context.getHandler(),
+    );
+
+    if (requiredRoles && requiredRoles.length > 0) {
+      if (!requiredRoles.includes(membership.role)) {
+        throw new ForbiddenException(
+          `You need one of the following roles: ${requiredRoles.join(", ")}`,
+        );
+      }
+    }
+
+    request.projectMembership = membership;
     return true;
   }
 }

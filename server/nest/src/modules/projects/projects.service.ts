@@ -72,7 +72,7 @@ export class ProjectsService {
     });
   }
 
-  async remove(id: number) {
+   async remove(id: number) {
     const project = await this.prisma.project.findUnique({
       where: { id },
     });
@@ -81,6 +81,34 @@ export class ProjectsService {
     }
     return this.prisma.project.delete({
       where: { id },
+    });
+  }
+
+  async archive(id: number) {
+    const project = await this.prisma.project.findUnique({
+      where: { id },
+    });
+    if (!project) {
+      throw new NotFoundException(`Project with id ${id} not found`);
+    }
+    return this.prisma.project.update({
+      where: { id },
+      data: { archived: true, status: "ARCHIVED" },
+    });
+  }
+
+  async restore(id: number) {
+    const project = await this.prisma.project.findUnique({
+      where: { id, archived: true },
+    });
+    if (!project) {
+      throw new NotFoundException(
+        `Archived project with id ${id} not found`,
+      );
+    }
+    return this.prisma.project.update({
+      where: { id },
+      data: { archived: false, status: "ACTIVE" },
     });
   }
 }

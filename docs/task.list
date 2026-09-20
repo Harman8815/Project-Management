@@ -395,7 +395,7 @@ Suggested migration order:
 - [x] Add project key and unique identifier.
 - [x] Add owner, manager, priority, health, and objectives.
 - [x] Add project start and target dates. (startDate, endDate, dueDate)
-- [ ] Add archive and restore behavior.
+- [x] Add archive and restore behavior.
 - [ ] Add lifecycle validation and tests.
 - [ ] Update project creation and editing UI.
 
