@@ -154,87 +154,73 @@ These commits have been implemented on `develop`.
 
 ## 1.1 UI Audit and Cleanup
 
-- [ ] Review every route and page state.
-- [ ] Identify inconsistent spacing, typography, colors, and borders.
-- [ ] Identify duplicated UI patterns.
-- [ ] Remove unused components and styles.
-- [ ] Replace static data with API-driven states where available.
-- [ ] Document page-level UI improvements.
+- [x] Review every route and page state.
+- [x] Identify inconsistent spacing, typography, colors, and borders.
+- [x] Identify duplicated UI patterns.
+- [x] Remove unused components and styles.
+- [x] Replace static data with API-driven states where available.
+- [x] Document page-level UI improvements.
 
 **Commits**
-- `refactor(ui): remove unused components and styles`
-- `refactor(ui): remove duplicated UI patterns`
-- `fix(ui): standardize existing page states`
+- `refactor(ui): add design tokens and shared component system`
+- `refactor(ui): update views and pages with shared components and states`
+- `refactor(ui): improve application shell with breadcrumbs and accessibility`
 
 ## 1.2 Design Tokens and Shared Components
 
-- [ ] Define color tokens and semantic colors.
-- [ ] Define typography scale.
-- [ ] Define spacing and sizing rules.
-- [ ] Define border radius, shadows, and elevation.
-- [ ] Create reusable buttons and icon buttons.
-- [ ] Create inputs, selects, checkboxes, and text areas.
-- [ ] Create cards, badges, tooltips, and dropdowns.
-- [ ] Create modal, drawer, dialog, and confirmation components.
-- [ ] Create skeleton, loading, empty, and error components.
+- [x] Define color tokens and semantic colors.
+- [x] Define typography scale.
+- [x] Define spacing and sizing rules.
+- [x] Define border radius, shadows, and elevation.
+- [x] Create reusable buttons and icon buttons.
+- [x] Create inputs, selects, checkboxes, and text areas.
+- [x] Create cards, badges, tooltips, and dropdowns.
+- [x] Create modal, drawer, dialog, and confirmation components.
+- [x] Create skeleton, loading, empty, and error components.
 - [ ] Add component documentation or a component showcase.
 
 **Commits**
-- `feat(ui): add design tokens`
-- `feat(ui): add form and action components`
-- `feat(ui): add feedback and overlay components`
-- `feat(ui): add reusable data display components`
-- `docs(ui): document shared component usage`
+- `refactor(ui): add design tokens and shared component system`
 
 ## 1.3 Application Shell
 
-- [ ] Refine sidebar and navigation.
-- [ ] Add responsive navigation behavior.
-- [ ] Improve top bar and user menu.
-- [ ] Add breadcrumbs where needed.
-- [ ] Add consistent page headers and actions.
-- [ ] Add route-level loading and error states.
-- [ ] Verify keyboard navigation and focus behavior.
+- [x] Refine sidebar and navigation.
+- [x] Add responsive navigation behavior.
+- [x] Improve top bar and user menu.
+- [x] Add breadcrumbs where needed.
+- [x] Add consistent page headers and actions.
+- [x] Add route-level loading and error states.
+- [x] Verify keyboard navigation and focus behavior.
 
 **Commits**
-- `refactor(ui): improve application shell`
-- `feat(ui): add responsive navigation`
-- `feat(ui): standardize page headers and actions`
-- `test(ui): test application shell interactions`
+- `refactor(ui): improve application shell with breadcrumbs and accessibility`
 
 ## 1.4 Dashboard and Workspace UI
 
-- [ ] Redesign dashboard layout.
-- [ ] Improve project summary cards.
-- [ ] Improve task statistics and charts.
+- [x] Redesign dashboard layout.
+- [x] Improve project summary cards.
+- [x] Improve task statistics and charts.
 - [ ] Add workload and activity sections.
-- [ ] Refine project header and project navigation.
+- [x] Refine project header and project navigation.
 - [ ] Add project overview sections.
-- [ ] Add consistent empty and permission-denied states.
+- [x] Add consistent empty and permission-denied states.
 
 **Commits**
-- `refactor(ui): redesign dashboard layout`
-- `refactor(ui): improve project workspace layout`
-- `feat(ui): add dashboard loading and empty states`
-- `test(ui): test dashboard and workspace rendering`
+- `refactor(ui): update views and pages with shared components and states`
 
 ## 1.5 Views and Responsiveness
 
-- [ ] Improve Kanban board layout.
-- [ ] Improve drag-and-drop feedback.
-- [ ] Improve list and table views.
+- [x] Improve Kanban board layout.
+- [x] Improve drag-and-drop feedback.
+- [x] Improve list and table views.
 - [ ] Add sorting, filtering, and bulk-action UI patterns.
-- [ ] Improve timeline and calendar presentation.
-- [ ] Fix overflow and mobile layout issues.
-- [ ] Test desktop, tablet, and mobile breakpoints.
-- [ ] Complete accessibility review.
+- [x] Improve timeline and calendar presentation.
+- [x] Fix overflow and mobile layout issues.
+- [x] Test desktop, tablet, and mobile breakpoints.
+- [x] Complete accessibility review.
 
 **Commits**
-- `refactor(ui): improve board view`
-- `refactor(ui): improve list and table views`
-- `refactor(ui): improve timeline and calendar views`
-- `fix(ui): resolve responsive layout issues`
-- `fix(a11y): improve keyboard and screen-reader support`
+- `refactor(ui): update views and pages with shared components and states`
 
 ## 1.6 UI Refactor Verification
 
