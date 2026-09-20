@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import Header from "../Header";
+import Header from "@/components/Header";
+import { Button } from "@/components/ui";
 import { X } from "lucide-react";
 
 type Props = {
@@ -19,12 +20,14 @@ const Modal = ({ children, isOpen, onClose, name }: Props) => {
         <Header
           name={name}
           buttonComponent={
-            <button
-              className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-primary text-white hover:bg-blue-600"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 rounded-full bg-blue-600 text-white hover:bg-blue-700"
               onClick={onClose}
             >
               <X size={18} />
-            </button>
+            </Button>
           }
           isSmallText
         />

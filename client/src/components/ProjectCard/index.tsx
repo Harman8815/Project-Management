@@ -1,4 +1,5 @@
 import { Project } from "@/state/api";
+import { Card } from "@/components/ui";
 import React from "react";
 
 type Props = {
@@ -7,12 +8,18 @@ type Props = {
 
 const ProjectCard = ({ project }: Props) => {
   return (
-    <div className="rounded border p-4 shadow">
-      <h3>{project.name}</h3>
-      <p>{project.description}</p>
-      <p>Start Date: {project.startDate}</p>
-      <p>End Date: {project.endDate}</p>
-    </div>
+    <Card
+      title={project.name}
+      className="border border-gray-200 shadow dark:border-gray-700"
+    >
+      <p className="text-sm text-gray-600 dark:text-gray-300">
+        {project.description}
+      </p>
+      <div className="mt-2 flex gap-4 text-xs text-gray-500 dark:text-gray-400">
+        <span>Start: {project.startDate ?? "Not set"}</span>
+        <span>End: {project.endDate ?? "Not set"}</span>
+      </div>
+    </Card>
   );
 };
 

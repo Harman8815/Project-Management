@@ -31,10 +31,15 @@ export const dataGridSxStyles = (isDarkMode: boolean) => {
   };
 };
 
-export interface ApiError {
+export interface ApiErrorData {
   status: string;
   message: string;
   issues?: Array<{ path: string; message: string }>;
+}
+
+export interface ApiError {
+  data: ApiErrorData;
+  status: number;
 }
 
 export function isApiError(error: unknown): error is ApiError {

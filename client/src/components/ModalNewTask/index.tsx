@@ -1,5 +1,6 @@
+import { Button, Input, Textarea, Select } from "@/components/ui";
 import Modal from "@/components/Modal";
-import { Priority, Status, useCreateTaskMutation } from "@/state/api";
+import { useCreateTaskMutation, Priority, Status } from "@/state/api";
 import React, { useState } from "react";
 import { formatISO } from "date-fns";
 
@@ -50,12 +51,6 @@ const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
     return title && authorUserId && !(id !== null || projectId);
   };
 
-  const selectStyles =
-    "mb-4 block w-full rounded border border-gray-300 px-3 py-2 dark:border-dark-tertiary dark:bg-dark-tertiary dark:text-white dark:focus:outline-none";
-
-  const inputStyles =
-    "w-full rounded border border-gray-300 p-2 shadow-sm dark:border-dark-tertiary dark:bg-dark-tertiary dark:text-white dark:focus:outline-none";
-
   return (
     <Modal isOpen={isOpen} onClose={onClose} name="Create New Task">
       <form
@@ -65,102 +60,96 @@ const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
           handleSubmit();
         }}
       >
-        <input
+        <Input
           type="text"
-          className={inputStyles}
-          placeholder="Title"
+          label="Title"
+          placeholder="Task title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
-        <textarea
-          className={inputStyles}
-          placeholder="Description"
+        <Textarea
+          label="Description"
+          placeholder="Task description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-2">
-          <select
-            className={selectStyles}
+          <Select
+            label="Status"
             value={status}
-            onChange={(e) =>
-              setStatus(Status[e.target.value as keyof typeof Status])
-            }
+            onChange={(e) => setStatus(Status[e.target.value as keyof typeof Status])}
           >
-            <option value="">Select Status</option>
             <option value={Status.ToDo}>To Do</option>
             <option value={Status.WorkInProgress}>Work In Progress</option>
             <option value={Status.UnderReview}>Under Review</option>
             <option value={Status.Completed}>Completed</option>
-          </select>
-          <select
-            className={selectStyles}
+          </Select>
+          <Select
+            label="Priority"
             value={priority}
             onChange={(e) =>
               setPriority(Priority[e.target.value as keyof typeof Priority])
             }
           >
-            <option value="">Select Priority</option>
             <option value={Priority.Urgent}>Urgent</option>
             <option value={Priority.High}>High</option>
             <option value={Priority.Medium}>Medium</option>
             <option value={Priority.Low}>Low</option>
             <option value={Priority.Backlog}>Backlog</option>
-          </select>
+          </Select>
         </div>
-        <input
+        <Input
           type="text"
-          className={inputStyles}
-          placeholder="Tags (comma separated)"
+          label="Tags"
+          placeholder="Comma-separated tags"
           value={tags}
           onChange={(e) => setTags(e.target.value)}
         />
-
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-2">
-          <input
+          <Input
             type="date"
-            className={inputStyles}
+            label="Start Date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
           />
-          <input
+          <Input
             type="date"
-            className={inputStyles}
+            label="Due Date"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
           />
         </div>
-        <input
+        <Input
           type="text"
-          className={inputStyles}
+          label="Author User ID"
           placeholder="Author User ID"
           value={authorUserId}
           onChange={(e) => setAuthorUserId(e.target.value)}
         />
-        <input
+        <Input
           type="text"
-          className={inputStyles}
+          label="Assigned User ID"
           placeholder="Assigned User ID"
           value={assignedUserId}
           onChange={(e) => setAssignedUserId(e.target.value)}
         />
         {id === null && (
-          <input
+          <Input
             type="text"
-            className={inputStyles}
-            placeholder="ProjectId"
+            label="Project ID"
+            placeholder="Project ID"
             value={projectId}
             onChange={(e) => setProjectId(e.target.value)}
           />
         )}
-        <button
+        <Button
           type="submit"
-          className={`focus-offset-2 mt-4 flex w-full justify-center rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-            !isFormValid() || isLoading ? "cursor-not-allowed opacity-50" : ""
-          }`}
+          variant="primary"
           disabled={!isFormValid() || isLoading}
+          className="w-full"
         >
           {isLoading ? "Creating..." : "Create Task"}
-        </button>
+        </Button>
       </form>
     </Modal>
   );
