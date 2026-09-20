@@ -283,11 +283,12 @@ These commits have been implemented on `develop`.
 - [ ] Test valid, expired, missing, and invalid tokens.
 
 **Commits**
+- `feat(backend): add CORS and security configuration`
 - `feat(auth): add Cognito authentication guard`
 - `feat(auth): add current-user request context`
 - `feat(auth): add project access guard`
 - `feat(auth): add permission guard foundation`
-- `test(auth): cover authentication and authorization`
+- `test(backend): add NestJS controller unit tests`
 
 ## 2.4 Core Module Migration
 
@@ -310,7 +311,7 @@ Suggested migration order:
 
 1. [x] Users and profile module.
 2. [x] Projects module.
-3. [ ] Project membership module.
+3. [x] Project membership module.
 4. [x] Tasks module.
 5. [ ] Comments and activity module.
 6. [ ] Files and attachments module.
@@ -325,6 +326,32 @@ Suggested migration order:
 - `test(backend): add <module> unit and API tests`
 - `refactor(backend): remove legacy <module> Express implementation`
 
+**Migration Progress**
+- Users module: DONE (controller, service, DTOs, tests)
+- Projects module: DONE (controller, service, DTOs, tests, pagination)
+- Tasks module: DONE (controller, service, DTOs, tests)
+- Search module: DONE (controller, service, DTOs)
+- Teams module: DONE (controller, service, DTOs)
+- Project memberships module: DONE (controller, service, DTOs, pagination)
+
+**Commits per module**
+- `feat(backend): add users NestJS module`
+- `feat(backend): add projects NestJS module with pagination`
+- `feat(backend): add tasks NestJS module`
+- `feat(backend): add search NestJS module`
+- `feat(backend): add teams NestJS module with pagination`
+- `feat(backend): add project memberships module`
+- `test(backend): add NestJS controller unit tests`
+
+**Completed**
+- Users module: DONE
+- Projects module: DONE (with pagination)
+- Tasks module: DONE
+- Search module: DONE
+- Teams module: DONE (with pagination)
+- Project memberships module: DONE
+- NestJS tests: 18 tests passing (AppController + 3 module controllers)
+
 ## 2.5 API Standards and Database Refinement
 
 - [ ] Standardize response envelopes.
@@ -338,6 +365,7 @@ Suggested migration order:
 - [ ] Verify seed data and test fixtures.
 
 **Commits**
+- `feat(backend): add pagination utilities`
 - `refactor(api): standardize response format`
 - `feat(api): add pagination and filtering utilities`
 - `fix(database): improve constraints and indexes`

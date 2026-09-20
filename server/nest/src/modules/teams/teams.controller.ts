@@ -6,11 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from "@nestjs/common";
-import { ApiTags, ApiBearerAuth } from "@nestjs/swagger";
+import { ApiTags, ApiBearerAuth, ApiQuery } from "@nestjs/swagger";
 import { TeamsService } from "./teams.service";
 import { CreateTeamDto } from "./dto/create-team.dto";
 import { UpdateTeamDto } from "./dto/update-team.dto";
+import { PaginationDto } from "../../common/dto/pagination.dto";
 
 @ApiTags("teams")
 @ApiBearerAuth()
@@ -23,9 +25,11 @@ export class TeamsController {
     return this.teamsService.create(createTeamDto);
   }
 
+  @ApiQuery({ name: "page", required: false })
+  @ApiQuery({ name: "limit", required: false })
   @Get()
-  async findAll() {
-    return this.teamsService.findAll();
+  async findAll(@Query() query: PaginationDto) {
+    return this.teamsService.findAll(query);
   }
 
   @Get(":id")

@@ -6,11 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from "@nestjs/common";
-import { ApiTags, ApiBearerAuth } from "@nestjs/swagger";
+import { ApiTags, ApiBearerAuth, ApiQuery } from "@nestjs/swagger";
 import { UsersService } from "./users.service";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
+import { PaginationDto } from "../../common/dto/pagination.dto";
 import { Public } from "../../common/guards/jwt-auth.guard";
 
 @ApiTags("users")
@@ -25,9 +27,11 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  @ApiQuery({ name: "page", required: false })
+  @ApiQuery({ name: "limit", required: false })
   @Get()
-  async findAll() {
-    return this.usersService.findAll();
+  async findAll(@Query() query: PaginationDto) {
+    return this.usersService.findAll(query);
   }
 
   @Get(":cognitoId")

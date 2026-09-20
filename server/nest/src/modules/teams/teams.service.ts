@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
 import { CreateTeamDto } from "./dto/create-team.dto";
 import { UpdateTeamDto } from "./dto/update-team.dto";
+import { getPaginationParams } from "../../common/utils/pagination.util";
+import { PaginationDto } from "../../common/dto/pagination.dto";
 
 @Injectable()
 export class TeamsService {
@@ -15,16 +17,23 @@ export class TeamsService {
     });
   }
 
-  async findAll() {
-    return this.prisma.team.findMany({
-      include: {
-        projectTeams: {
-          include: {
-            project: true,
+  async findAll(query: PaginationDto) {
+    const { skip, take } = getPaginationParams(query);
+    const [data, total] = await Promise.all([
+      this.prisma.team.findMany({
+        skip,
+        take,
+        include: {
+          projectTeams: {
+            include: {
+              project: true,
+            },
           },
         },
-      },
-    });
+      }),
+      this.prisma.team.count(),
+    ]);
+    return { data, meta: { total, page: query.page || 1, limit: query.limit || 10 } };
   }
 
   async findOne(id: number) {

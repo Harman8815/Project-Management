@@ -11,6 +11,7 @@ import { ProjectsModule } from "./modules/projects/projects.module";
 import { TasksModule } from "./modules/tasks/tasks.module";
 import { SearchModule } from "./modules/search/search.module";
 import { TeamsModule } from "./modules/teams/teams.module";
+import { ProjectMembershipsModule } from "./modules/project-memberships/project-memberships.module";
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { TeamsModule } from "./modules/teams/teams.module";
     TasksModule,
     SearchModule,
     TeamsModule,
+    ProjectMembershipsModule,
   ],
   providers: [
     PrismaService,

@@ -1,30 +1,15 @@
 import "reflect-metadata";
 import { NestFactory } from "@nestjs/core";
 import {
-  FastifyAdapter,
-  NestFastifyApplication,
-} from "@nestjs/platform-fastify";
-import {
   ValidationPipe,
   VersioningType,
   Logger,
 } from "@nestjs/common";
-import helmet from "@fastify/helmet";
-import cors from "@fastify/cors";
 import { AppModule } from "./app.module";
 import { setupApiDocs } from "./docs/api-documentation";
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule,
-    new FastifyAdapter(),
-  );
-
-  await app.register(helmet);
-  await app.register(cors, {
-    origin: process.env.CORS_ORIGIN || "*",
-    credentials: true,
-  });
+  const app = await NestFactory.create(AppModule);
 
   app.enableVersioning({
     type: VersioningType.URI,
@@ -42,6 +27,12 @@ async function bootstrap() {
       },
     }),
   );
+
+  const corsOrigin = process.env.CORS_ORIGIN || "*";
+  app.enableCors({
+    origin: corsOrigin,
+    credentials: corsOrigin !== "*",
+  });
 
   setupApiDocs(app);
 

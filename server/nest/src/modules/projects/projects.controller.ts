@@ -6,11 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from "@nestjs/common";
-import { ApiTags, ApiBearerAuth } from "@nestjs/swagger";
+import { ApiTags, ApiBearerAuth, ApiQuery } from "@nestjs/swagger";
 import { ProjectsService } from "./projects.service";
 import { CreateProjectDto } from "./dto/create-project.dto";
 import { UpdateProjectDto } from "./dto/update-project.dto";
+import { PaginationDto } from "../../common/dto/pagination.dto";
 
 @ApiTags("projects")
 @ApiBearerAuth()
@@ -23,9 +25,11 @@ export class ProjectsController {
     return this.projectsService.create(createProjectDto);
   }
 
+  @ApiQuery({ name: "page", required: false })
+  @ApiQuery({ name: "limit", required: false })
   @Get()
-  async findAll() {
-    return this.projectsService.findAll();
+  async findAll(@Query() query: PaginationDto) {
+    return this.projectsService.findAll(query);
   }
 
   @Get(":id")
