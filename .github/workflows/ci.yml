@@ -56,6 +56,21 @@ jobs:
           echo 'DATABASE_URL="file:./dev.db"' >> .env
       - run: npm test
 
+  test-nest:
+    name: Test (NestJS)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run test:nest
+
   build-client:
     name: Build (Client)
     runs-on: ubuntu-latest
