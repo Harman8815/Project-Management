@@ -1,4 +1,5 @@
 import { User } from "@/state/api";
+import { Card } from "@/components/ui";
 import Image from "next/image";
 import React from "react";
 
@@ -8,10 +9,10 @@ type Props = {
 
 const UserCard = ({ user }: Props) => {
   return (
-    <div className="flex items-center rounded border p-4 shadow">
+    <Card className="flex items-center gap-4 border border-gray-200 shadow dark:border-gray-700">
       {user.profilePictureUrl && (
         <Image
-          src={`/p1.jpeg`}
+          src={`/${user.profilePictureUrl}`}
           alt="profile picture"
           width={32}
           height={32}
@@ -19,10 +20,12 @@ const UserCard = ({ user }: Props) => {
         />
       )}
       <div>
-        <h3>{user.username}</h3>
-        <p>{user.email}</p>
+        <h3 className="font-medium dark:text-white">{user.username}</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-300">
+          {user.email}
+        </p>
       </div>
-    </div>
+    </Card>
   );
 };
 

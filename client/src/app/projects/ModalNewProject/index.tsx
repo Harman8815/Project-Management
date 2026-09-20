@@ -1,3 +1,4 @@
+import { Button, Input, Textarea } from "@/components/ui";
 import Modal from "@/components/Modal";
 import { useCreateProjectMutation } from "@/state/api";
 import React, { useState } from "react";
@@ -37,9 +38,6 @@ const ModalNewProject = ({ isOpen, onClose }: Props) => {
     return projectName && description && startDate && endDate;
   };
 
-  const inputStyles =
-    "w-full rounded border border-gray-300 p-2 shadow-sm dark:border-dark-tertiary dark:bg-dark-tertiary dark:text-white dark:focus:outline-none";
-
   return (
     <Modal isOpen={isOpen} onClose={onClose} name="Create New Project">
       <form
@@ -49,42 +47,41 @@ const ModalNewProject = ({ isOpen, onClose }: Props) => {
           handleSubmit();
         }}
       >
-        <input
+        <Input
           type="text"
-          className={inputStyles}
+          label="Project Name"
           placeholder="Project Name"
           value={projectName}
           onChange={(e) => setProjectName(e.target.value)}
         />
-        <textarea
-          className={inputStyles}
+        <Textarea
+          label="Description"
           placeholder="Description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-2">
-          <input
+          <Input
             type="date"
-            className={inputStyles}
+            label="Start Date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
           />
-          <input
+          <Input
             type="date"
-            className={inputStyles}
+            label="End Date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
           />
         </div>
-        <button
+        <Button
           type="submit"
-          className={`focus-offset-2 mt-4 flex w-full justify-center rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-            !isFormValid() || isLoading ? "cursor-not-allowed opacity-50" : ""
-          }`}
+          variant="primary"
           disabled={!isFormValid() || isLoading}
+          className="w-full"
         >
           {isLoading ? "Creating..." : "Create Project"}
-        </button>
+        </Button>
       </form>
     </Modal>
   );
