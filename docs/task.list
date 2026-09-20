@@ -37,27 +37,27 @@ content = r"""# ProjeX v2 — Detailed Implementation Task List
 
 ## 0.1 Codebase Audit
 
-- [ ] Inventory frontend routes, layouts, components, hooks, state, and API calls.
-  - [ ] Identify duplicated components and utilities.
-  - [ ] Identify static, mock, and hardcoded data.
-  - [ ] Identify unused files and dependencies.
-  - [ ] Record existing UI and API issues.
-  - [ ] Document current authentication and authorization flow.
-- [ ] Inventory Express routes, controllers, services, middleware, and utilities.
-  - [ ] Map every endpoint to its frontend consumer.
-  - [ ] Identify business logic inside route handlers.
-  - [ ] Record inconsistent responses and error formats.
-  - [ ] Identify security and validation gaps.
-- [ ] Review Prisma schema.
-  - [ ] Map model relationships.
-  - [ ] Identify missing indexes and constraints.
-  - [ ] Identify duplicate or unclear fields.
-  - [ ] Document risky migration areas.
-- [ ] Create an audit report.
-  - [ ] Add frontend findings.
-  - [ ] Add backend findings.
-  - [ ] Add database findings.
-  - [ ] Prioritize critical, high, medium, and low issues.
+- [x] Inventory frontend routes, layouts, components, hooks, state, and API calls.
+  - [x] Identify duplicated components and utilities.
+  - [x] Identify static, mock, and hardcoded data.
+  - [x] Identify unused files and dependencies.
+  - [x] Record existing UI and API issues.
+  - [x] Document current authentication and authorization flow.
+- [x] Inventory Express routes, controllers, services, middleware, and utilities.
+  - [x] Map every endpoint to its frontend consumer.
+  - [x] Identify business logic inside route handlers.
+  - [x] Record inconsistent responses and error formats.
+  - [x] Identify security and validation gaps.
+- [x] Review Prisma schema.
+  - [x] Map model relationships.
+  - [x] Identify missing indexes and constraints.
+  - [x] Identify duplicate or unclear fields.
+  - [x] Document risky migration areas.
+- [x] Create an audit report.
+  - [x] Add frontend findings.
+  - [x] Add backend findings.
+  - [x] Add database findings.
+  - [x] Prioritize critical, high, medium, and low issues.
 
 **Suggested commits**
 - `docs: add frontend codebase audit`
@@ -67,16 +67,16 @@ content = r"""# ProjeX v2 — Detailed Implementation Task List
 
 ## 0.2 Architecture and Contracts
 
-- [ ] Define frontend folder and feature structure.
-- [ ] Define NestJS module boundaries.
-- [ ] Define API naming and versioning conventions.
-- [ ] Define standard success response format.
-- [ ] Define standard error response format.
-- [ ] Define pagination, filtering, sorting, and search conventions.
-- [ ] Define DTO validation rules.
-- [ ] Define authorization and permission-checking conventions.
-- [ ] Define API contract documentation format.
-- [ ] Decide how frontend and backend changes remain backward-compatible during migration.
+- [x] Define frontend folder and feature structure.
+- [x] Define NestJS module boundaries.
+- [x] Define API naming and versioning conventions.
+- [x] Define standard success response format.
+- [x] Define standard error response format.
+- [x] Define pagination, filtering, sorting, and search conventions.
+- [x] Define DTO validation rules.
+- [x] Define authorization and permission-checking conventions.
+- [x] Define API contract documentation format.
+- [x] Decide how frontend and backend changes remain backward-compatible during migration.
 
 **Suggested commits**
 - `docs: define application architecture`
@@ -129,19 +129,22 @@ content = r"""# ProjeX v2 — Detailed Implementation Task List
 
 ## 0.5 Logging and Error Handling
 
-- [ ] Define structured log format.
-- [ ] Add request correlation IDs.
-- [ ] Add centralized frontend error handling.
-- [ ] Add backend exception handling strategy.
-- [ ] Remove unnecessary sensitive data from logs.
-- [ ] Add safe user-facing error messages.
-- [ ] Add error-handling tests.
+- [x] Define structured log format.
+- [x] Add request correlation IDs.
+- [x] Add centralized frontend error handling.
+- [x] Add backend exception handling strategy.
+- [x] Remove unnecessary sensitive data from logs.
+- [x] Add safe user-facing error messages.
+- [x] Add error-handling tests.
 
 **Suggested commits**
 - `feat: add structured backend logging`
 - `feat: add centralized exception handling`
 - `feat: add frontend error boundary and handlers`
 - `test: cover error handling behavior`
+- `fix: sanitize sensitive data from logs`
+
+These commits have been implemented on `develop`.
 
 ---
 
