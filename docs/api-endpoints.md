@@ -198,3 +198,32 @@ The NestJS API paths will be:
 - `PATCH /api/v1/projects/:id` (update project)
 - `DELETE /api/v1/projects/:id` (delete project)
 - And similar for tasks, teams, and search endpoints.
+
+### NestJS Enhancements
+
+The NestJS backend adds the following features over the Express API:
+
+#### Pagination
+All list endpoints accept optional pagination query parameters:
+- `page` (default: 1)
+- `limit` (default: 10)
+
+List responses return a paginated structure:
+```json
+{
+  "data": [...],
+  "meta": {
+    "total": 100,
+    "page": 1,
+    "limit": 10
+  }
+}
+```
+
+#### Task Filtering and Sorting
+`GET /api/v1/tasks?projectId=N` supports the following query parameters:
+- `status` — Filter by task status (e.g., "To Do", "In Progress", "Completed")
+- `priority` — Filter by priority (e.g., "Low", "Medium", "High")
+- `search` — Text search across title, description, and tags
+- `sortBy` — Sort field (e.g., "dueDate", "priority", "points")
+- `sortOrder` — Sort direction ("asc" or "desc", default: "asc")
