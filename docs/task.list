@@ -380,7 +380,7 @@ Suggested migration order:
 - [x] Verify logs, authentication, and error behavior. (Structured logging, JWT auth, AllExceptionsFilter)
 - [ ] Remove unused Express dependencies.
 - [x] Update deployment configuration. (CI workflow has NestJS test job)
-- [ ] Update backend documentation.
+- [x] Update backend documentation. (api-endpoints.md updated with NestJS features)
 - [ ] Merge `refactor/backend-nestjs` into `develop`.
 
 ---
@@ -391,24 +391,24 @@ Suggested migration order:
 
 ## 3.1 Project Lifecycle and Metadata
 
-- [ ] Define project status enum and transition rules.
-- [ ] Add project key and unique identifier.
-- [ ] Add owner, manager, priority, health, and objectives.
-- [ ] Add project start and target dates.
+- [x] Define project status enum and transition rules.
+- [x] Add project key and unique identifier.
+- [x] Add owner, manager, priority, health, and objectives.
+- [x] Add project start and target dates. (startDate, endDate, dueDate)
 - [ ] Add archive and restore behavior.
 - [ ] Add lifecycle validation and tests.
 - [ ] Update project creation and editing UI.
 
 ## 3.2 Membership and Roles
 
-- [ ] Design project membership model.
-- [ ] Support multiple projects per user.
-- [ ] Add invitation and removal flows.
-- [ ] Define project roles.
-- [ ] Add role-based permission checks.
+- [x] Design project membership model.
+- [x] Support multiple projects per user.
+- [x] Add invitation and removal flows.
+- [x] Define project roles. (OWNER, MANAGER, MEMBER, VIEWER)
+- [x] Add role-based permission checks. (checkUserAccess method)
 - [ ] Prevent unauthorized membership changes.
 - [ ] Add membership management UI.
-- [ ] Add authorization tests.
+- [x] Add authorization tests. (12 new NestJS tests)
 
 ## 3.3 Workspace Sections
 
