@@ -68,4 +68,51 @@ export class TasksController {
   async remove(@Param("id") id: string) {
     return this.tasksService.remove(Number(id));
   }
+
+  @Post(":id/dependencies")
+  async addDependency(
+    @Param("id") taskId: string,
+    @Body("blockedById") blockedById: number,
+  ) {
+    return this.tasksService.addDependency(Number(taskId), blockedById);
+  }
+
+  @Delete(":id/dependencies/:blockedById")
+  async removeDependency(
+    @Param("id") taskId: string,
+    @Param("blockedById") blockedById: string,
+  ) {
+    return this.tasksService.removeDependency(Number(taskId), Number(blockedById));
+  }
+
+  @Get(":id/dependencies")
+  async getDependencies(@Param("id") taskId: string) {
+    return this.tasksService.getDependencies(Number(taskId));
+  }
+
+  @Get(":id/children")
+  async getChildren(@Param("id") parentId: string) {
+    return this.tasksService.getChildren(Number(parentId));
+  }
+
+  @Post(":id/watchers")
+  async addWatcher(
+    @Param("id") taskId: string,
+    @Body("userId") userId: number,
+  ) {
+    return this.tasksService.addWatcher(Number(taskId), userId);
+  }
+
+  @Delete(":id/watchers/:userId")
+  async removeWatcher(
+    @Param("id") taskId: string,
+    @Param("userId") userId: string,
+  ) {
+    return this.tasksService.removeWatcher(Number(taskId), Number(userId));
+  }
+
+  @Get(":id/watchers")
+  async getWatchers(@Param("id") taskId: string) {
+    return this.tasksService.getWatchers(Number(taskId));
+  }
 }

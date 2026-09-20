@@ -30,6 +30,8 @@ model User {
   projectMemberships ProjectMembership[]
   invitedMembers    ProjectMembership[] @relation("InvitedBy")
   createdTemplates   ProjectTemplate[]
+  taskWatchers       TaskWatcher[]
+  taskHistoryChanges TaskHistory[]
 }
 
 model Team {
@@ -101,20 +103,34 @@ model Task {
   description    String?
   status         String?
   priority       String?
+  severity       String?
+  type           String?   @default("TASK")
   tags           String?
   startDate      DateTime?
   dueDate        DateTime?
   points         Int?
+  estimateHours  Int?
+  actualHours    Int?
+  acceptanceCriteria String?
+  identifier     String?   @unique
+  position       Int?
   projectId      Int
   authorUserId   Int
   assignedUserId Int?
+  parentId       Int?
 
   project         Project          @relation(fields: [projectId], references: [id])
   author          User             @relation("TaskAuthor", fields: [authorUserId], references: [userId])
   assignee        User?            @relation("TaskAssignee", fields: [assignedUserId], references: [userId])
+  parent          Task?            @relation("TaskHierarchy", fields: [parentId], references: [id])
+  children        Task[]           @relation("TaskHierarchy")
   taskAssignments TaskAssignment[]
   attachments     Attachment[]
   comments        Comment[]
+  taskDependenciesAsBlocked TaskDependency[] @relation("BlockedTask")
+  taskDependenciesAsBlocker TaskDependency[] @relation("BlockerTask")
+  watchers        TaskWatcher[]
+  history         TaskHistory[]
 }
 
 model TaskAssignment {
@@ -124,6 +140,38 @@ model TaskAssignment {
 
   user User @relation(fields: [userId], references: [userId])
   task Task @relation(fields: [taskId], references: [id])
+}
+
+model TaskDependency {
+  id          Int @id @default(autoincrement())
+  taskId      Int
+  blockedById Int
+
+  task        Task @relation("BlockedTask", fields: [taskId], references: [id])
+  blockedBy   Task @relation("BlockerTask", fields: [blockedById], references: [id])
+}
+
+model TaskWatcher {
+  id     Int @id @default(autoincrement())
+  taskId Int
+  userId Int
+  createdAt DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id])
+  user User @relation(fields: [userId], references: [userId])
+}
+
+model TaskHistory {
+  id          Int      @id @default(autoincrement())
+  taskId      Int
+  field       String
+  oldValue    String?
+  newValue    String?
+  changedById Int?
+  createdAt   DateTime @default(now())
+
+  task   Task @relation(fields: [taskId], references: [id])
+  changedBy User? @relation(fields: [changedById], references: [userId])
 }
 
 model Attachment {

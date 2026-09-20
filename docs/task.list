@@ -437,14 +437,14 @@ Suggested migration order:
 
 ## 4.1 Task Model Improvements
 
-- [ ] Review task schema.
-- [ ] Add task type support.
-- [ ] Add priority and severity.
-- [ ] Add parent-child relationships.
+- [x] Review task schema.
+- [x] Add task type support. (TASK, BUG, STORY, EPIC)
+- [x] Add priority and severity.
+- [x] Add parent-child relationships. (parent/children relation)
 - [ ] Add task identifiers.
-- [ ] Add acceptance criteria.
-- [ ] Add estimates and actual effort.
-- [ ] Add due dates and scheduling fields.
+- [x] Add acceptance criteria.
+- [x] Add estimates and actual effort. (estimateHours, actualHours)
+- [x] Add due dates and scheduling fields. (dueDate, position)
 - [ ] Add database indexes and constraints.
 
 ## 4.2 Workflow and Statuses
@@ -458,21 +458,21 @@ Suggested migration order:
 
 ## 4.3 Dependencies and Planning
 
-- [ ] Create task dependency model.
-- [ ] Support blocking and blocked-by relationships.
-- [ ] Prevent invalid and circular dependencies.
+- [x] Create task dependency model.
+- [x] Support blocking and blocked-by relationships.
+- [x] Prevent invalid and circular dependencies.
 - [ ] Add dependency visualization.
 - [ ] Display blocked task indicators.
-- [ ] Add dependency validation tests.
+- [x] Add dependency validation tests.
 
 ## 4.4 Task Productivity Features
 
-- [ ] Add watchers.
+- [x] Add watchers. (TaskWatcher model + service)
 - [ ] Add bulk assignment and status updates.
 - [ ] Add bulk archive and delete safeguards.
-- [ ] Add task history.
+- [ ] Add task history. (TaskHistory model created, service pending)
 - [ ] Add task activity timeline.
-- [ ] Add advanced search and filters.
+- [x] Add advanced search and filters. (FilterSortDto integration)
 - [ ] Add keyboard shortcuts where useful.
 - [ ] Add E2E coverage for critical task flows.
 

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
 import { CreateTaskDto } from "./dto/create-task.dto";
 import { UpdateTaskDto } from "./dto/update-task.dto";
@@ -16,10 +20,16 @@ export class TasksService {
         description: createTaskDto.description,
         status: createTaskDto.status,
         priority: createTaskDto.priority,
+        severity: createTaskDto.severity,
+        type: createTaskDto.type || "TASK",
         tags: createTaskDto.tags,
         startDate: createTaskDto.startDate,
         dueDate: createTaskDto.dueDate,
         points: createTaskDto.points,
+        estimateHours: createTaskDto.estimateHours,
+        actualHours: createTaskDto.actualHours,
+        acceptanceCriteria: createTaskDto.acceptanceCriteria,
+        parentId: createTaskDto.parentId,
         projectId: createTaskDto.projectId,
         authorUserId: createTaskDto.authorUserId,
         assignedUserId: createTaskDto.assignedUserId,
@@ -27,6 +37,8 @@ export class TasksService {
       include: {
         author: true,
         assignee: true,
+        children: true,
+        watchers: { include: { user: true } },
       },
     });
   }
@@ -137,5 +149,157 @@ export class TasksService {
     return this.prisma.task.delete({
       where: { id },
     });
+  }
+
+  async addDependency(taskId: number, blockedById: number) {
+    const task = await this.prisma.task.findUnique({
+      where: { id: taskId },
+    });
+    if (!task) {
+      throw new NotFoundException(`Task with id ${taskId} not found`);
+    }
+
+    const blockedBy = await this.prisma.task.findUnique({
+      where: { id: blockedById },
+    });
+    if (!blockedBy) {
+      throw new NotFoundException(`Task with id ${blockedById} not found`);
+    }
+
+    if (taskId === blockedById) {
+      throw new BadRequestException("A task cannot depend on itself");
+    }
+
+    const isCircular = await this.checkCircularDependency(taskId, blockedById);
+    if (isCircular) {
+      throw new BadRequestException(
+        "This dependency would create a circular reference",
+      );
+    }
+
+    return this.prisma.taskDependency.create({
+      data: {
+        taskId,
+        blockedById,
+      },
+    });
+  }
+
+  async removeDependency(taskId: number, blockedById: number) {
+    const dependency = await this.prisma.taskDependency.findFirst({
+      where: { taskId, blockedById },
+    });
+    if (!dependency) {
+      throw new NotFoundException(
+        `Dependency from task ${taskId} blocked by ${blockedById} not found`,
+      );
+    }
+    return this.prisma.taskDependency.delete({
+      where: { id: dependency.id },
+    });
+  }
+
+  async getDependencies(taskId: number) {
+    const task = await this.prisma.task.findUnique({
+      where: { id: taskId },
+    });
+    if (!task) {
+      throw new NotFoundException(`Task with id ${taskId} not found`);
+    }
+
+    return this.prisma.taskDependency.findMany({
+      where: { taskId },
+      include: { blockedBy: true },
+    });
+  }
+
+  async addWatcher(taskId: number, userId: number) {
+    const task = await this.prisma.task.findUnique({
+      where: { id: taskId },
+    });
+    if (!task) {
+      throw new NotFoundException(`Task with id ${taskId} not found`);
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { userId },
+    });
+    if (!user) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+
+    return this.prisma.taskWatcher.create({
+      data: { taskId, userId },
+    });
+  }
+
+  async removeWatcher(taskId: number, userId: number) {
+    const watcher = await this.prisma.taskWatcher.findFirst({
+      where: { taskId, userId },
+    });
+    if (!watcher) {
+      throw new NotFoundException(
+        `Watcher for user ${userId} on task ${taskId} not found`,
+      );
+    }
+    return this.prisma.taskWatcher.delete({
+      where: { id: watcher.id },
+    });
+  }
+
+  async getWatchers(taskId: number) {
+    const task = await this.prisma.task.findUnique({
+      where: { id: taskId },
+    });
+    if (!task) {
+      throw new NotFoundException(`Task with id ${taskId} not found`);
+    }
+
+    return this.prisma.taskWatcher.findMany({
+      where: { taskId },
+      include: { user: true },
+    });
+  }
+
+  async getChildren(parentId: number) {
+    const parent = await this.prisma.task.findUnique({
+      where: { id: parentId },
+    });
+    if (!parent) {
+      throw new NotFoundException(`Task with id ${parentId} not found`);
+    }
+
+    return this.prisma.task.findMany({
+      where: { parentId },
+      include: {
+        author: true,
+        assignee: true,
+      },
+    });
+  }
+
+  private async checkCircularDependency(
+    taskId: number,
+    blockedById: number,
+  ): Promise<boolean> {
+    const visited = new Set<number>();
+    const queue: number[] = [taskId];
+
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      if (current === blockedById) return true;
+      if (visited.has(current)) continue;
+      visited.add(current);
+
+      const deps = await this.prisma.taskDependency.findMany({
+        where: { taskId: current },
+      });
+      for (const dep of deps) {
+        if (!visited.has(dep.blockedById)) {
+          queue.push(dep.blockedById);
+        }
+      }
+    }
+    return false;
   }
 }

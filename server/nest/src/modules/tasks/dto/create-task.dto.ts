@@ -1,4 +1,10 @@
-import { IsDateString, IsInt, IsOptional, IsString } from "class-validator";
+import {
+  IsDateString,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+} from "class-validator";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateTaskDto {
@@ -11,15 +17,35 @@ export class CreateTaskDto {
   @IsOptional()
   description?: string;
 
-  @ApiPropertyOptional({ example: "To Do" })
-  @IsString()
+  @ApiPropertyOptional({
+    enum: ["To Do", "In Progress", "In Review", "Completed", "Blocked"],
+    default: "To Do",
+  })
+  @IsEnum(["To Do", "In Progress", "In Review", "Completed", "Blocked"])
   @IsOptional()
   status?: string;
 
-  @ApiPropertyOptional({ example: "Medium" })
-  @IsString()
+  @ApiPropertyOptional({
+    enum: ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+  })
+  @IsEnum(["LOW", "MEDIUM", "HIGH", "CRITICAL"])
   @IsOptional()
   priority?: string;
+
+  @ApiPropertyOptional({
+    enum: ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+  })
+  @IsEnum(["LOW", "MEDIUM", "HIGH", "CRITICAL"])
+  @IsOptional()
+  severity?: string;
+
+  @ApiPropertyOptional({
+    enum: ["TASK", "BUG", "STORY", "EPIC"],
+    default: "TASK",
+  })
+  @IsEnum(["TASK", "BUG", "STORY", "EPIC"])
+  @IsOptional()
+  type?: string;
 
   @ApiPropertyOptional({ example: "frontend,urgent" })
   @IsString()
@@ -40,6 +66,26 @@ export class CreateTaskDto {
   @IsInt()
   @IsOptional()
   points?: number;
+
+  @ApiPropertyOptional({ example: 8 })
+  @IsInt()
+  @IsOptional()
+  estimateHours?: number;
+
+  @ApiPropertyOptional({ example: 4 })
+  @IsInt()
+  @IsOptional()
+  actualHours?: number;
+
+  @ApiPropertyOptional({ example: "Must be responsive on all devices" })
+  @IsString()
+  @IsOptional()
+  acceptanceCriteria?: string;
+
+  @ApiPropertyOptional({ example: 2 })
+  @IsInt()
+  @IsOptional()
+  parentId?: number;
 
   @ApiProperty({ example: 1 })
   @IsInt()
