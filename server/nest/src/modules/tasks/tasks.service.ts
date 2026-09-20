@@ -8,10 +8,14 @@ import { CreateTaskDto } from "./dto/create-task.dto";
 import { UpdateTaskDto } from "./dto/update-task.dto";
 import { UpdateTaskStatusDto } from "./dto/update-task-status.dto";
 import { FilterSortDto } from "../../common/dto/filter-sort.dto";
+import { WorkflowService } from "./workflow/workflow.service";
 
 @Injectable()
 export class TasksService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly workflowService: WorkflowService,
+  ) {}
 
   async create(createTaskDto: CreateTaskDto) {
     return this.prisma.task.create({
@@ -116,6 +120,13 @@ export class TasksService {
     if (!task) {
       throw new NotFoundException(`Task with id ${id} not found`);
     }
+
+    this.workflowService.validateTransition(
+      task.status,
+      updateTaskStatusDto.status,
+      task.projectId,
+    );
+
     return this.prisma.task.update({
       where: { id },
       data: { status: updateTaskStatusDto.status },
@@ -276,6 +287,21 @@ export class TasksService {
         assignee: true,
       },
     });
+  }
+
+  getValidTransitions(status: string, projectId?: string) {
+    return this.workflowService.getValidTransitions(
+      status,
+      projectId ? Number(projectId) : undefined,
+    );
+  }
+
+  getDefaultWorkflow() {
+    return this.workflowService.getProjectWorkflow();
+  }
+
+  getWorkflowForProject(projectId: number) {
+    return this.workflowService.getProjectWorkflow(projectId);
   }
 
   private async checkCircularDependency(

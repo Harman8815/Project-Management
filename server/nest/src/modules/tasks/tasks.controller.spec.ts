@@ -2,6 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { TasksController } from "./tasks.controller";
 import { TasksService } from "./tasks.service";
 import { PrismaService } from "../../prisma/prisma.service";
+import { WorkflowService } from "./workflow/workflow.service";
 
 describe("TasksController", () => {
   let controller: TasksController;
@@ -16,6 +17,12 @@ describe("TasksController", () => {
     },
   };
 
+  const mockWorkflowService = {
+    validateTransition: jest.fn().mockReturnValue(true),
+    getValidTransitions: jest.fn().mockReturnValue([]),
+    getProjectWorkflow: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [TasksController],
@@ -24,6 +31,10 @@ describe("TasksController", () => {
         {
           provide: PrismaService,
           useValue: mockPrismaService,
+        },
+        {
+          provide: WorkflowService,
+          useValue: mockWorkflowService,
         },
       ],
     }).compile();

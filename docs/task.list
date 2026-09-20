@@ -449,12 +449,12 @@ Suggested migration order:
 
 ## 4.2 Workflow and Statuses
 
-- [ ] Define default task workflow.
-- [ ] Define valid status transitions.
-- [ ] Support project-specific statuses.
-- [ ] Add workflow validation service.
+- [x] Define default task workflow.
+- [x] Define valid status transitions.
+- [x] Support project-specific statuses. (setProjectWorkflow)
+- [x] Add workflow validation service.
 - [ ] Add status management UI.
-- [ ] Add tests for invalid transitions.
+- [x] Add tests for invalid transitions. (11 new tests)
 
 ## 4.3 Dependencies and Planning
 

@@ -90,6 +90,22 @@ export class TasksController {
     return this.tasksService.getDependencies(Number(taskId));
   }
 
+  @Get("workflow/transitions")
+  async getValidTransitions(
+    @Query("status") status: string,
+    @Query("projectId") projectId?: string,
+  ) {
+    return this.tasksService.getValidTransitions(status, projectId);
+  }
+
+  @Get("workflow/statuses")
+  async getWorkflowStatuses(@Query("projectId") projectId?: string) {
+    if (projectId) {
+      return this.tasksService.getWorkflowForProject(Number(projectId));
+    }
+    return this.tasksService.getDefaultWorkflow();
+  }
+
   @Get(":id/children")
   async getChildren(@Param("id") parentId: string) {
     return this.tasksService.getChildren(Number(parentId));

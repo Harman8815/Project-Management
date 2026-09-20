@@ -2,6 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { TasksService } from "./tasks.service";
 import { PrismaService } from "../../prisma/prisma.service";
 import { NotFoundException, BadRequestException } from "@nestjs/common";
+import { WorkflowService } from "./workflow/workflow.service";
 
 describe("TasksService", () => {
   let service: TasksService;
@@ -31,6 +32,13 @@ describe("TasksService", () => {
     },
   };
 
+  const mockWorkflowService = {
+    validateTransition: jest.fn().mockReturnValue(true),
+    getValidTransitions: jest.fn().mockReturnValue(["In Progress"]),
+    getDefaultWorkflow: jest.fn(),
+    getProjectWorkflow: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -38,6 +46,10 @@ describe("TasksService", () => {
         {
           provide: PrismaService,
           useValue: mockPrismaService,
+        },
+        {
+          provide: WorkflowService,
+          useValue: mockWorkflowService,
         },
       ],
     }).compile();
@@ -327,8 +339,13 @@ describe("TasksService", () => {
   });
 
   describe("updateStatus", () => {
-    it("should update task status", async () => {
-      mockPrismaService.task.findUnique.mockResolvedValue({ id: 1 });
+    it("should update task status with valid workflow transition", async () => {
+      mockPrismaService.task.findUnique.mockResolvedValue({
+        id: 1,
+        status: "In Progress",
+        projectId: 1,
+      });
+      mockWorkflowService.validateTransition.mockReturnValue(true);
       mockPrismaService.task.update.mockResolvedValue({
         id: 1,
         status: "Completed",
@@ -337,6 +354,52 @@ describe("TasksService", () => {
       const result = await service.updateStatus(1, { status: "Completed" });
 
       expect(result.status).toBe("Completed");
+      expect(mockWorkflowService.validateTransition).toHaveBeenCalledWith(
+        "In Progress",
+        "Completed",
+        1,
+      );
+    });
+
+    it("should throw NotFoundException when task does not exist", async () => {
+      mockPrismaService.task.findUnique.mockResolvedValue(null);
+
+      await expect(service.updateStatus(999, { status: "Completed" })).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it("should throw BadRequestException on invalid transition", async () => {
+      mockPrismaService.task.findUnique.mockResolvedValue({
+        id: 1,
+        status: "Completed",
+        projectId: 1,
+      });
+      mockWorkflowService.validateTransition.mockImplementation(() => {
+        throw new BadRequestException("Invalid transition");
+      });
+
+      await expect(
+        service.updateStatus(1, { status: "In Progress" }),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe("getValidTransitions", () => {
+    it("should return valid transitions for a status", () => {
+      const result = service.getValidTransitions("To Do");
+      expect(result).toEqual(["In Progress"]);
+    });
+  });
+
+  describe("getDefaultWorkflow", () => {
+    it("should return the default workflow", () => {
+      const expected = { statuses: ["To Do"] };
+      mockWorkflowService.getProjectWorkflow.mockReturnValue(expected);
+
+      const result = service.getDefaultWorkflow();
+
+      expect(result).toEqual(expected);
     });
   });
 
