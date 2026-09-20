@@ -11,6 +11,7 @@ import React from "react";
 import { useAppSelector } from "../redux";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Header from "@/components/Header";
+import { Card, LoadingState, EmptyState, ErrorState } from "@/components/ui";
 import {
   Bar,
   BarChart,
@@ -40,16 +41,29 @@ const HomePage = () => {
     data: tasks,
     isLoading: tasksLoading,
     isError: tasksError,
-  } = useGetTasksQuery({ projectId: parseInt("1") });
-  const { data: projects, isLoading: isProjectsLoading } =
-    useGetProjectsQuery();
+  } = useGetTasksQuery({ projectId: 1 });
+  const {
+    data: projects,
+    isLoading: isProjectsLoading,
+    isError: projectsError,
+  } = useGetProjectsQuery();
 
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
 
-  if (tasksLoading || isProjectsLoading) return <div>Loading..</div>;
-  if (tasksError || !tasks || !projects) return <div>Error fetching data</div>;
+  if (tasksLoading || isProjectsLoading)
+    return <LoadingState message="Loading dashboard..." />;
+  if (tasksError || projectsError)
+    return (
+      <ErrorState
+        message="Failed to load dashboard data"
+        onRetry={() => window.location.reload()}
+      />
+    );
 
-  const priorityCount = tasks.reduce(
+  const tasksList = tasks || [];
+  const projectsList = projects || [];
+
+  const priorityCount = tasksList.reduce(
     (acc: Record<string, number>, task: Task) => {
       const { priority } = task;
       acc[priority as Priority] = (acc[priority as Priority] || 0) + 1;
@@ -63,7 +77,7 @@ const HomePage = () => {
     count: priorityCount[key],
   }));
 
-  const statusCount = projects.reduce(
+  const statusCount = projectsList.reduce(
     (acc: Record<string, number>, project: Project) => {
       const status = project.endDate ? "Completed" : "Active";
       acc[status] = (acc[status] || 0) + 1;
@@ -91,14 +105,18 @@ const HomePage = () => {
         text: "#000000",
       };
 
+  if (tasksList.length === 0 && projectsList.length === 0) {
+    return <EmptyState message="No tasks or projects found" />;
+  }
+
   return (
-    <div className="container h-full w-[100%] bg-gray-100 bg-transparent p-8">
+    <div className="container h-full w-full bg-gray-100 p-8 dark:bg-dark-bg">
       <Header name="Project Management Dashboard" />
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="rounded-lg bg-white p-4 shadow dark:bg-dark-secondary">
-          <h3 className="mb-4 text-lg font-semibold dark:text-white">
-            Task Priority Distribution
-          </h3>
+        <Card
+          title="Task Priority Distribution"
+          className="shadow dark:border-gray-700"
+        >
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={taskDistribution}>
               <CartesianGrid
@@ -117,14 +135,11 @@ const HomePage = () => {
               <Bar dataKey="count" fill={chartColors.bar} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
-        <div className="rounded-lg bg-white p-4 shadow dark:bg-dark-secondary">
-          <h3 className="mb-4 text-lg font-semibold dark:text-white">
-            Project Status
-          </h3>
+        </Card>
+        <Card title="Project Status" className="shadow dark:border-gray-700">
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
-              <Pie dataKey="count" data={projectStatus} fill="#82ca9d" label>
+              <Pie dataKey="count" data={projectStatus} fill={chartColors.pieFill} label>
                 {projectStatus.map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
@@ -136,24 +151,22 @@ const HomePage = () => {
               <Legend />
             </PieChart>
           </ResponsiveContainer>
-        </div>
-        <div className="rounded-lg bg-white p-4 shadow dark:bg-dark-secondary md:col-span-2">
-          <h3 className="mb-4 text-lg font-semibold dark:text-white">
-            Your Tasks
-          </h3>
+        </Card>
+        <Card
+          title="Your Tasks"
+          className="md:col-span-2 shadow dark:border-gray-700"
+        >
           <div style={{ height: 400, width: "100%" }}>
             <DataGrid
-              rows={tasks}
+              rows={tasksList}
               columns={taskColumns}
               checkboxSelection
-              loading={tasksLoading}
-              getRowClassName={() => "data-grid-row"}
-              getCellClassName={() => "data-grid-cell"}
+              getRowId={(row) => row.id}
               className={dataGridClassNames}
               sx={dataGridSxStyles(isDarkMode)}
             />
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );

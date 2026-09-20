@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import ProjectHeader from "@/app/projects/ProjectHeader";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import Board from "../BoardView";
 import List from "../ListView";
 import Timeline from "../TimelineView";
@@ -19,30 +20,39 @@ const Project = () => {
   const projectName =
     projects?.find((p) => p.id === Number(id))?.name ?? "Project";
 
+  const breadcrumbItems = [
+    { label: "Home", href: "/" },
+    { label: "Projects", href: "/projects" },
+    { label: projectName },
+  ];
+
   return (
     <div>
-      <ModalNewTask
-        isOpen={isModalNewTaskOpen}
-        onClose={() => setIsModalNewTaskOpen(false)}
-        id={id}
-      />
-      <ProjectHeader
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        projectName={projectName}
-      />
-      {activeTab === "Board" && (
-        <Board id={id} setIsModalNewTaskOpen={setIsModalNewTaskOpen} />
-      )}
-      {activeTab === "List" && (
-        <List id={id} setIsModalNewTaskOpen={setIsModalNewTaskOpen} />
-      )}
-      {activeTab === "Timeline" && (
-        <Timeline id={id} setIsModalNewTaskOpen={setIsModalNewTaskOpen} />
-      )}
-      {activeTab === "Table" && (
-        <Table id={id} setIsModalNewTaskOpen={setIsModalNewTaskOpen} />
-      )}
+      <div className="p-4">
+        <Breadcrumbs items={breadcrumbItems} />
+        <ModalNewTask
+          isOpen={isModalNewTaskOpen}
+          onClose={() => setIsModalNewTaskOpen(false)}
+          id={id}
+        />
+        <ProjectHeader
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          projectName={projectName}
+        />
+        {activeTab === "Board" && (
+          <Board id={id} setIsModalNewTaskOpen={setIsModalNewTaskOpen} />
+        )}
+        {activeTab === "List" && (
+          <List id={id} setIsModalNewTaskOpen={setIsModalNewTaskOpen} />
+        )}
+        {activeTab === "Timeline" && (
+          <Timeline id={id} setIsModalNewTaskOpen={setIsModalNewTaskOpen} />
+        )}
+        {activeTab === "Table" && (
+          <Table id={id} setIsModalNewTaskOpen={setIsModalNewTaskOpen} />
+        )}
+      </div>
     </div>
   );
 };
