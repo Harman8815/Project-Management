@@ -30,3 +30,29 @@ export const dataGridSxStyles = (isDarkMode: boolean) => {
     },
   };
 };
+
+export interface ApiError {
+  status: string;
+  message: string;
+  issues?: Array<{ path: string; message: string }>;
+}
+
+export function isApiError(error: unknown): error is ApiError {
+  if (error && typeof error === "object" && "data" in error) {
+    const data = (error as { data: unknown }).data;
+    if (data && typeof data === "object" && "message" in data) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function getErrorMessage(error: unknown): string {
+  if (isApiError(error)) {
+    return error.data.message;
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return "An unexpected error occurred";
+}

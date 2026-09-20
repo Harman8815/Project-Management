@@ -151,7 +151,7 @@ describe("API Regression Tests", () => {
     });
   });
 
-  describe("GET /search?query=Task", () => {
+   describe("GET /search?query=Task", () => {
     it("should search across tasks, projects, and users", async () => {
       const res = await request(app).get("/search?query=Task");
       expect(res.status).toBe(200);
@@ -159,6 +159,35 @@ describe("API Regression Tests", () => {
       expect(res.body).toHaveProperty("projects");
       expect(res.body).toHaveProperty("users");
       expect(Array.isArray(res.body.tasks)).toBe(true);
+    });
+  });
+
+  describe("Error handling", () => {
+    it("should return 404 with JSON for unknown route", async () => {
+      const res = await request(app).get("/unknown-route");
+      expect(res.status).toBe(404);
+      expect(res.body).toHaveProperty("status", "error");
+      expect(res.body).toHaveProperty("message", "Not found");
+    });
+
+    it("should not leak stack traces in non-development mode", async () => {
+      const res = await request(app).get("/unknown-route");
+      expect(res.body).not.toHaveProperty("stack");
+    });
+
+    it("should handle validation errors with 400", async () => {
+      const res = await request(app).post("/projects").send({});
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty("status", "fail");
+      expect(res.body).toHaveProperty("message", "Validation failed");
+    });
+
+    it("should return 500 for non-existent task update", async () => {
+      const res = await request(app).patch("/tasks/999999/status").send({
+        status: "Completed",
+      });
+      expect(res.status).toBe(500);
+      expect(res.body).toHaveProperty("message");
     });
   });
 });
