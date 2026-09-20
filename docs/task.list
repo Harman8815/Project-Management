@@ -238,12 +238,12 @@ These commits have been implemented on `develop`.
 
 ## 1.6 UI Refactor Verification
 
-- [ ] Run visual regression checks.
-- [ ] Run component and E2E tests.
-- [ ] Verify API states: loading, success, empty, error, forbidden.
-- [ ] Verify dark/light theme behavior if supported.
-- [ ] Review performance and unnecessary rerenders.
-- [ ] Merge `refactor/ui-foundation` into `develop`.
+- [x] Run visual regression checks.
+- [x] Run component and E2E tests.
+- [x] Verify API states: loading, success, empty, error, forbidden.
+- [x] Verify dark/light theme behavior if supported.
+- [x] Review performance and unnecessary rerenders.
+- [x] Merge `refactor/ui-foundation` into `develop`.
 
 ---
 
