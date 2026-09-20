@@ -3,8 +3,8 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import cors from "cors";
 import helmet from "helmet";
-import morgan from "morgan";
-import crypto from "crypto";
+import { RequestWithId, requestIdMiddleware, httpLogger } from "./middleware/logger";
+import { sanitizeMessage } from "./middleware/logger";
 
 import projectRoutes from "./routes/projectRoutes";
 import taskRoutes from "./routes/taskRoutes";
@@ -30,15 +30,10 @@ if (missingEnvVars.length > 0) {
 
 const app = express();
 
-app.use((req, res, next) => {
-  req.headers["x-request-id"] =
-    req.headers["x-request-id"] || crypto.randomUUID();
-  next();
-});
-
+app.use(requestIdMiddleware);
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
-app.use(morgan("combined"));
+app.use(httpLogger);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -53,6 +48,13 @@ app.use("/tasks", taskRoutes);
 app.use("/search", searchRoutes);
 app.use("/users", userRoutes);
 app.use("/teams", teamRoutes);
+
+app.use((req, res) => {
+  res.status(404).json({
+    status: "error",
+    message: "Not found",
+  });
+});
 
 app.use(errorHandler);
 
