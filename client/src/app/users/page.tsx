@@ -1,8 +1,7 @@
 "use client";
-import { useGetUsersQuery } from "@/state/api";
-import React from "react";
-import { useAppSelector } from "../redux";
+
 import Header from "@/components/Header";
+import { ErrorState, LoadingState } from "@/components/ui";
 import {
   DataGrid,
   GridColDef,
@@ -10,8 +9,11 @@ import {
   GridToolbarExport,
   GridToolbarFilterButton,
 } from "@mui/x-data-grid";
-import Image from "next/image";
+import { useGetUsersQuery } from "@/state/api";
+import { useAppSelector } from "@/app/redux";
 import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
+import Image from "next/image";
+import React from "react";
 
 const CustomToolbar = () => (
   <GridToolbarContainer className="toolbar flex gap-2">
@@ -47,8 +49,14 @@ const Users = () => {
   const { data: users, isLoading, isError } = useGetUsersQuery();
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isError || !users) return <div>Error fetching users</div>;
+  if (isLoading) return <LoadingState message="Loading users..." />;
+  if (isError || !users)
+    return (
+      <ErrorState
+        message="Failed to load users"
+        onRetry={() => window.location.reload()}
+      />
+    );
 
   return (
     <div className="flex w-full flex-col p-8">

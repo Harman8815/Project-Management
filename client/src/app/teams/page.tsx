@@ -1,8 +1,7 @@
 "use client";
-import { useGetTeamsQuery } from "@/state/api";
-import React from "react";
-import { useAppSelector } from "../redux";
+
 import Header from "@/components/Header";
+import { ErrorState, LoadingState } from "@/components/ui";
 import {
   DataGrid,
   GridColDef,
@@ -10,7 +9,10 @@ import {
   GridToolbarExport,
   GridToolbarFilterButton,
 } from "@mui/x-data-grid";
+import { useGetTeamsQuery } from "@/state/api";
+import { useAppSelector } from "@/app/redux";
 import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
+import React from "react";
 
 const CustomToolbar = () => (
   <GridToolbarContainer className="toolbar flex gap-2">
@@ -34,8 +36,14 @@ const Teams = () => {
   const { data: teams, isLoading, isError } = useGetTeamsQuery();
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isError || !teams) return <div>Error fetching teams</div>;
+  if (isLoading) return <LoadingState message="Loading teams..." />;
+  if (isError || !teams)
+    return (
+      <ErrorState
+        message="Failed to load teams"
+        onRetry={() => window.location.reload()}
+      />
+    );
 
   return (
     <div className="flex w-full flex-col p-8">
@@ -44,6 +52,7 @@ const Teams = () => {
         <DataGrid
           rows={teams || []}
           columns={columns}
+          getRowId={(row) => row.id}
           pagination
           slots={{
             toolbar: CustomToolbar,

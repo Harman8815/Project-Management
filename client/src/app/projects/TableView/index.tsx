@@ -1,5 +1,6 @@
 import { useAppSelector } from "@/app/redux";
 import Header from "@/components/Header";
+import { Button, ErrorState, LoadingState, Badge } from "@/components/ui";
 import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
 import { useGetTasksQuery } from "@/state/api";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
@@ -11,57 +12,33 @@ type Props = {
 };
 
 const columns: GridColDef[] = [
-  {
-    field: "title",
-    headerName: "Title",
-    width: 100,
-  },
-  {
-    field: "description",
-    headerName: "Description",
-    width: 200,
-  },
+  { field: "title", headerName: "Title", width: 200 },
+  { field: "description", headerName: "Description", width: 200 },
   {
     field: "status",
     headerName: "Status",
     width: 130,
     renderCell: (params) => (
-      <span className="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800">
+      <Badge variant="success" size="sm">
         {params.value}
-      </span>
+      </Badge>
     ),
   },
-  {
-    field: "priority",
-    headerName: "Priority",
-    width: 75,
-  },
-  {
-    field: "tags",
-    headerName: "Tags",
-    width: 130,
-  },
-  {
-    field: "startDate",
-    headerName: "Start Date",
-    width: 130,
-  },
-  {
-    field: "dueDate",
-    headerName: "Due Date",
-    width: 130,
-  },
+  { field: "priority", headerName: "Priority", width: 100 },
+  { field: "tags", headerName: "Tags", width: 130 },
+  { field: "startDate", headerName: "Start Date", width: 130 },
+  { field: "dueDate", headerName: "Due Date", width: 130 },
   {
     field: "author",
     headerName: "Author",
     width: 150,
-    renderCell: (params) => params.value?.author || "Unknown",
+    renderCell: (params) => params.value?.username || "Unknown",
   },
   {
     field: "assignee",
     headerName: "Assignee",
     width: 150,
-    renderCell: (params) => params.value?.assignee || "Unassigned",
+    renderCell: (params) => params.value?.username || "Unassigned",
   },
 ];
 
@@ -73,8 +50,14 @@ const TableView = ({ id, setIsModalNewTaskOpen }: Props) => {
     isLoading,
   } = useGetTasksQuery({ projectId: Number(id) });
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error || !tasks) return <div>An error occurred while fetching tasks</div>;
+  if (isLoading) return <LoadingState message="Loading tasks..." />;
+  if (error || !tasks)
+    return (
+      <ErrorState
+        message="Failed to load tasks"
+        onRetry={() => window.location.reload()}
+      />
+    );
 
   return (
     <div className="h-[540px] w-full px-4 pb-8 xl:px-6">
@@ -82,12 +65,12 @@ const TableView = ({ id, setIsModalNewTaskOpen }: Props) => {
         <Header
           name="Table"
           buttonComponent={
-            <button
-              className="flex items-center rounded bg-blue-primary px-3 py-2 text-white hover:bg-blue-600"
+            <Button
+              variant="primary"
               onClick={() => setIsModalNewTaskOpen(true)}
             >
               Add Task
-            </button>
+            </Button>
           }
           isSmallText
         />
@@ -95,6 +78,7 @@ const TableView = ({ id, setIsModalNewTaskOpen }: Props) => {
       <DataGrid
         rows={tasks || []}
         columns={columns}
+        getRowId={(row) => row.id}
         className={dataGridClassNames}
         sx={dataGridSxStyles(isDarkMode)}
       />
