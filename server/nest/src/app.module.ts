@@ -22,6 +22,10 @@ import { AnalyticsModule } from "./modules/analytics/analytics.module";
 import { ReportsModule } from "./modules/reports/reports.module";
 import { ExportModule } from "./modules/export/export.module";
 import { PortfolioModule } from "./modules/portfolio/portfolio.module";
+import { OrganizationsModule } from "./modules/organizations/organizations.module";
+import { CustomFieldsModule } from "./modules/custom-fields/custom-fields.module";
+import { IntegrationsModule } from "./modules/integrations/integrations.module";
+import { AiModule } from "./modules/ai/ai.module";
 
 @Module({
   imports: [
@@ -45,6 +49,10 @@ import { PortfolioModule } from "./modules/portfolio/portfolio.module";
     ReportsModule,
     ExportModule,
     PortfolioModule,
+    OrganizationsModule,
+    CustomFieldsModule,
+    IntegrationsModule,
+    AiModule,
   ],
   providers: [
     PrismaService,
