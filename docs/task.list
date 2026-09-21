@@ -619,7 +619,7 @@ Suggested migration order:
 - [x] Add user capacity configuration.
 - [x] Display workload by user and time period.
 - [x] Detect over-allocation.
-- [ ] Add workload filters and export options.
+- [x] Add workload filters and export options.
 
 ## 8.3 Reports
 
