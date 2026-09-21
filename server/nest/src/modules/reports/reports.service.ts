@@ -1,12 +1,29 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException, ForbiddenException } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
 import { ReportQueryDto } from "./dto/report-query.dto";
+import { ProjectMembershipsService } from "../project-memberships/project-memberships.service";
 
 @Injectable()
 export class ReportsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly projectMembershipsService: ProjectMembershipsService,
+  ) {}
 
-  async getBurndownReport(projectId: number, sprintId?: number) {
+  private async checkProjectAccess(userId: number, projectId: number) {
+    const hasAccess = await this.projectMembershipsService.checkUserAccess(
+      userId,
+      projectId,
+    );
+    if (!hasAccess) {
+      throw new ForbiddenException("You do not have access to this project");
+    }
+  }
+
+  async getBurndownReport(projectId: number, sprintId?: number, userId?: number) {
+    if (userId) {
+      await this.checkProjectAccess(userId, projectId);
+    }
     let sprints;
     if (sprintId) {
       const sprint = await this.prisma.sprint.findUnique({
@@ -59,7 +76,10 @@ export class ReportsService {
     });
   }
 
-  async getBurnupReport(projectId: number) {
+  async getBurnupReport(projectId: number, userId?: number) {
+    if (userId) {
+      await this.checkProjectAccess(userId, projectId);
+    }
     const tasks = await this.prisma.task.findMany({
       where: { projectId },
       select: {
@@ -97,7 +117,10 @@ export class ReportsService {
     };
   }
 
-  async getVelocityReport(projectId: number) {
+  async getVelocityReport(projectId: number, userId?: number) {
+    if (userId) {
+      await this.checkProjectAccess(userId, projectId);
+    }
     const sprints = await this.prisma.sprint.findMany({
       where: { projectId, status: "COMPLETED" },
       include: {
@@ -142,7 +165,10 @@ export class ReportsService {
     };
   }
 
-  async getRiskReport(projectId: number) {
+  async getRiskReport(projectId: number, userId?: number) {
+    if (userId) {
+      await this.checkProjectAccess(userId, projectId);
+    }
     const project = await this.prisma.project.findUnique({
       where: { id: projectId },
     });
@@ -212,7 +238,10 @@ export class ReportsService {
     };
   }
 
-  async getWeeklySummary(projectId: number, query?: ReportQueryDto) {
+  async getWeeklySummary(projectId: number, query?: ReportQueryDto, userId?: number) {
+    if (userId) {
+      await this.checkProjectAccess(userId, projectId);
+    }
     const startDate = query?.startDate
       ? new Date(query.startDate)
       : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);

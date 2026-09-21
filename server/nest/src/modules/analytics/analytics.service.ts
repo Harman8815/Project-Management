@@ -1,15 +1,31 @@
 import {
   Injectable,
   NotFoundException,
+  ForbiddenException,
 } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
 import { AnalyticsQueryDto } from "./dto/analytics-query.dto";
+import { ProjectMembershipsService } from "../project-memberships/project-memberships.service";
 
 @Injectable()
 export class AnalyticsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly projectMembershipsService: ProjectMembershipsService,
+  ) {}
+
+  private async checkProjectAccess(userId: number, projectId: number) {
+    const hasAccess = await this.projectMembershipsService.checkUserAccess(
+      userId,
+      projectId,
+    );
+    if (!hasAccess) {
+      throw new ForbiddenException("You do not have access to this project");
+    }
+  }
 
   async getProjectMetrics(projectId: number, query?: AnalyticsQueryDto) {
+    await this.checkProjectAccess(query?.userId || 0, projectId);
     const project = await this.prisma.project.findUnique({
       where: { id: projectId },
     });
@@ -180,7 +196,10 @@ export class AnalyticsService {
     });
   }
 
-  async getSprintMetrics(projectId: number) {
+  async getSprintMetrics(projectId: number, query?: AnalyticsQueryDto) {
+    if (query?.projectId) {
+      await this.checkProjectAccess(query.userId || 0, projectId);
+    }
     const sprints = await this.prisma.sprint.findMany({
       where: projectId ? { projectId } : {},
       include: {
@@ -219,7 +238,10 @@ export class AnalyticsService {
     });
   }
 
-  async getMilestoneMetrics(projectId: number) {
+  async getMilestoneMetrics(projectId: number, query?: AnalyticsQueryDto) {
+    if (query?.projectId) {
+      await this.checkProjectAccess(query.userId || 0, projectId);
+    }
     const milestones = await this.prisma.milestone.findMany({
       where: projectId ? { projectId } : {},
       include: {
@@ -246,11 +268,12 @@ export class AnalyticsService {
     });
   }
 
-  async getTrendData(projectId: number, groupBy: string = "week") {
+  async getTrendData(projectId: number, query?: AnalyticsQueryDto) {
+    await this.checkProjectAccess(query?.userId || 0, projectId);
     const since = new Date();
-    if (groupBy === "week") {
+    if (query?.groupBy === "week") {
       since.setDate(since.getDate() - 28);
-    } else if (groupBy === "month") {
+    } else if (query?.groupBy === "month") {
       since.setMonth(since.getMonth() - 3);
     }
 
@@ -270,7 +293,7 @@ export class AnalyticsService {
 
     return {
       projectId,
-      groupBy,
+      groupBy: query?.groupBy || "week",
       trendData: Object.entries(trends).map(([date, count]) => ({
         date,
         count,

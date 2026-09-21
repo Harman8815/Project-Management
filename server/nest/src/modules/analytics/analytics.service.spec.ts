@@ -1,6 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { AnalyticsService } from "./analytics.service";
 import { PrismaService } from "../../prisma/prisma.service";
+import { ProjectMembershipsService } from "../project-memberships/project-memberships.service";
 import { NotFoundException } from "@nestjs/common";
 
 describe("AnalyticsService", () => {
@@ -29,6 +30,10 @@ describe("AnalyticsService", () => {
     },
   };
 
+  const mockProjectMembershipsService = {
+    checkUserAccess: jest.fn().mockResolvedValue(true),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -36,6 +41,10 @@ describe("AnalyticsService", () => {
         {
           provide: PrismaService,
           useValue: mockPrismaService,
+        },
+        {
+          provide: ProjectMembershipsService,
+          useValue: mockProjectMembershipsService,
         },
       ],
     }).compile();
@@ -231,7 +240,7 @@ describe("AnalyticsService", () => {
         { createdAt: new Date("2024-01-20T10:30:00Z"), eventType: "TASK_CREATED" },
       ]);
 
-      const result = await service.getTrendData(1, "week");
+      const result = await service.getTrendData(1, { groupBy: "week", userId: 1 });
 
       expect(result.trendData).toHaveLength(2);
       expect(result.trendData[0].count).toBe(2);

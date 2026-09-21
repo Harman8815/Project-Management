@@ -5,6 +5,7 @@ import {
   Query,
 } from "@nestjs/common";
 import { ApiTags, ApiBearerAuth, ApiQuery } from "@nestjs/swagger";
+import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { AnalyticsService } from "./analytics.service";
 import { AnalyticsQueryDto } from "./dto/analytics-query.dto";
 
@@ -19,8 +20,9 @@ export class AnalyticsController {
   async getProjectMetrics(
     @Param("id") id: string,
     @Query() query: AnalyticsQueryDto,
+    @CurrentUser() user: any,
   ) {
-    return this.analyticsService.getProjectMetrics(Number(id), query);
+    return this.analyticsService.getProjectMetrics(Number(id), { ...query, userId: user?.userId });
   }
 
   @ApiQuery({ name: "projectId", required: false })
@@ -28,28 +30,42 @@ export class AnalyticsController {
   async getUserMetrics(
     @Param("id") id: string,
     @Query() query: AnalyticsQueryDto,
+    @CurrentUser() user: any,
   ) {
-    return this.analyticsService.getUserMetrics(Number(id), query);
+    return this.analyticsService.getUserMetrics(Number(id), { ...query, userId: user?.userId });
   }
 
   @Get("teams/workload")
-  async getTeamWorkload(@Query() query: AnalyticsQueryDto) {
-    return this.analyticsService.getTeamWorkload(query);
+  async getTeamWorkload(
+    @Query() query: AnalyticsQueryDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.analyticsService.getTeamWorkload({ ...query, userId: user?.userId });
   }
 
   @ApiQuery({ name: "projectId", required: false })
   @Get("sprints/metrics")
-  async getSprintMetrics(@Query("projectId") projectId?: string) {
+  async getSprintMetrics(
+    @Query("projectId") projectId?: string,
+    @CurrentUser() user?: any,
+    @Query() query?: AnalyticsQueryDto,
+  ) {
     return this.analyticsService.getSprintMetrics(
       projectId ? Number(projectId) : 0,
+      { ...query, userId: user?.userId },
     );
   }
 
   @ApiQuery({ name: "projectId", required: false })
   @Get("milestones/metrics")
-  async getMilestoneMetrics(@Query("projectId") projectId?: string) {
+  async getMilestoneMetrics(
+    @Query("projectId") projectId?: string,
+    @CurrentUser() user?: any,
+    @Query() query?: AnalyticsQueryDto,
+  ) {
     return this.analyticsService.getMilestoneMetrics(
       projectId ? Number(projectId) : 0,
+      { ...query, userId: user?.userId },
     );
   }
 
@@ -59,7 +75,8 @@ export class AnalyticsController {
   async getTrendData(
     @Param("id") id: string,
     @Query("groupBy") groupBy: string = "week",
+    @CurrentUser() user: any,
   ) {
-    return this.analyticsService.getTrendData(Number(id), groupBy);
+    return this.analyticsService.getTrendData(Number(id), { groupBy, userId: user?.userId });
   }
 }
