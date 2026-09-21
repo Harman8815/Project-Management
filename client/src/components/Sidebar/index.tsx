@@ -19,6 +19,7 @@ import {
   Settings,
   ShieldAlert,
   Sparkles,
+  Bell,
   User,
   Users,
   X,
@@ -99,6 +100,7 @@ const Sidebar = () => {
           <SidebarLink icon={Settings} label="Settings" href="/settings" />
           <SidebarLink icon={ShieldAlert} label="Organization" href="/organization" />
           <SidebarLink icon={Sparkles} label="Assistant" href="/assistant" />
+          <SidebarLink icon={Bell} label="Notifications" href="/notifications" />
           <SidebarLink icon={User} label="Users" href="/users" />
           <SidebarLink icon={Users} label="Teams" href="/teams" />
         </nav>

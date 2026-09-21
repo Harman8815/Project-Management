@@ -90,6 +90,16 @@ export interface CustomFieldDefinition {
   required: boolean;
 }
 
+export interface Notification {
+  id: number;
+  title: string;
+  message: string;
+  type: string;
+  read: boolean;
+  createdAt: string;
+  link?: string;
+}
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -103,7 +113,7 @@ export const api = createApi({
     },
   }),
   reducerPath: "api",
-  tagTypes: ["Projects", "Tasks", "Users", "Teams", "Organization", "CustomFields"],
+  tagTypes: ["Projects", "Tasks", "Users", "Teams", "Organization", "CustomFields", "Notifications"],
   endpoints: (build) => ({
     getAuthUser: build.query({
       queryFn: async (_, _queryApi, _extraoptions, fetchWithBQ) => {
@@ -204,6 +214,18 @@ export const api = createApi({
     askAi: build.mutation<{ requestId: number; answer: string; sources: Array<{ type: string; id: number }> }, { organizationId: number; projectId?: number; prompt: string }>({
       query: ({ organizationId, ...body }) => ({ url: `organizations/${organizationId}/ai/answer`, method: "POST", body }),
     }),
+    getNotifications: build.query<{ data: Notification[]; meta: { total: number } }, { userId: number; unreadOnly?: boolean }>({
+      query: ({ userId, unreadOnly }) => `notifications?userId=${userId}${unreadOnly ? "&unreadOnly=true" : ""}`,
+      providesTags: ["Notifications"],
+    }),
+    markNotificationRead: build.mutation<Notification, number>({
+      query: (id) => ({ url: `notifications/${id}/read`, method: "PATCH" }),
+      invalidatesTags: ["Notifications"],
+    }),
+    markAllNotificationsRead: build.mutation<unknown, number>({
+      query: (userId) => ({ url: `notifications/user/${userId}/read-all`, method: "PATCH" }),
+      invalidatesTags: ["Notifications"],
+    }),
   }),
 });
 
@@ -225,4 +247,7 @@ export const {
   useCreateCustomFieldMutation,
   useCreateIntegrationMutation,
   useAskAiMutation,
+  useGetNotificationsQuery,
+  useMarkNotificationReadMutation,
+  useMarkAllNotificationsReadMutation,
 } = api;
