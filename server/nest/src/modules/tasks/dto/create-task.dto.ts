@@ -8,6 +8,11 @@ import {
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateTaskDto {
+  @ApiPropertyOptional({ example: "PROJ-42" })
+  @IsString()
+  @IsOptional()
+  identifier?: string;
+
   @ApiProperty({ example: "Fix login page" })
   @IsString()
   title: string;

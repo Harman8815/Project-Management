@@ -49,6 +49,7 @@ describe("TasksController", () => {
   describe("create", () => {
     it("should create a task", async () => {
       const createTaskDto = {
+        identifier: "PROJ-42",
         title: "New Task",
         description: "A test task",
         status: "TODO",
