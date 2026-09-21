@@ -14,4 +14,14 @@ export class IntegrationsController {
   verify(@Body() body: { payload: string; signature: string; secret: string }) {
     return { valid: this.service.verifyWebhook(body.payload, body.signature, body.secret) };
   }
+
+  @Post("events")
+  queueEvent(@Body() body: { integrationId: number; eventType: string; payload: unknown }) {
+    return this.service.queueEvent(body.integrationId, body.eventType, body.payload);
+  }
+
+  @Post("events/retry")
+  retryEvent(@Body() body: { eventId: number; error: string }) {
+    return this.service.retryEvent(body.eventId, body.error);
+  }
 }

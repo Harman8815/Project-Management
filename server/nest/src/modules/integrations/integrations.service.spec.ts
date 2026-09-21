@@ -1,0 +1,19 @@
+import { UnauthorizedException } from "@nestjs/common";
+import { IntegrationsService } from "./integrations.service";
+
+describe("IntegrationsService", () => {
+  it("verifies valid webhook signatures and rejects invalid ones", () => {
+    const service = new IntegrationsService({} as any, {} as any);
+    const payload = "event-payload";
+    const signature = require("crypto").createHmac("sha256", "secret").update(payload).digest("hex");
+    expect(service.verifyWebhook(payload, signature, "secret")).toBe(true);
+    expect(() => service.verifyWebhook(payload, "bad", "secret")).toThrow(UnauthorizedException);
+  });
+
+  it("moves an event to failed after five attempts", async () => {
+    const prisma = { integrationEvent: { findUnique: jest.fn().mockResolvedValue({ id: 3, attempts: 4 }), update: jest.fn().mockResolvedValue({ status: "FAILED" }) } };
+    const service = new IntegrationsService(prisma as any, {} as any);
+    await expect(service.retryEvent(3, "provider unavailable")).resolves.toEqual({ status: "FAILED" });
+    expect(prisma.integrationEvent.update).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ attempts: 5, status: "FAILED" }) }));
+  });
+});

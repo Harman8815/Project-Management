@@ -18,4 +18,25 @@ export class IntegrationsService {
     if (!valid) throw new UnauthorizedException("Invalid webhook signature");
     return true;
   }
+
+  async queueEvent(integrationId: number, eventType: string, payload: unknown) {
+    return this.prisma.integrationEvent.create({
+      data: { integrationId, eventType, payload: JSON.stringify(payload) },
+    });
+  }
+
+  async retryEvent(eventId: number, error: string) {
+    const event = await this.prisma.integrationEvent.findUnique({ where: { id: eventId } });
+    if (!event) throw new UnauthorizedException("Integration event not found");
+    const attempts = event.attempts + 1;
+    return this.prisma.integrationEvent.update({
+      where: { id: eventId },
+      data: {
+        attempts,
+        lastError: error,
+        status: attempts >= 5 ? "FAILED" : "RETRYING",
+        nextAttemptAt: attempts >= 5 ? null : new Date(Date.now() + 2 ** attempts * 1000),
+      },
+    });
+  }
 }
