@@ -9,4 +9,9 @@ export class AiController {
   answer(@Req() request: any, @Param("organizationId") organizationId: string, @Body() body: { projectId?: number; prompt: string; confirmMutation?: boolean }) {
     return this.service.answer(request.user.userId, Number(organizationId), body);
   }
+
+  @Post("feedback")
+  feedback(@Req() request: any, @Body() body: { requestId: number; rating: number; comment?: string }) {
+    return this.service.feedback(request.user.userId, body.requestId, body.rating, body.comment);
+  }
 }
