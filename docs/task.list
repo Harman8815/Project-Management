@@ -606,16 +606,16 @@ Suggested migration order:
 
 ## 8.1 Metrics and Project Health
 
-- [ ] Replace hardcoded metrics with database queries.
-- [ ] Define metric calculation rules.
-- [ ] Add project health indicators.
-- [ ] Add blocker and overdue calculations.
-- [ ] Add milestone and sprint progress metrics.
-- [ ] Add metric performance tests.
+- [x] Replace hardcoded metrics with database queries.
+- [x] Define metric calculation rules.
+- [x] Add project health indicators.
+- [x] Add blocker and overdue calculations.
+- [x] Add milestone and sprint progress metrics.
+- [x] Add metric performance tests. (10 test cases)
 
 ## 8.2 Team Workload
 
-- [ ] Calculate assignments and estimates.
+- [x] Calculate assignments and estimates.
 - [ ] Add user capacity configuration.
 - [ ] Display workload by user and time period.
 - [ ] Detect over-allocation.
