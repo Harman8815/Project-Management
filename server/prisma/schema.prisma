@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
@@ -15,18 +9,35 @@ datasource db {
 }
 
 model User {
-  userId            Int     @id @default(autoincrement())
-  cognitoId         String  @unique
-  username          String  @unique
-  profilePictureUrl String?
-  teamId            Int?
-
-  authoredTasks   Task[]           @relation("TaskAuthor")
-  assignedTasks   Task[]           @relation("TaskAssignee")
-  taskAssignments TaskAssignment[]
-  attachments     Attachment[]
-  comments        Comment[]
-  team            Team?            @relation(fields: [teamId], references: [id])
+  userId              Int                 @id @default(autoincrement())
+  cognitoId           String              @unique
+  username            String              @unique
+  profilePictureUrl   String?
+  teamId              Int?
+  capacityHoursPerWeek Int?               @default(40)
+  capacityStoryPoints  Int?
+  activityTarget      ActivityLog[]       @relation("ActivityTarget")
+  activityActor       ActivityLog[]       @relation("ActivityActor")
+  attachments         Attachment[]
+  comments            Comment[]
+  mentionedInComments CommentMention[]
+  ownedMilestones     Milestone[]
+  invitedMembers      ProjectMembership[] @relation("InvitedBy")
+  projectMemberships  ProjectMembership[]
+  createdTemplates    ProjectTemplate[]
+  ownedSprints        Sprint[]
+  assignedTasks       Task[]              @relation("TaskAssignee")
+  authoredTasks       Task[]              @relation("TaskAuthor")
+  taskAssignments     TaskAssignment[]
+  taskHistoryChanges  TaskHistory[]
+  taskWatchers        TaskWatcher[]
+  team                Team?               @relation(fields: [teamId], references: [id])
+  notifications       Notification[]
+  notificationPreference NotificationPreference?
+  organizationMemberships OrganizationMembership[]
+  createdOrganizations Organization[] @relation("OrganizationCreator")
+  aiRequestLogs       AiRequestLog[]
+  aiFeedback          AiFeedback[]
 }
 
 model Team {
@@ -39,52 +50,202 @@ model Team {
 }
 
 model Project {
-  id           Int           @id @default(autoincrement())
+  id           Int                 @id @default(autoincrement())
+  key          String?             @unique
   name         String
   description  String?
   startDate    DateTime?
   endDate      DateTime?
-  tasks        Task[]
+  dueDate      DateTime?
+  status       String              @default("PLANNED")
+  priority     String              @default("MEDIUM")
+  health       String              @default("ON_TRACK")
+  objectives   String?
+  archived     Boolean             @default(false)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  activityLogs ActivityLog[]
+  milestones   Milestone[]
+  members      ProjectMembership[]
   projectTeams ProjectTeam[]
+  sprints      Sprint[]
+  tasks        Task[]
+  organizationId Int?
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  customFieldValues CustomFieldValue[]
 }
 
 model ProjectTeam {
   id        Int     @id @default(autoincrement())
   teamId    Int
   projectId Int
-  team      Team    @relation(fields: [teamId], references: [id])
   project   Project @relation(fields: [projectId], references: [id])
+  team      Team    @relation(fields: [teamId], references: [id])
+}
+
+model ProjectMembership {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  projectId   Int
+  role        String   @default("MEMBER")
+  status      String   @default("ACTIVE")
+  invitedById Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  invitedBy   User?    @relation("InvitedBy", fields: [invitedById], references: [userId])
+  project     Project  @relation(fields: [projectId], references: [id])
+  user        User     @relation(fields: [userId], references: [userId])
+}
+
+model ProjectTemplate {
+  id            Int      @id @default(autoincrement())
+  name          String
+  description   String?
+  isDefault     Boolean  @default(false)
+  projectConfig String?
+  createdById   Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  createdBy     User?    @relation(fields: [createdById], references: [userId])
 }
 
 model Task {
-  id             Int       @id @default(autoincrement())
-  title          String
-  description    String?
-  status         String?
-  priority       String?
-  tags           String?
-  startDate      DateTime?
-  dueDate        DateTime?
-  points         Int?
-  projectId      Int
-  authorUserId   Int
-  assignedUserId Int?
+  id                        Int              @id @default(autoincrement())
+  title                     String
+  description               String?
+  status                    String?
+  priority                  String?
+  severity                  String?
+  type                      String?          @default("TASK")
+  tags                      String?
+  startDate                 DateTime?
+  dueDate                   DateTime?
+  points                    Int?
+  estimateHours             Int?
+  actualHours               Int?
+  acceptanceCriteria        String?
+  identifier                String?          @unique
+  position                  Int?
+  projectId                 Int
+  authorUserId              Int
+  assignedUserId            Int?
+  parentId                  Int?
+  milestoneId               Int?
+   sprintId                  Int?
+   createdAt                 DateTime @default(now())
+   updatedAt                 DateTime @updatedAt
+   activityLogs              ActivityLog[]
+  attachments               Attachment[]
+  comments                  Comment[]
+  sprint                    Sprint?          @relation("SprintTasks", fields: [sprintId], references: [id])
+  milestone                 Milestone?       @relation(fields: [milestoneId], references: [id])
+  parent                    Task?            @relation("TaskHierarchy", fields: [parentId], references: [id])
+  children                  Task[]           @relation("TaskHierarchy")
+  assignee                  User?            @relation("TaskAssignee", fields: [assignedUserId], references: [userId])
+  author                    User             @relation("TaskAuthor", fields: [authorUserId], references: [userId])
+  project                   Project          @relation(fields: [projectId], references: [id])
+  taskAssignments           TaskAssignment[]
+  taskDependenciesAsBlocker TaskDependency[] @relation("BlockerTask")
+  taskDependenciesAsBlocked TaskDependency[] @relation("BlockedTask")
+  history                   TaskHistory[]
+  watchers                  TaskWatcher[]
+  customFieldValues         CustomFieldValue[]
+}
 
-  project         Project          @relation(fields: [projectId], references: [id])
-  author          User             @relation("TaskAuthor", fields: [authorUserId], references: [userId])
-  assignee        User?            @relation("TaskAssignee", fields: [assignedUserId], references: [userId])
-  taskAssignments TaskAssignment[]
-  attachments     Attachment[]
-  comments        Comment[]
+model Milestone {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  projectId   Int
+  startDate   DateTime?
+  dueDate     DateTime?
+  status      String    @default("PLANNED")
+  ownerId     Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  owner       User?     @relation(fields: [ownerId], references: [userId])
+  project     Project   @relation(fields: [projectId], references: [id])
+  tasks       Task[]
+}
+
+model Sprint {
+  id          Int       @id @default(autoincrement())
+  name        String
+  projectId   Int
+  goal        String?
+  startDate   DateTime?
+  endDate     DateTime?
+  status      String    @default("PLANNED")
+  capacity    Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  ownerId     Int?
+  owner       User?     @relation(fields: [ownerId], references: [userId])
+  project     Project   @relation(fields: [projectId], references: [id])
+  sprintTasks Task[]    @relation("SprintTasks")
 }
 
 model TaskAssignment {
-  id     Int @id @default(autoincrement())
+  id     Int  @id @default(autoincrement())
   userId Int
   taskId Int
+  task   Task @relation(fields: [taskId], references: [id])
+  user   User @relation(fields: [userId], references: [userId])
+}
 
-  user User @relation(fields: [userId], references: [userId])
-  task Task @relation(fields: [taskId], references: [id])
+model TaskDependency {
+  id          Int  @id @default(autoincrement())
+  taskId      Int
+  blockedById Int
+  blockedBy   Task @relation("BlockerTask", fields: [blockedById], references: [id])
+  task        Task @relation("BlockedTask", fields: [taskId], references: [id])
+}
+
+model TaskWatcher {
+  id        Int      @id @default(autoincrement())
+  taskId    Int
+  userId    Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [userId])
+  task      Task     @relation(fields: [taskId], references: [id])
+}
+
+model TaskHistory {
+  id          Int      @id @default(autoincrement())
+  taskId      Int
+  field       String
+  oldValue    String?
+  newValue    String?
+  changedById Int?
+  createdAt   DateTime @default(now())
+  changedBy   User?    @relation(fields: [changedById], references: [userId])
+  task        Task     @relation(fields: [taskId], references: [id])
+}
+
+model ActivityLog {
+  id           Int      @id @default(autoincrement())
+  eventType    String
+  actorId      Int?
+  projectId    Int?
+  taskId       Int?
+  targetUserId Int?
+  message      String
+  metadata     String?
+  createdAt    DateTime @default(now())
+  targetUser   User?    @relation("ActivityTarget", fields: [targetUserId], references: [userId])
+  task         Task?    @relation(fields: [taskId], references: [id])
+  project      Project? @relation(fields: [projectId], references: [id])
+  actor        User?    @relation("ActivityActor", fields: [actorId], references: [userId])
+  notifications Notification[]
+}
+
+model CommentMention {
+  id              Int      @id @default(autoincrement())
+  commentId       Int
+  mentionedUserId Int
+  createdAt       DateTime @default(now())
+  mentionedBy     User     @relation(fields: [mentionedUserId], references: [userId])
+  comment         Comment  @relation(fields: [commentId], references: [id])
 }
 
 model Attachment {
@@ -93,17 +254,167 @@ model Attachment {
   fileName     String?
   taskId       Int
   uploadedById Int
-
-  task       Task @relation(fields: [taskId], references: [id])
-  uploadedBy User @relation(fields: [uploadedById], references: [userId])
+  fileSize     Int?
+  fileType     String?
+  uploadedBy   User    @relation(fields: [uploadedById], references: [userId])
+  task         Task    @relation(fields: [taskId], references: [id])
 }
 
 model Comment {
-  id     Int    @id @default(autoincrement())
-  text   String
-  taskId Int
-  userId Int
+  id        Int              @id @default(autoincrement())
+  text      String
+  taskId    Int
+  userId    Int
+  parentId  Int?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @default(now()) @updatedAt
+  parent    Comment?         @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[]        @relation("CommentReplies")
+  user      User             @relation(fields: [userId], references: [userId])
+  task      Task             @relation(fields: [taskId], references: [id])
+   mentions  CommentMention[]
+}
 
-  task Task @relation(fields: [taskId], references: [id])
-  user User @relation(fields: [userId], references: [userId])
+model Notification {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  type          String
+  title         String
+  message       String
+  read          Boolean  @default(false)
+  link          String?
+  activityLogId Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [userId])
+  activityLog   ActivityLog? @relation(fields: [activityLogId], references: [id])
+}
+
+model NotificationPreference {
+  id         Int       @id @default(autoincrement())
+  userId     Int       @unique
+  notificationType String @default("ALL")
+  emailEnabled Boolean  @default(true)
+  inAppEnabled Boolean  @default(true)
+  updatedAt  DateTime  @updatedAt
+
+   user       User      @relation(fields: [userId], references: [userId])
+}
+
+model Organization {
+  id          Int       @id @default(autoincrement())
+  name        String
+  slug        String    @unique
+  createdById Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdBy   User      @relation("OrganizationCreator", fields: [createdById], references: [userId])
+  memberships OrganizationMembership[]
+  settings    OrganizationSetting[]
+  projects    Project[]
+  integrations Integration[]
+  customFields CustomFieldDefinition[]
+  aiRequestLogs AiRequestLog[]
+}
+
+model OrganizationMembership {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  userId         Int
+  role           String       @default("MEMBER")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  user           User         @relation(fields: [userId], references: [userId])
+  @@unique([organizationId, userId])
+}
+
+model OrganizationSetting {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  key            String
+  value          String
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  @@unique([organizationId, key])
+}
+
+model CustomFieldDefinition {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  name           String
+  key            String
+  fieldType      String
+  options        String?
+  required       Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  values         CustomFieldValue[]
+  @@unique([organizationId, key])
+}
+
+model CustomFieldValue {
+  id           Int                  @id @default(autoincrement())
+  definitionId Int
+  projectId    Int?
+  taskId       Int?
+  value        String
+  definition   CustomFieldDefinition @relation(fields: [definitionId], references: [id])
+  project      Project?             @relation(fields: [projectId], references: [id])
+  task         Task?                @relation(fields: [taskId], references: [id])
+  @@unique([definitionId, projectId, taskId])
+}
+
+model Integration {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  provider       String
+  name           String
+  config         String       @default("{}")
+  secretRef      String?
+  enabled        Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  events         IntegrationEvent[]
+  @@unique([organizationId, provider, name])
+}
+
+model IntegrationEvent {
+  id            Int         @id @default(autoincrement())
+  integrationId Int
+  eventType     String
+  payload       String
+  status        String      @default("PENDING")
+  attempts      Int         @default(0)
+  lastError     String?
+  nextAttemptAt DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  integration   Integration @relation(fields: [integrationId], references: [id])
+}
+
+model AiRequestLog {
+  id             Int          @id @default(autoincrement())
+  userId         Int
+  organizationId Int
+  projectId      Int?
+  feature        String
+  promptLength   Int
+  status         String
+  createdAt      DateTime     @default(now())
+  user           User         @relation(fields: [userId], references: [userId])
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+model AiFeedback {
+  id        Int      @id @default(autoincrement())
+  requestId Int
+  userId    Int
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [userId])
 }

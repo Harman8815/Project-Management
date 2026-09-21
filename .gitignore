@@ -14,5 +14,6 @@ client/node_modules/
 client/dist/
 client/.next/
 client/.env
+client/tsconfig.tsbuildinfo
 
 Phase_information.md
