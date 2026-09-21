@@ -571,12 +571,12 @@ Suggested migration order:
 
 ## 7.1 Notification Foundation
 
-- [ ] Define notification model.
-- [ ] Define notification event types.
-- [ ] Add in-app notification service.
-- [ ] Add unread and read states.
+- [x] Define notification model.
+- [x] Define notification event types.
+- [x] Add in-app notification service.
+- [x] Add unread and read states.
 - [ ] Add notification list and detail UI.
-- [ ] Add notification preferences.
+- [x] Add notification preferences. (NotificationPreference model)
 
 ## 7.2 Email and Background Jobs
 
