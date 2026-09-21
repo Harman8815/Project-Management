@@ -74,6 +74,22 @@ export interface Team {
   projectManagerUserId?: number;
 }
 
+export interface Organization {
+  id: number;
+  name: string;
+  slug: string;
+  memberships: Array<{ userId: number; role: string }>;
+  settings: Array<{ key: string; value: string }>;
+}
+
+export interface CustomFieldDefinition {
+  id: number;
+  name: string;
+  key: string;
+  fieldType: string;
+  required: boolean;
+}
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -87,7 +103,7 @@ export const api = createApi({
     },
   }),
   reducerPath: "api",
-  tagTypes: ["Projects", "Tasks", "Users", "Teams"],
+  tagTypes: ["Projects", "Tasks", "Users", "Teams", "Organization", "CustomFields"],
   endpoints: (build) => ({
     getAuthUser: build.query({
       queryFn: async (_, _queryApi, _extraoptions, fetchWithBQ) => {
@@ -162,6 +178,32 @@ export const api = createApi({
     search: build.query<SearchResults, string>({
       query: (query) => `search?query=${query}`,
     }),
+    getOrganization: build.query<Organization, number>({
+      query: (organizationId) => `organizations/${organizationId}`,
+      providesTags: ["Organization"],
+    }),
+    updateOrganizationSettings: build.mutation<unknown, { organizationId: number; settings: Record<string, string> }>({
+      query: ({ organizationId, settings }) => ({ url: `organizations/${organizationId}/settings`, method: "POST", body: settings }),
+      invalidatesTags: ["Organization"],
+    }),
+    addOrganizationMember: build.mutation<unknown, { organizationId: number; userId: number; role: string }>({
+      query: ({ organizationId, ...body }) => ({ url: `organizations/${organizationId}/members`, method: "POST", body }),
+      invalidatesTags: ["Organization"],
+    }),
+    getCustomFields: build.query<CustomFieldDefinition[], number>({
+      query: (organizationId) => `organizations/${organizationId}/custom-fields`,
+      providesTags: ["CustomFields"],
+    }),
+    createCustomField: build.mutation<CustomFieldDefinition, { organizationId: number; name: string; key: string; fieldType: string; required?: boolean }>({
+      query: ({ organizationId, ...body }) => ({ url: `organizations/${organizationId}/custom-fields`, method: "POST", body }),
+      invalidatesTags: ["CustomFields"],
+    }),
+    createIntegration: build.mutation<unknown, { organizationId: number; provider: string; name: string; config?: Record<string, unknown> }>({
+      query: ({ organizationId, ...body }) => ({ url: `organizations/${organizationId}/integrations`, method: "POST", body }),
+    }),
+    askAi: build.mutation<{ requestId: number; answer: string; sources: Array<{ type: string; id: number }> }, { organizationId: number; projectId?: number; prompt: string }>({
+      query: ({ organizationId, ...body }) => ({ url: `organizations/${organizationId}/ai/answer`, method: "POST", body }),
+    }),
   }),
 });
 
@@ -176,4 +218,11 @@ export const {
   useGetTeamsQuery,
   useGetTasksByUserQuery,
   useGetAuthUserQuery,
+  useGetOrganizationQuery,
+  useUpdateOrganizationSettingsMutation,
+  useAddOrganizationMemberMutation,
+  useGetCustomFieldsQuery,
+  useCreateCustomFieldMutation,
+  useCreateIntegrationMutation,
+  useAskAiMutation,
 } = api;
