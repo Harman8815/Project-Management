@@ -95,7 +95,7 @@ content = r"""# ProjeX v2 — Detailed Implementation Task List
 - [x] Configure Playwright E2E testing.
 - [x] Create test environment variables.
 - [x] Create test database setup and teardown.
-- [ ] Add test fixtures and factory utilities.
+- [x] Add test fixtures and factory utilities.
 - [x] Add baseline tests for authentication and core existing flows.
 - [x] Add coverage reporting without making coverage the only quality metric.
 
@@ -396,7 +396,7 @@ Suggested migration order:
 - [x] Add owner, manager, priority, health, and objectives.
 - [x] Add project start and target dates. (startDate, endDate, dueDate)
 - [x] Add archive and restore behavior.
-- [ ] Add lifecycle validation and tests.
+- [x] Add lifecycle validation and tests.
 - [ ] Update project creation and editing UI.
 
 ## 3.2 Membership and Roles
@@ -441,7 +441,7 @@ Suggested migration order:
 - [x] Add task type support. (TASK, BUG, STORY, EPIC)
 - [x] Add priority and severity.
 - [x] Add parent-child relationships. (parent/children relation)
-- [ ] Add task identifiers.
+- [x] Add task identifiers.
 - [x] Add acceptance criteria.
 - [x] Add estimates and actual effort. (estimateHours, actualHours)
 - [x] Add due dates and scheduling fields. (dueDate, position)
@@ -575,7 +575,7 @@ Suggested migration order:
 - [x] Define notification event types.
 - [x] Add in-app notification service.
 - [x] Add unread and read states.
-- [ ] Add notification list and detail UI.
+- [x] Add notification list and detail UI.
 - [x] Add notification preferences. (NotificationPreference model)
 
 ## 7.2 Email and Background Jobs
@@ -711,7 +711,7 @@ Suggested migration order:
 
 - [x] Require confirmation for mutations.
 - [x] Prevent unauthorized data retrieval.
-- [ ] Add prompt injection safeguards.
+- [x] Add prompt injection safeguards.
 - [ ] Add evaluation datasets.
 - [ ] Test factual grounding.
 - [ ] Test authorization boundaries.
