@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
 import { CreateProjectDto } from "./dto/create-project.dto";
 import { UpdateProjectDto } from "./dto/update-project.dto";
@@ -65,6 +65,18 @@ export class ProjectsService {
     });
     if (!project) {
       throw new NotFoundException(`Project with id ${id} not found`);
+    }
+    if (updateProjectDto.status && updateProjectDto.status !== project.status) {
+      const transitions: Record<string, string[]> = {
+        PLANNED: ["ACTIVE", "ON_HOLD", "ARCHIVED"],
+        ACTIVE: ["ON_HOLD", "COMPLETED", "ARCHIVED"],
+        ON_HOLD: ["ACTIVE", "ARCHIVED"],
+        COMPLETED: ["ARCHIVED"],
+        ARCHIVED: ["ACTIVE"],
+      };
+      if (!transitions[project.status]?.includes(updateProjectDto.status)) {
+        throw new BadRequestException(`Invalid project status transition: ${project.status} -> ${updateProjectDto.status}`);
+      }
     }
     return this.prisma.project.update({
       where: { id },

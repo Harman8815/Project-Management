@@ -118,6 +118,21 @@ describe("ProjectsController", () => {
     });
   });
 
+  describe("update lifecycle", () => {
+    it("allows a valid project status transition", async () => {
+      mockPrismaService.project.findUnique.mockResolvedValue({ id: 1, status: "PLANNED" });
+      mockPrismaService.project.update.mockResolvedValue({ id: 1, status: "ACTIVE" });
+
+      await expect(controller.update("1", { status: "ACTIVE" })).resolves.toEqual({ id: 1, status: "ACTIVE" });
+    });
+
+    it("rejects an invalid project status transition", async () => {
+      mockPrismaService.project.findUnique.mockResolvedValue({ id: 1, status: "COMPLETED" });
+
+      await expect(controller.update("1", { status: "ACTIVE" })).rejects.toThrow("Invalid project status transition");
+    });
+  });
+
   describe("archive", () => {
     it("should archive a project", async () => {
       const mockProject = { id: 1, name: "Project 1" };
