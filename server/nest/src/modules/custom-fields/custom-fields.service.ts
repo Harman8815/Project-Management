@@ -18,4 +18,29 @@ export class CustomFieldsService {
     await this.organizations.assertRole(userId, organizationId);
     return this.prisma.customFieldDefinition.findMany({ where: { organizationId } });
   }
+
+  async setValue(userId: number, definitionId: number, target: { projectId?: number; taskId?: number; value: string }) {
+    const definition = await this.prisma.customFieldDefinition.findUnique({ where: { id: definitionId } });
+    if (!definition || (!target.projectId && !target.taskId)) throw new BadRequestException("A field definition and target are required");
+    await this.organizations.assertRole(userId, definition.organizationId);
+    if (definition.fieldType === "NUMBER" && Number.isNaN(Number(target.value))) throw new BadRequestException("Value must be numeric");
+    if (definition.fieldType === "BOOLEAN" && !["true", "false"].includes(target.value)) throw new BadRequestException("Value must be boolean");
+    const existing = await this.prisma.customFieldValue.findFirst({
+      where: { definitionId, projectId: target.projectId, taskId: target.taskId },
+    });
+    if (existing) {
+      return this.prisma.customFieldValue.update({ where: { id: existing.id }, data: { value: target.value } });
+    }
+    return this.prisma.customFieldValue.create({
+      data: { definitionId, projectId: target.projectId, taskId: target.taskId, value: target.value },
+    });
+  }
+
+  async values(userId: number, organizationId: number, query?: { projectId?: number; taskId?: number; key?: string }) {
+    await this.organizations.assertRole(userId, organizationId);
+    return this.prisma.customFieldValue.findMany({
+      where: { projectId: query?.projectId, taskId: query?.taskId, definition: { organizationId, key: query?.key } },
+      include: { definition: true },
+    });
+  }
 }
