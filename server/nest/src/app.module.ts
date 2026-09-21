@@ -19,6 +19,7 @@ import { SprintsModule } from "./modules/sprints/sprints.module";
 import { ActivityLogModule } from "./modules/activity-log/activity-log.module";
 import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { AnalyticsModule } from "./modules/analytics/analytics.module";
+import { ReportsModule } from "./modules/reports/reports.module";
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { AnalyticsModule } from "./modules/analytics/analytics.module";
     ActivityLogModule,
     NotificationsModule,
     AnalyticsModule,
+    ReportsModule,
   ],
   providers: [
     PrismaService,

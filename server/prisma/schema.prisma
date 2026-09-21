@@ -120,8 +120,10 @@ model Task {
   assignedUserId            Int?
   parentId                  Int?
   milestoneId               Int?
-  sprintId                  Int?
-  activityLogs              ActivityLog[]
+   sprintId                  Int?
+   createdAt                 DateTime @default(now())
+   updatedAt                 DateTime @updatedAt
+   activityLogs              ActivityLog[]
   attachments               Attachment[]
   comments                  Comment[]
   sprint                    Sprint?          @relation("SprintTasks", fields: [sprintId], references: [id])
