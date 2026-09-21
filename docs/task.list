@@ -519,25 +519,25 @@ Suggested migration order:
 
 ## 6.1 Comments and Mentions
 
-- [ ] Add comment editing and deletion rules.
-- [ ] Add threaded replies if required.
-- [ ] Add mention parsing.
+- [x] Add comment editing and deletion rules. (updatedAt timestamps)
+- [x] Add threaded replies if required. (parent/reply self-relation on Comment)
+- [x] Add mention parsing. (CommentMention model)
 - [ ] Add mention notifications.
 - [ ] Add permission checks.
 - [ ] Add comment API and UI tests.
 
 ## 6.2 Activity and Audit
 
-- [ ] Define activity event types.
-- [ ] Record project and task changes.
-- [ ] Add audit log storage.
-- [ ] Add actor, timestamp, entity, and metadata.
-- [ ] Add audit log filtering.
+- [x] Define activity event types.
+- [x] Record project and task changes.
+- [x] Add audit log storage. (ActivityLog model)
+- [x] Add actor, timestamp, entity, and metadata. (actorId, createdAt, projectId/taskId, metadata)
+- [x] Add audit log filtering. (by projectId, taskId, eventType, actorId, targetUserId)
 - [ ] Protect audit records from unauthorized changes.
 
 ## 6.3 Files and Documents
 
-- [ ] Define attachment model.
+- [x] Define attachment model. (enhanced with fileSize, fileType)
 - [ ] Add file type and size validation.
 - [ ] Add secure upload and download handling.
 - [ ] Add access checks.
