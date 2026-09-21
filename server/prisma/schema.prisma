@@ -34,6 +34,8 @@ model User {
   team                Team?               @relation(fields: [teamId], references: [id])
   notifications       Notification[]
   notificationPreference NotificationPreference?
+  organizationMemberships OrganizationMembership[]
+  createdOrganizations Organization[] @relation("OrganizationCreator")
 }
 
 model Team {
@@ -66,6 +68,9 @@ model Project {
   projectTeams ProjectTeam[]
   sprints      Sprint[]
   tasks        Task[]
+  organizationId Int?
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  customFieldValues CustomFieldValue[]
 }
 
 model ProjectTeam {
@@ -142,6 +147,7 @@ model Task {
   taskDependenciesAsBlocked TaskDependency[] @relation("BlockedTask")
   history                   TaskHistory[]
   watchers                  TaskWatcher[]
+  customFieldValues         CustomFieldValue[]
 }
 
 model Milestone {
@@ -292,4 +298,82 @@ model NotificationPreference {
   updatedAt  DateTime  @updatedAt
 
    user       User      @relation(fields: [userId], references: [userId])
+}
+
+model Organization {
+  id          Int       @id @default(autoincrement())
+  name        String
+  slug        String    @unique
+  createdById Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdBy   User      @relation("OrganizationCreator", fields: [createdById], references: [userId])
+  memberships OrganizationMembership[]
+  settings    OrganizationSetting[]
+  projects    Project[]
+  integrations Integration[]
+  customFields CustomFieldDefinition[]
+}
+
+model OrganizationMembership {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  userId         Int
+  role           String       @default("MEMBER")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  user           User         @relation(fields: [userId], references: [userId])
+  @@unique([organizationId, userId])
+}
+
+model OrganizationSetting {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  key            String
+  value          String
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  @@unique([organizationId, key])
+}
+
+model CustomFieldDefinition {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  name           String
+  key            String
+  fieldType      String
+  options        String?
+  required       Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  values         CustomFieldValue[]
+  @@unique([organizationId, key])
+}
+
+model CustomFieldValue {
+  id           Int                  @id @default(autoincrement())
+  definitionId Int
+  projectId    Int?
+  taskId       Int?
+  value        String
+  definition   CustomFieldDefinition @relation(fields: [definitionId], references: [id])
+  project      Project?             @relation(fields: [projectId], references: [id])
+  task         Task?                @relation(fields: [taskId], references: [id])
+  @@unique([definitionId, projectId, taskId])
+}
+
+model Integration {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  provider       String
+  name           String
+  config         String       @default("{}")
+  secretRef      String?
+  enabled        Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  @@unique([organizationId, provider, name])
 }
