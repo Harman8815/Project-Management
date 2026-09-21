@@ -652,8 +652,8 @@ Suggested migration order:
 - [x] Add organization roles.
 - [x] Add organization-level settings.
 - [x] Extend permission checks to organization scope.
-- [ ] Add organization administration UI.
-- [ ] Add isolation and authorization tests.
+- [x] Add organization administration UI.
+- [x] Add isolation and authorization tests.
 
 ## 9.2 Customization
 
@@ -661,16 +661,16 @@ Suggested migration order:
 - [x] Add custom fields for tasks.
 - [ ] Add configurable workflow definitions.
 - [x] Add field validation and type handling.
-- [ ] Add custom field filtering and reporting.
+- [x] Add custom field filtering and reporting.
 
 ## 9.3 Integration Framework
 
 - [x] Define integration interface and configuration model.
 - [ ] Add credential and secret handling.
 - [x] Add webhook verification.
-- [ ] Add integration event logging.
-- [ ] Add retry and failure handling.
-- [ ] Add integration management UI.
+- [x] Add integration event logging.
+- [x] Add retry and failure handling.
+- [x] Add integration management UI.
 
 ## 9.4 External Integrations
 
@@ -690,7 +690,7 @@ Suggested migration order:
 ## 10.1 AI Foundation
 
 - [x] Define AI service boundary.
-- [ ] Define allowed tools and data sources.
+- [x] Define allowed tools and data sources.
 - [x] Enforce project and organization permissions.
 - [x] Define prompt and response schemas.
 - [ ] Add model configuration management.
@@ -699,9 +699,9 @@ Suggested migration order:
 
 ## 10.2 AI Features
 
-- [ ] Add project question answering.
-- [ ] Add project and sprint summaries.
-- [ ] Add risk explanations using source data.
+- [x] Add project question answering.
+- [x] Add project and sprint summaries.
+- [x] Add risk explanations using source data.
 - [ ] Add natural-language task search.
 - [ ] Add report generation.
 - [ ] Add task breakdown suggestions.
@@ -709,14 +709,14 @@ Suggested migration order:
 
 ## 10.3 AI Safety and Evaluation
 
-- [ ] Require confirmation for mutations.
-- [ ] Prevent unauthorized data retrieval.
+- [x] Require confirmation for mutations.
+- [x] Prevent unauthorized data retrieval.
 - [ ] Add prompt injection safeguards.
 - [ ] Add evaluation datasets.
 - [ ] Test factual grounding.
 - [ ] Test authorization boundaries.
 - [ ] Add fallback behavior for model failures.
-- [ ] Add user feedback collection.
+- [x] Add user feedback collection.
 
 ---
 
