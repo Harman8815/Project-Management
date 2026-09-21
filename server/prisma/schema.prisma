@@ -36,6 +36,8 @@ model User {
   notificationPreference NotificationPreference?
   organizationMemberships OrganizationMembership[]
   createdOrganizations Organization[] @relation("OrganizationCreator")
+  aiRequestLogs       AiRequestLog[]
+  aiFeedback          AiFeedback[]
 }
 
 model Team {
@@ -313,6 +315,7 @@ model Organization {
   projects    Project[]
   integrations Integration[]
   customFields CustomFieldDefinition[]
+  aiRequestLogs AiRequestLog[]
 }
 
 model OrganizationMembership {
@@ -375,5 +378,43 @@ model Integration {
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   organization   Organization @relation(fields: [organizationId], references: [id])
+  events         IntegrationEvent[]
   @@unique([organizationId, provider, name])
+}
+
+model IntegrationEvent {
+  id            Int         @id @default(autoincrement())
+  integrationId Int
+  eventType     String
+  payload       String
+  status        String      @default("PENDING")
+  attempts      Int         @default(0)
+  lastError     String?
+  nextAttemptAt DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  integration   Integration @relation(fields: [integrationId], references: [id])
+}
+
+model AiRequestLog {
+  id             Int          @id @default(autoincrement())
+  userId         Int
+  organizationId Int
+  projectId      Int?
+  feature        String
+  promptLength   Int
+  status         String
+  createdAt      DateTime     @default(now())
+  user           User         @relation(fields: [userId], references: [userId])
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+model AiFeedback {
+  id        Int      @id @default(autoincrement())
+  requestId Int
+  userId    Int
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [userId])
 }
