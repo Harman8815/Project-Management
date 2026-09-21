@@ -17,6 +17,7 @@ import { ProjectTemplatesModule } from "./modules/project-templates/project-temp
 import { MilestonesModule } from "./modules/milestones/milestones.module";
 import { SprintsModule } from "./modules/sprints/sprints.module";
 import { ActivityLogModule } from "./modules/activity-log/activity-log.module";
+import { NotificationsModule } from "./modules/notifications/notifications.module";
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ActivityLogModule } from "./modules/activity-log/activity-log.module";
     MilestonesModule,
     SprintsModule,
     ActivityLogModule,
+    NotificationsModule,
   ],
   providers: [
     PrismaService,
