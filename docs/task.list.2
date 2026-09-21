@@ -1,0 +1,267 @@
+# ProjeX v2 - Remaining Task List
+
+Generated from `docs/task.list` on 2026-09-21. This file contains only unchecked work from the current master checklist. Complete items here first, then reflect verified completion in `docs/task.list`.
+
+## Phase 2 - NestJS Backend Migration and Refinement
+
+### Core Module Migration
+
+- [ ] Create NestJS module.
+- [ ] Create controller.
+- [ ] Create service.
+- [ ] Create DTOs.
+- [ ] Add validation.
+- [ ] Add Prisma queries.
+- [ ] Add authorization checks.
+- [ ] Add unit tests.
+- [ ] Add integration and API tests.
+- [ ] Compare responses with the Express implementation.
+- [ ] Update frontend API integration if required.
+- [ ] Remove the old Express implementation only after verification.
+
+### API Standards and Database Refinement
+
+- [ ] Standardize error codes and messages.
+- [ ] Add transaction handling for multi-step operations.
+- [ ] Review indexes and query performance.
+- [ ] Add database constraints where needed.
+- [ ] Add migration rollback guidance.
+- [ ] Verify seed data and test fixtures.
+
+### Migration Completion
+
+- [ ] Remove unused Express dependencies.
+- [ ] Merge `refactor/backend-nestjs` into `develop`.
+
+## Phase 3 - Project and Workspace Management
+
+### Project Lifecycle and Metadata
+
+- [ ] Update project creation and editing UI.
+
+### Membership and Roles
+
+- [ ] Prevent unauthorized membership changes.
+- [ ] Add membership management UI.
+
+### Workspace Sections
+
+- [ ] Add project overview page.
+- [ ] Add tasks section.
+- [ ] Add milestones section.
+- [ ] Add activity section.
+- [ ] Add project settings section.
+- [ ] Add project navigation state.
+- [ ] Add permission-aware actions.
+
+## Phase 4 - Advanced Task Management
+
+### Task Model Improvements
+
+- [ ] Add database indexes and constraints.
+
+### Workflow and Statuses
+
+- [ ] Add status management UI.
+
+### Dependencies and Planning
+
+- [ ] Add dependency visualization.
+- [ ] Display blocked task indicators.
+
+### Task Productivity Features
+
+- [ ] Add bulk assignment and status updates.
+- [ ] Add bulk archive and delete safeguards.
+- [ ] Add task history. (TaskHistory model created, service pending)
+- [ ] Add task activity timeline.
+- [ ] Add keyboard shortcuts where useful.
+- [ ] Add E2E coverage for critical task flows.
+
+## Phase 5 - Milestones, Sprints and Planning
+
+### Milestones
+
+- [ ] Add milestone UI and progress indicators.
+
+### Sprints
+
+- [ ] Prevent invalid sprint transitions.
+- [ ] Add sprint UI.
+
+### Calendar and Timeline
+
+- [ ] Add calendar data API.
+- [ ] Display tasks, milestones, and deadlines.
+- [ ] Add date filtering.
+- [ ] Add dependency-aware timeline.
+- [ ] Add drag-to-reschedule with validation.
+- [ ] Add critical path calculation.
+- [ ] Add timeline performance tests.
+
+## Phase 6 - Collaboration and Activity
+
+### Comments and Mentions
+
+- [ ] Add mention notifications.
+- [ ] Add permission checks.
+- [ ] Add comment API and UI tests.
+
+### Activity and Audit
+
+- [ ] Protect audit records from unauthorized changes.
+
+### Files and Documents
+
+- [ ] Add file type and size validation.
+- [ ] Add secure upload and download handling.
+- [ ] Add access checks.
+- [ ] Add object storage integration.
+- [ ] Add file deletion and retention rules.
+- [ ] Add upload and access tests.
+
+### Real-Time Collaboration
+
+- [ ] Select WebSocket or SSE architecture.
+- [ ] Define event names and payloads.
+- [ ] Add authenticated connections.
+- [ ] Add project-level event authorization.
+- [ ] Add real-time task and comment updates.
+- [ ] Add reconnect and failure handling.
+- [ ] Add real-time integration tests.
+
+### Decision Logs and Announcements
+
+- [ ] Create decision log model.
+- [ ] Add decision owner and status.
+- [ ] Add project announcements.
+- [ ] Add visibility and permission rules.
+- [ ] Add UI for creating and viewing records.
+
+## Phase 7 - Notifications and Automation
+
+### Email and Background Jobs
+
+- [ ] Configure BullMQ and Redis.
+- [ ] Create job and queue conventions.
+- [ ] Add retry and failure handling.
+- [ ] Configure email provider abstraction.
+- [ ] Add email templates.
+- [ ] Add email delivery tests.
+
+### Reminders and Automation
+
+- [ ] Add due-date reminders.
+- [ ] Add overdue alerts.
+- [ ] Add assignment notifications.
+- [ ] Add workflow event triggers.
+- [ ] Add scheduled jobs.
+- [ ] Add recurring report jobs.
+- [ ] Add automation audit records.
+- [ ] Add idempotency and duplicate-event protection.
+
+## Phase 9 - Enterprise Features and Integrations
+
+### Customization
+
+- [ ] Add configurable workflow definitions.
+
+### Integration Framework
+
+- [ ] Add credential and secret handling.
+
+### External Integrations
+
+- [ ] Integrate GitHub or GitLab activity.
+- [ ] Link commits and pull requests to tasks.
+- [ ] Add calendar synchronization.
+- [ ] Add structured project import.
+- [ ] Add structured project export.
+- [ ] Add integration permission and security tests.
+
+## Phase 10 - AI and Intelligent Project Assistance
+
+### AI Foundation
+
+- [ ] Add model configuration management.
+
+### AI Features
+
+- [ ] Add natural-language task search.
+- [ ] Add report generation.
+- [ ] Add task breakdown suggestions.
+- [ ] Add planning assistance.
+
+### AI Safety and Evaluation
+
+- [ ] Add evaluation datasets.
+- [ ] Test factual grounding.
+- [ ] Test authorization boundaries.
+- [ ] Add fallback behavior for model failures.
+
+## Phase 11 - Production Readiness and Optimization
+
+### Performance
+
+- [ ] Audit frontend rendering and bundle size.
+- [ ] Audit API latency.
+- [ ] Review slow database queries.
+- [ ] Add indexes where justified.
+- [ ] Add pagination limits.
+- [ ] Add caching for stable, frequently accessed data.
+- [ ] Test large projects and datasets.
+
+### Security
+
+- [ ] Run authorization boundary tests.
+- [ ] Review input validation.
+- [ ] Review file upload security.
+- [ ] Review secret handling.
+- [ ] Add rate limiting where required.
+- [ ] Review dependency vulnerabilities.
+- [ ] Run security testing and remediation.
+
+### Observability and Operations
+
+- [ ] Add structured logs and correlation IDs.
+- [ ] Add metrics and health checks.
+- [ ] Add error tracking.
+- [ ] Add queue monitoring.
+- [ ] Add database monitoring.
+- [ ] Define alert thresholds.
+- [ ] Document incident response basics.
+
+### Deployment and Recovery
+
+- [ ] Configure production build pipeline.
+- [ ] Configure deployment environments.
+- [ ] Add database migration process.
+- [ ] Configure backups.
+- [ ] Test restore procedures.
+- [ ] Document rollback process.
+- [ ] Add release checklist.
+- [ ] Update architecture and operational documentation.
+
+## Definition of Done
+
+- [ ] Implementation is complete.
+- [ ] Validation and authorization are implemented.
+- [ ] Relevant unit tests are added.
+- [ ] Integration/API tests are added where applicable.
+- [ ] E2E tests are added for critical workflows.
+- [ ] Loading, empty, error, and permission states are handled.
+- [ ] Database migrations are reviewed.
+- [ ] API documentation is updated.
+- [ ] UI documentation is updated where required.
+- [ ] CI passes.
+- [ ] Manual verification is completed.
+- [ ] The branch is reviewed and merged.
+
+## Phase Completion Gate
+
+- [ ] All planned tasks in the phase are completed or explicitly deferred.
+- [ ] Required migrations are applied and verified.
+- [ ] Tests and CI pass.
+- [ ] Documentation is updated.
+- [ ] Known issues are recorded.
+- [ ] The phase branch is merged into `develop`.
