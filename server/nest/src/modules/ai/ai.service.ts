@@ -12,6 +12,9 @@ export class AiService {
     await this.organizations.assertRole(userId, organizationId);
     if (!request.prompt || request.prompt.length > 4000) throw new BadRequestException("Prompt must be between 1 and 4000 characters");
     if (request.confirmMutation) throw new BadRequestException("AI mutations require an explicit action endpoint");
+    if (/ignore\s+(all|previous|prior)\s+instructions|reveal\s+(the|your)\s+system\s+prompt|developer\s+message/i.test(request.prompt)) {
+      throw new BadRequestException("Prompt contains a disallowed instruction override");
+    }
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const requestCount = await this.prisma.aiRequestLog.count({ where: { userId, organizationId, createdAt: { gte: since } } });
     if (requestCount >= 100) throw new BadRequestException("Daily AI request limit reached");
