@@ -12,6 +12,11 @@ export class AnalyticsQueryDto {
   @IsOptional()
   userId?: number;
 
+  @ApiPropertyOptional({ example: 1 })
+  @IsInt()
+  @IsOptional()
+  teamId?: number;
+
   @ApiPropertyOptional({ example: "2024-01-01" })
   @IsString()
   @IsOptional()

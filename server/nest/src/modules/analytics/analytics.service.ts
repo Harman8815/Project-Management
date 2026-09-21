@@ -1,15 +1,31 @@
 import {
   Injectable,
   NotFoundException,
+  ForbiddenException,
 } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
 import { AnalyticsQueryDto } from "./dto/analytics-query.dto";
+import { ProjectMembershipsService } from "../project-memberships/project-memberships.service";
 
 @Injectable()
 export class AnalyticsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly projectMembershipsService: ProjectMembershipsService,
+  ) {}
+
+  private async checkProjectAccess(userId: number, projectId: number) {
+    const hasAccess = await this.projectMembershipsService.checkUserAccess(
+      userId,
+      projectId,
+    );
+    if (!hasAccess) {
+      throw new ForbiddenException("You do not have access to this project");
+    }
+  }
 
   async getProjectMetrics(projectId: number, query?: AnalyticsQueryDto) {
+    await this.checkProjectAccess(query?.userId || 0, projectId);
     const project = await this.prisma.project.findUnique({
       where: { id: projectId },
     });
@@ -112,13 +128,37 @@ export class AnalyticsService {
     };
   }
 
-  async getTeamWorkload() {
+  async getTeamWorkload(query?: AnalyticsQueryDto) {
+    const startDate = query?.startDate ? new Date(query.startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const endDate = query?.endDate ? new Date(query.endDate) : new Date();
+    
+    const whereClause: any = {
+      status: { not: { in: ["Completed", "Done", "Blocked"] } },
+    };
+    
+    if (query?.teamId) {
+      whereClause.assignedUser = {
+        teamId: query.teamId,
+      };
+    }
+    
+    if (query?.projectId) {
+      whereClause.projectId = query.projectId;
+    }
+    
+    if (query?.startDate || query?.endDate) {
+      whereClause.createdAt = { gte: startDate, lte: endDate };
+    }
+
     const users = await this.prisma.user.findMany({
+      where: query?.teamId ? { teamId: query.teamId } : {},
       select: {
         userId: true,
         username: true,
+        capacityHoursPerWeek: true,
+        capacityStoryPoints: true,
         assignedTasks: {
-          where: { status: { not: { in: ["Completed", "Done", "Blocked"] } } },
+          where: whereClause,
           select: { points: true, estimateHours: true },
         },
       },
@@ -133,17 +173,33 @@ export class AnalyticsService {
         (sum, t) => sum + (t.estimateHours || 0),
         0,
       );
+      
+      const capacityHours = user.capacityHoursPerWeek || 40;
+      const capacityPoints = user.capacityStoryPoints;
+      const hoursUtilization = capacityHours > 0 ? Math.round((totalHours / capacityHours) * 100) : 0;
+      const pointsUtilization = capacityPoints && capacityPoints > 0 ? Math.round((totalPoints / capacityPoints) * 100) : 0;
+      
+      const overAllocated = hoursUtilization > 100 || (capacityPoints && pointsUtilization > 100);
+
       return {
         userId: user.userId,
         username: user.username,
         activeTaskCount: user.assignedTasks.length,
         totalStoryPoints: totalPoints,
         totalEstimatedHours: totalHours,
+        capacityHoursPerWeek: user.capacityHoursPerWeek,
+        capacityStoryPoints: user.capacityStoryPoints,
+        hoursUtilization,
+        pointsUtilization,
+        overAllocated,
       };
     });
   }
 
-  async getSprintMetrics(projectId: number) {
+  async getSprintMetrics(projectId: number, query?: AnalyticsQueryDto) {
+    if (query?.projectId) {
+      await this.checkProjectAccess(query.userId || 0, projectId);
+    }
     const sprints = await this.prisma.sprint.findMany({
       where: projectId ? { projectId } : {},
       include: {
@@ -182,7 +238,10 @@ export class AnalyticsService {
     });
   }
 
-  async getMilestoneMetrics(projectId: number) {
+  async getMilestoneMetrics(projectId: number, query?: AnalyticsQueryDto) {
+    if (query?.projectId) {
+      await this.checkProjectAccess(query.userId || 0, projectId);
+    }
     const milestones = await this.prisma.milestone.findMany({
       where: projectId ? { projectId } : {},
       include: {
@@ -209,11 +268,12 @@ export class AnalyticsService {
     });
   }
 
-  async getTrendData(projectId: number, groupBy: string = "week") {
+  async getTrendData(projectId: number, query?: AnalyticsQueryDto) {
+    await this.checkProjectAccess(query?.userId || 0, projectId);
     const since = new Date();
-    if (groupBy === "week") {
+    if (query?.groupBy === "week") {
       since.setDate(since.getDate() - 28);
-    } else if (groupBy === "month") {
+    } else if (query?.groupBy === "month") {
       since.setMonth(since.getMonth() - 3);
     }
 
@@ -233,7 +293,7 @@ export class AnalyticsService {
 
     return {
       projectId,
-      groupBy,
+      groupBy: query?.groupBy || "week",
       trendData: Object.entries(trends).map(([date, count]) => ({
         date,
         count,

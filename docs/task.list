@@ -277,8 +277,8 @@ These commits have been implemented on `develop`.
 - [x] Create authentication guard.
 - [x] Create current-user decorator or request helper.
 - [x] Add public-route handling where required.
-- [ ] Add project access guard.
-- [ ] Add role and permission guard foundation.
+- [x] Add project access guard.
+- [x] Add role and permission guard foundation.
 - [x] Add authorization failure responses.
 - [x] Test valid, expired, missing, and invalid tokens.
 
@@ -316,7 +316,7 @@ Suggested migration order:
 5. [ ] Comments and activity module.
 6. [ ] Files and attachments module.
 7. [ ] Notifications module.
-8. [ ] Analytics and reporting module.
+8. [x] Analytics and reporting module.
 
 **Commits per module**
 - `feat(backend): add <module> NestJS module`
@@ -616,29 +616,28 @@ Suggested migration order:
 ## 8.2 Team Workload
 
 - [x] Calculate assignments and estimates.
-- [ ] Add user capacity configuration.
-- [ ] Display workload by user and time period.
-- [ ] Detect over-allocation.
-- [ ] Add workload filters and export options.
+- [x] Add user capacity configuration.
+- [x] Display workload by user and time period.
+- [x] Detect over-allocation.
+- [x] Add workload filters and export options.
 
 ## 8.3 Reports
 
-- [ ] Add burndown and burnup reports.
-- [ ] Add sprint velocity reports.
-- [ ] Add weekly project summaries.
-- [ ] Add risk and issue reports.
-- [ ] Add report filtering by project, team, and date.
-- [ ] Add report access controls.
-
+- [x] Add burndown and burnup reports.
+- [x] Add sprint velocity reports.
+- [x] Add weekly project summaries.
+- [x] Add risk and issue reports.
+- [x] Add report filtering by project, team, and date.
+- [x] Add report access controls.
 ## 8.4 Export and Portfolio
 
-- [ ] Define export job architecture.
-- [ ] Add CSV export.
-- [ ] Add Excel export.
-- [ ] Add PDF export.
-- [ ] Add organization-level portfolio dashboard.
-- [ ] Add portfolio-level filters and permissions.
-- [ ] Test large report generation.
+- [x] Define export job architecture.
+- [x] Add CSV export.
+- [x] Add Excel export.
+- [x] Add PDF export.
+- [x] Add organization-level portfolio dashboard.
+- [x] Add portfolio-level filters and permissions.
+- [x] Test large report generation.
 
 ---
 

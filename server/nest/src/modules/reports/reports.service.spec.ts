@@ -1,6 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ReportsService } from "./reports.service";
 import { PrismaService } from "../../prisma/prisma.service";
+import { ProjectMembershipsService } from "../project-memberships/project-memberships.service";
 import { NotFoundException } from "@nestjs/common";
 
 describe("ReportsService", () => {
@@ -29,6 +30,10 @@ describe("ReportsService", () => {
     },
   };
 
+  const mockProjectMembershipsService = {
+    checkUserAccess: jest.fn().mockResolvedValue(true),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -36,6 +41,10 @@ describe("ReportsService", () => {
         {
           provide: PrismaService,
           useValue: mockPrismaService,
+        },
+        {
+          provide: ProjectMembershipsService,
+          useValue: mockProjectMembershipsService,
         },
       ],
     }).compile();

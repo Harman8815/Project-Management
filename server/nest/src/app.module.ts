@@ -20,6 +20,8 @@ import { ActivityLogModule } from "./modules/activity-log/activity-log.module";
 import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { AnalyticsModule } from "./modules/analytics/analytics.module";
 import { ReportsModule } from "./modules/reports/reports.module";
+import { ExportModule } from "./modules/export/export.module";
+import { PortfolioModule } from "./modules/portfolio/portfolio.module";
 
 @Module({
   imports: [
@@ -41,6 +43,8 @@ import { ReportsModule } from "./modules/reports/reports.module";
     NotificationsModule,
     AnalyticsModule,
     ReportsModule,
+    ExportModule,
+    PortfolioModule,
   ],
   providers: [
     PrismaService,
