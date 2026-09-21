@@ -58,6 +58,8 @@ model Project {
   health       String              @default("ON_TRACK")
   objectives   String?
   archived     Boolean             @default(false)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
   activityLogs ActivityLog[]
   milestones   Milestone[]
   members      ProjectMembership[]
