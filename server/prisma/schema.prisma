@@ -14,24 +14,26 @@ model User {
   username            String              @unique
   profilePictureUrl   String?
   teamId              Int?
+  capacityHoursPerWeek Int?               @default(40)
+  capacityStoryPoints  Int?
   activityTarget      ActivityLog[]       @relation("ActivityTarget")
   activityActor       ActivityLog[]       @relation("ActivityActor")
   attachments         Attachment[]
   comments            Comment[]
-   mentionedInComments CommentMention[]
-   ownedMilestones     Milestone[]
-   invitedMembers      ProjectMembership[] @relation("InvitedBy")
-   projectMemberships  ProjectMembership[]
-   createdTemplates    ProjectTemplate[]
-   ownedSprints        Sprint[]
-   assignedTasks       Task[]              @relation("TaskAssignee")
-   authoredTasks       Task[]              @relation("TaskAuthor")
-   taskAssignments     TaskAssignment[]
-   taskHistoryChanges  TaskHistory[]
-   taskWatchers        TaskWatcher[]
-   team                Team?               @relation(fields: [teamId], references: [id])
-   notifications       Notification[]
-   notificationPreference NotificationPreference?
+  mentionedInComments CommentMention[]
+  ownedMilestones     Milestone[]
+  invitedMembers      ProjectMembership[] @relation("InvitedBy")
+  projectMemberships  ProjectMembership[]
+  createdTemplates    ProjectTemplate[]
+  ownedSprints        Sprint[]
+  assignedTasks       Task[]              @relation("TaskAssignee")
+  authoredTasks       Task[]              @relation("TaskAuthor")
+  taskAssignments     TaskAssignment[]
+  taskHistoryChanges  TaskHistory[]
+  taskWatchers        TaskWatcher[]
+  team                Team?               @relation(fields: [teamId], references: [id])
+  notifications       Notification[]
+  notificationPreference NotificationPreference?
 }
 
 model Team {

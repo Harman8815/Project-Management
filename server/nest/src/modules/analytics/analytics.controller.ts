@@ -33,8 +33,8 @@ export class AnalyticsController {
   }
 
   @Get("teams/workload")
-  async getTeamWorkload() {
-    return this.analyticsService.getTeamWorkload();
+  async getTeamWorkload(@Query() query: AnalyticsQueryDto) {
+    return this.analyticsService.getTeamWorkload(query);
   }
 
   @ApiQuery({ name: "projectId", required: false })

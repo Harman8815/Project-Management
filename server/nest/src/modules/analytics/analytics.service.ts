@@ -112,13 +112,37 @@ export class AnalyticsService {
     };
   }
 
-  async getTeamWorkload() {
+  async getTeamWorkload(query?: AnalyticsQueryDto) {
+    const startDate = query?.startDate ? new Date(query.startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const endDate = query?.endDate ? new Date(query.endDate) : new Date();
+    
+    const whereClause: any = {
+      status: { not: { in: ["Completed", "Done", "Blocked"] } },
+    };
+    
+    if (query?.teamId) {
+      whereClause.assignedUser = {
+        teamId: query.teamId,
+      };
+    }
+    
+    if (query?.projectId) {
+      whereClause.projectId = query.projectId;
+    }
+    
+    if (query?.startDate || query?.endDate) {
+      whereClause.createdAt = { gte: startDate, lte: endDate };
+    }
+
     const users = await this.prisma.user.findMany({
+      where: query?.teamId ? { teamId: query.teamId } : {},
       select: {
         userId: true,
         username: true,
+        capacityHoursPerWeek: true,
+        capacityStoryPoints: true,
         assignedTasks: {
-          where: { status: { not: { in: ["Completed", "Done", "Blocked"] } } },
+          where: whereClause,
           select: { points: true, estimateHours: true },
         },
       },
@@ -133,12 +157,25 @@ export class AnalyticsService {
         (sum, t) => sum + (t.estimateHours || 0),
         0,
       );
+      
+      const capacityHours = user.capacityHoursPerWeek || 40;
+      const capacityPoints = user.capacityStoryPoints;
+      const hoursUtilization = capacityHours > 0 ? Math.round((totalHours / capacityHours) * 100) : 0;
+      const pointsUtilization = capacityPoints && capacityPoints > 0 ? Math.round((totalPoints / capacityPoints) * 100) : 0;
+      
+      const overAllocated = hoursUtilization > 100 || (capacityPoints && pointsUtilization > 100);
+
       return {
         userId: user.userId,
         username: user.username,
         activeTaskCount: user.assignedTasks.length,
         totalStoryPoints: totalPoints,
         totalEstimatedHours: totalHours,
+        capacityHoursPerWeek: user.capacityHoursPerWeek,
+        capacityStoryPoints: user.capacityStoryPoints,
+        hoursUtilization,
+        pointsUtilization,
+        overAllocated,
       };
     });
   }
