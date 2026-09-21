@@ -45,4 +45,22 @@ export class OrganizationsService {
     if (!organization) throw new NotFoundException("Organization not found");
     return organization;
   }
+
+  async updateSettings(userId: number, organizationId: number, settings: Record<string, string>) {
+    await this.assertRole(userId, organizationId, ["OWNER", "ADMIN"]);
+    return Promise.all(Object.entries(settings).map(([key, value]) =>
+      this.prisma.organizationSetting.upsert({
+        where: { organizationId_key: { organizationId, key } },
+        update: { value },
+        create: { organizationId, key, value },
+      }),
+    ));
+  }
+
+  async removeMember(actorId: number, organizationId: number, userId: number) {
+    await this.assertRole(actorId, organizationId, ["OWNER", "ADMIN"]);
+    return this.prisma.organizationMembership.delete({
+      where: { organizationId_userId: { organizationId, userId } },
+    });
+  }
 }

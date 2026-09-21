@@ -19,4 +19,14 @@ export class OrganizationsController {
   addMember(@Req() request: any, @Param("id") id: string, @Body() body: { userId: number; role?: string }) {
     return this.service.addMember(request.user.userId, Number(id), body.userId, body.role);
   }
+
+  @Post(":id/settings")
+  updateSettings(@Req() request: any, @Param("id") id: string, @Body() body: Record<string, string>) {
+    return this.service.updateSettings(request.user.userId, Number(id), body);
+  }
+
+  @Post(":id/members/:userId/remove")
+  removeMember(@Req() request: any, @Param("id") id: string, @Param("userId") userId: string) {
+    return this.service.removeMember(request.user.userId, Number(id), Number(userId));
+  }
 }
