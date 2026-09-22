@@ -355,10 +355,10 @@ Suggested migration order:
 ## 2.5 API Standards and Database Refinement
 
 - [x] Standardize response envelopes.
-- [ ] Standardize error codes and messages.
+- [x] Standardize error codes and messages.
 - [x] Add pagination utilities.
 - [x] Add filtering and sorting utilities.
-- [ ] Add transaction handling for multi-step operations.
+- [x] Add transaction handling for multi-step operations.
 - [ ] Review indexes and query performance.
 - [ ] Add database constraints where needed.
 - [ ] Add migration rollback guidance.
