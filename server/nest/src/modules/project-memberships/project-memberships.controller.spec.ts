@@ -214,7 +214,7 @@ describe("ProjectMembershipsController", () => {
       );
       mockPrismaService.projectMembership.count.mockResolvedValue(1);
 
-      const result = await controller.findAll({ page: 1, limit: 10 });
+      const result = await controller.findAll({ page: 1, limit: 10 }, { userId: 1 });
 
       expect(result).toEqual(expectedResult);
     });
@@ -234,6 +234,7 @@ describe("ProjectMembershipsController", () => {
       };
 
       mockPrismaService.project.findUnique.mockResolvedValue({ id: 1 });
+      mockPrismaService.projectMembership.findFirst.mockResolvedValue({ role: "OWNER" });
       mockPrismaService.projectMembership.findMany.mockResolvedValue(
         expectedResult.data,
       );
@@ -242,7 +243,7 @@ describe("ProjectMembershipsController", () => {
       const result = await controller.findByProject("1", {
         page: 1,
         limit: 10,
-      });
+      }, { userId: 1 });
 
       expect(result).toEqual(expectedResult);
     });
@@ -257,11 +258,12 @@ describe("ProjectMembershipsController", () => {
         project: { id: 1 },
       };
 
+      mockPrismaService.projectMembership.findFirst.mockResolvedValue({ role: "MEMBER" });
       mockPrismaService.projectMembership.findUnique.mockResolvedValue(
         expectedResult,
       );
 
-      const result = await controller.findOne("1");
+      const result = await controller.findOne("1", { userId: 1 });
 
       expect(result).toEqual(expectedResult);
     });
@@ -269,7 +271,7 @@ describe("ProjectMembershipsController", () => {
     it("should throw NotFoundException when membership does not exist", async () => {
       mockPrismaService.projectMembership.findUnique.mockResolvedValue(null);
 
-      await expect(controller.findOne("999")).rejects.toThrow(
+      await expect(controller.findOne("999", { userId: 1 })).rejects.toThrow(
         "ProjectMembership with id 999 not found",
       );
     });
