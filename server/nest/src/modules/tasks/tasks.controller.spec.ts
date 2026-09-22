@@ -21,6 +21,9 @@ describe("TasksController", () => {
     taskHistory: {
       create: jest.fn(),
     },
+    projectMembership: {
+      findFirst: jest.fn(),
+    },
     $transaction: jest.fn(),
   };
 
@@ -104,11 +107,18 @@ describe("TasksController", () => {
         },
       ];
 
+      mockPrismaService.projectMembership.findFirst.mockResolvedValue({ id: 1, userId: 1, projectId: 1, status: "ACTIVE" });
       mockPrismaService.task.findMany.mockResolvedValue(expectedResult);
 
-      const result = await controller.findAll(1, {});
+      const result = await controller.findAll(1, {}, { userId: 1 });
 
       expect(result).toEqual(expectedResult);
+    });
+
+    it("should throw error when user has no access to project", async () => {
+      mockPrismaService.projectMembership.findFirst.mockResolvedValue(null);
+
+      await expect(controller.findAll(1, {}, { userId: 1 })).rejects.toThrow("You do not have access to this project");
     });
   });
 

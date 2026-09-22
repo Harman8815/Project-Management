@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
 import { CreateTaskDto } from "./dto/create-task.dto";
@@ -64,8 +65,22 @@ export class TasksService {
     });
   }
 
-  async findAll(projectId: number, filterDto?: FilterSortDto) {
+  async findAll(projectId: number, filterDto?: FilterSortDto, userId?: number) {
     const where: any = { projectId };
+
+    // Check if user has access to the project
+    if (userId) {
+      const membership = await this.prisma.projectMembership.findFirst({
+        where: {
+          projectId,
+          userId,
+          status: "ACTIVE",
+        },
+      });
+      if (!membership) {
+        throw new ForbiddenException("You do not have access to this project");
+      }
+    }
 
     if (filterDto?.status) {
       where.status = filterDto.status;
@@ -114,7 +129,7 @@ export class TasksService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, userId?: number) {
     const task = await this.prisma.task.findUnique({
       where: { id },
       include: {
@@ -127,6 +142,21 @@ export class TasksService {
     if (!task) {
       throw new NotFoundException(`Task with id ${id} not found`);
     }
+
+    // Check if user has access to the project
+    if (userId) {
+      const membership = await this.prisma.projectMembership.findFirst({
+        where: {
+          projectId: task.projectId,
+          userId,
+          status: "ACTIVE",
+        },
+      });
+      if (!membership) {
+        throw new ForbiddenException("You do not have access to this project");
+      }
+    }
+
     return task;
   }
 
@@ -187,30 +217,74 @@ export class TasksService {
     if (!task) {
       throw new NotFoundException(`Task with id ${id} not found`);
     }
+
+    // Check if user has access to the project
+    if (actorId) {
+      const membership = await this.prisma.projectMembership.findFirst({
+        where: {
+          projectId: task.projectId,
+          userId: actorId,
+          status: "ACTIVE",
+        },
+      });
+      if (!membership) {
+        throw new ForbiddenException("You do not have access to this project");
+      }
+    }
+
     return this.prisma.task.update({
       where: { id },
       data: updateTaskDto,
     });
   }
 
-  async remove(id: number) {
+  async remove(id: number, userId?: number) {
     const task = await this.prisma.task.findUnique({
       where: { id },
     });
     if (!task) {
       throw new NotFoundException(`Task with id ${id} not found`);
     }
+
+    // Check if user has access to the project
+    if (userId) {
+      const membership = await this.prisma.projectMembership.findFirst({
+        where: {
+          projectId: task.projectId,
+          userId,
+          status: "ACTIVE",
+        },
+      });
+      if (!membership) {
+        throw new ForbiddenException("You do not have access to this project");
+      }
+    }
+
     return this.prisma.task.delete({
       where: { id },
     });
   }
 
-  async addDependency(taskId: number, blockedById: number) {
+  async addDependency(taskId: number, blockedById: number, userId?: number) {
     const task = await this.prisma.task.findUnique({
       where: { id: taskId },
     });
     if (!task) {
       throw new NotFoundException(`Task with id ${taskId} not found`);
+    }
+
+    // Check if user has access to the project
+    if (userId) {
+      const membership = await this.prisma.projectMembership.findFirst({
+        where: {
+          projectId: task.projectId,
+          userId,
+          status: "ACTIVE",
+        },
+      });
+      if (!membership) {
+        throw new ForbiddenException("You do not have access to this project");
+      }
     }
 
     const blockedBy = await this.prisma.task.findUnique({
@@ -239,7 +313,28 @@ export class TasksService {
     });
   }
 
-  async removeDependency(taskId: number, blockedById: number) {
+  async removeDependency(taskId: number, blockedById: number, userId?: number) {
+    const task = await this.prisma.task.findUnique({
+      where: { id: taskId },
+    });
+    if (!task) {
+      throw new NotFoundException(`Task with id ${taskId} not found`);
+    }
+
+    // Check if user has access to the project
+    if (userId) {
+      const membership = await this.prisma.projectMembership.findFirst({
+        where: {
+          projectId: task.projectId,
+          userId,
+          status: "ACTIVE",
+        },
+      });
+      if (!membership) {
+        throw new ForbiddenException("You do not have access to this project");
+      }
+    }
+
     const dependency = await this.prisma.taskDependency.findFirst({
       where: { taskId, blockedById },
     });
@@ -253,12 +348,26 @@ export class TasksService {
     });
   }
 
-  async getDependencies(taskId: number) {
+  async getDependencies(taskId: number, userId?: number) {
     const task = await this.prisma.task.findUnique({
       where: { id: taskId },
     });
     if (!task) {
       throw new NotFoundException(`Task with id ${taskId} not found`);
+    }
+
+    // Check if user has access to the project
+    if (userId) {
+      const membership = await this.prisma.projectMembership.findFirst({
+        where: {
+          projectId: task.projectId,
+          userId,
+          status: "ACTIVE",
+        },
+      });
+      if (!membership) {
+        throw new ForbiddenException("You do not have access to this project");
+      }
     }
 
     return this.prisma.taskDependency.findMany({
@@ -267,60 +376,26 @@ export class TasksService {
     });
   }
 
-  async addWatcher(taskId: number, userId: number) {
-    const task = await this.prisma.task.findUnique({
-      where: { id: taskId },
-    });
-    if (!task) {
-      throw new NotFoundException(`Task with id ${taskId} not found`);
-    }
-
-    const user = await this.prisma.user.findUnique({
-      where: { userId },
-    });
-    if (!user) {
-      throw new NotFoundException(`User with id ${userId} not found`);
-    }
-
-    return this.prisma.taskWatcher.create({
-      data: { taskId, userId },
-    });
-  }
-
-  async removeWatcher(taskId: number, userId: number) {
-    const watcher = await this.prisma.taskWatcher.findFirst({
-      where: { taskId, userId },
-    });
-    if (!watcher) {
-      throw new NotFoundException(
-        `Watcher for user ${userId} on task ${taskId} not found`,
-      );
-    }
-    return this.prisma.taskWatcher.delete({
-      where: { id: watcher.id },
-    });
-  }
-
-  async getWatchers(taskId: number) {
-    const task = await this.prisma.task.findUnique({
-      where: { id: taskId },
-    });
-    if (!task) {
-      throw new NotFoundException(`Task with id ${taskId} not found`);
-    }
-
-    return this.prisma.taskWatcher.findMany({
-      where: { taskId },
-      include: { user: true },
-    });
-  }
-
-  async getChildren(parentId: number) {
+  async getChildren(parentId: number, userId?: number) {
     const parent = await this.prisma.task.findUnique({
       where: { id: parentId },
     });
     if (!parent) {
       throw new NotFoundException(`Task with id ${parentId} not found`);
+    }
+
+    // Check if user has access to the project
+    if (userId) {
+      const membership = await this.prisma.projectMembership.findFirst({
+        where: {
+          projectId: parent.projectId,
+          userId,
+          status: "ACTIVE",
+        },
+      });
+      if (!membership) {
+        throw new ForbiddenException("You do not have access to this project");
+      }
     }
 
     return this.prisma.task.findMany({
@@ -370,5 +445,102 @@ export class TasksService {
       }
     }
     return false;
+  }
+
+  async addWatcher(taskId: number, userId: number, actorId?: number) {
+    const task = await this.prisma.task.findUnique({
+      where: { id: taskId },
+    });
+    if (!task) {
+      throw new NotFoundException(`Task with id ${taskId} not found`);
+    }
+
+    // Check if actor has access to the project
+    if (actorId) {
+      const membership = await this.prisma.projectMembership.findFirst({
+        where: {
+          projectId: task.projectId,
+          userId: actorId,
+          status: "ACTIVE",
+        },
+      });
+      if (!membership) {
+        throw new ForbiddenException("You do not have access to this project");
+      }
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { userId },
+    });
+    if (!user) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+
+    return this.prisma.taskWatcher.create({
+      data: { taskId, userId },
+    });
+  }
+
+  async removeWatcher(taskId: number, userId: number, actorId?: number) {
+    const task = await this.prisma.task.findUnique({
+      where: { id: taskId },
+    });
+    if (!task) {
+      throw new NotFoundException(`Task with id ${taskId} not found`);
+    }
+
+    // Check if actor has access to the project
+    if (actorId) {
+      const membership = await this.prisma.projectMembership.findFirst({
+        where: {
+          projectId: task.projectId,
+          userId: actorId,
+          status: "ACTIVE",
+        },
+      });
+      if (!membership) {
+        throw new ForbiddenException("You do not have access to this project");
+      }
+    }
+
+    const watcher = await this.prisma.taskWatcher.findFirst({
+      where: { taskId, userId },
+    });
+    if (!watcher) {
+      throw new NotFoundException(
+        `Watcher for user ${userId} on task ${taskId} not found`,
+      );
+    }
+    return this.prisma.taskWatcher.delete({
+      where: { id: watcher.id },
+    });
+  }
+
+  async getWatchers(taskId: number, userId?: number) {
+    const task = await this.prisma.task.findUnique({
+      where: { id: taskId },
+    });
+    if (!task) {
+      throw new NotFoundException(`Task with id ${taskId} not found`);
+    }
+
+    // Check if user has access to the project
+    if (userId) {
+      const membership = await this.prisma.projectMembership.findFirst({
+        where: {
+          projectId: task.projectId,
+          userId,
+          status: "ACTIVE",
+        },
+      });
+      if (!membership) {
+        throw new ForbiddenException("You do not have access to this project");
+      }
+    }
+
+    return this.prisma.taskWatcher.findMany({
+      where: { taskId },
+      include: { user: true },
+    });
   }
 }

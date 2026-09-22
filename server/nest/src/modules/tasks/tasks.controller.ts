@@ -7,6 +7,8 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
+  ForbiddenException,
 } from "@nestjs/common";
 import { ApiTags, ApiBearerAuth, ApiQuery } from "@nestjs/swagger";
 import { TasksService } from "./tasks.service";
@@ -15,10 +17,12 @@ import { UpdateTaskDto } from "./dto/update-task.dto";
 import { UpdateTaskStatusDto } from "./dto/update-task-status.dto";
 import { FilterSortDto } from "../../common/dto/filter-sort.dto";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 
 @ApiTags("tasks")
 @ApiBearerAuth()
 @Controller("tasks")
+@UseGuards(JwtAuthGuard)
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
@@ -38,18 +42,23 @@ export class TasksController {
   async findAll(
     @Query("projectId") projectId: number,
     @Query() filterDto: FilterSortDto,
+    @CurrentUser() user: any,
   ) {
-    return this.tasksService.findAll(projectId, filterDto);
+    return this.tasksService.findAll(projectId, filterDto, user?.userId);
   }
 
   @Get("user/:userId")
-  async findByUser(@Param("userId") userId: number) {
+  async findByUser(@Param("userId") userId: number, @CurrentUser() user: any) {
+    // Users can only see their own tasks
+    if (user?.userId !== userId) {
+      throw new ForbiddenException("You can only view your own tasks");
+    }
     return this.tasksService.findByUser(userId);
   }
 
   @Get(":id")
-  async findOne(@Param("id") id: string) {
-    return this.tasksService.findOne(Number(id));
+  async findOne(@Param("id") id: string, @CurrentUser() user: any) {
+    return this.tasksService.findOne(Number(id), user?.userId);
   }
 
   @Patch(":id/status")
@@ -71,29 +80,31 @@ export class TasksController {
   }
 
   @Delete(":id")
-  async remove(@Param("id") id: string) {
-    return this.tasksService.remove(Number(id));
+  async remove(@Param("id") id: string, @CurrentUser() user: any) {
+    return this.tasksService.remove(Number(id), user?.userId);
   }
 
   @Post(":id/dependencies")
   async addDependency(
     @Param("id") taskId: string,
     @Body("blockedById") blockedById: number,
+    @CurrentUser() user: any,
   ) {
-    return this.tasksService.addDependency(Number(taskId), blockedById);
+    return this.tasksService.addDependency(Number(taskId), blockedById, user?.userId);
   }
 
   @Delete(":id/dependencies/:blockedById")
   async removeDependency(
     @Param("id") taskId: string,
     @Param("blockedById") blockedById: string,
+    @CurrentUser() user: any,
   ) {
-    return this.tasksService.removeDependency(Number(taskId), Number(blockedById));
+    return this.tasksService.removeDependency(Number(taskId), Number(blockedById), user?.userId);
   }
 
   @Get(":id/dependencies")
-  async getDependencies(@Param("id") taskId: string) {
-    return this.tasksService.getDependencies(Number(taskId));
+  async getDependencies(@Param("id") taskId: string, @CurrentUser() user: any) {
+    return this.tasksService.getDependencies(Number(taskId), user?.userId);
   }
 
   @Get("workflow/transitions")
@@ -113,28 +124,30 @@ export class TasksController {
   }
 
   @Get(":id/children")
-  async getChildren(@Param("id") parentId: string) {
-    return this.tasksService.getChildren(Number(parentId));
+  async getChildren(@Param("id") parentId: string, @CurrentUser() user: any) {
+    return this.tasksService.getChildren(Number(parentId), user?.userId);
   }
 
   @Post(":id/watchers")
   async addWatcher(
     @Param("id") taskId: string,
     @Body("userId") userId: number,
+    @CurrentUser() user: any,
   ) {
-    return this.tasksService.addWatcher(Number(taskId), userId);
+    return this.tasksService.addWatcher(Number(taskId), userId, user?.userId);
   }
 
   @Delete(":id/watchers/:userId")
   async removeWatcher(
     @Param("id") taskId: string,
     @Param("userId") userId: string,
+    @CurrentUser() user: any,
   ) {
-    return this.tasksService.removeWatcher(Number(taskId), Number(userId));
+    return this.tasksService.removeWatcher(Number(taskId), Number(userId), user?.userId);
   }
 
   @Get(":id/watchers")
-  async getWatchers(@Param("id") taskId: string) {
-    return this.tasksService.getWatchers(Number(taskId));
+  async getWatchers(@Param("id") taskId: string, @CurrentUser() user: any) {
+    return this.tasksService.getWatchers(Number(taskId), user?.userId);
   }
 }

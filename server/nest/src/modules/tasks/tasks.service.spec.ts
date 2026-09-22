@@ -36,6 +36,9 @@ describe("TasksService", () => {
     user: {
       findUnique: jest.fn(),
     },
+    projectMembership: {
+      findFirst: jest.fn(),
+    },
     $transaction: jest.fn(),
   } as any;
 
