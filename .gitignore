@@ -17,3 +17,6 @@ client/.env
 client/tsconfig.tsbuildinfo
 
 Phase_information.md
+docs
+docs/*
+./docs
