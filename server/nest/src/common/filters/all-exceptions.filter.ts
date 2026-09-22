@@ -4,10 +4,6 @@ import {
   ArgumentsHost,
   HttpException,
   Logger,
-  BadRequestException,
-  NotFoundException,
-  ForbiddenException,
-  UnauthorizedException,
 } from "@nestjs/common";
 import { Request, Response } from "express";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
