@@ -7,6 +7,7 @@ import {
 } from "@nestjs/common";
 import { AppModule } from "./app.module";
 import { setupApiDocs } from "./docs/api-documentation";
+import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -27,6 +28,8 @@ async function bootstrap() {
       },
     }),
   );
+
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   const corsOrigin = process.env.CORS_ORIGIN || "*";
   app.enableCors({

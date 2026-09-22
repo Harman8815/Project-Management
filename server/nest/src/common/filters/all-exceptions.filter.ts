@@ -47,6 +47,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
         code = ErrorCode.NOT_FOUND;
         message = "Resource not found";
       }
+      if (exception.code === "P2002") {
+        code = ErrorCode.DUPLICATE_RESOURCE;
+        message = "Resource already exists";
+      }
     }
 
     if (status >= 500) {
