@@ -15,6 +15,7 @@ export class UsersService {
         username: createUserDto.username,
         cognitoId: createUserDto.cognitoId,
         profilePictureUrl: createUserDto.profilePictureUrl,
+        teamId: createUserDto.teamId ?? 1,
       },
     });
   }

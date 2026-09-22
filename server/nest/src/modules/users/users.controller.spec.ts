@@ -50,6 +50,7 @@ describe("UsersController", () => {
         username: "testuser",
         cognitoId: "test-cognito-id",
         profilePictureUrl: "p1.jpeg",
+        teamId: 1,
       };
 
       mockPrismaService.user.create.mockResolvedValue(expectedResult);
@@ -62,6 +63,38 @@ describe("UsersController", () => {
           username: dto.username,
           cognitoId: dto.cognitoId,
           profilePictureUrl: dto.profilePictureUrl,
+          teamId: 1,
+        },
+      });
+    });
+
+    it("should create a user with teamId", async () => {
+      const dto: CreateUserDto = {
+        username: "testuser",
+        cognitoId: "test-cognito-id",
+        profilePictureUrl: "p1.jpeg",
+        teamId: 5,
+      };
+
+      const expectedResult = {
+        id: 1,
+        username: "testuser",
+        cognitoId: "test-cognito-id",
+        profilePictureUrl: "p1.jpeg",
+        teamId: 5,
+      };
+
+      mockPrismaService.user.create.mockResolvedValue(expectedResult);
+
+      const result = await controller.create(dto);
+
+      expect(result).toEqual(expectedResult);
+      expect(mockPrismaService.user.create).toHaveBeenCalledWith({
+        data: {
+          username: dto.username,
+          cognitoId: dto.cognitoId,
+          profilePictureUrl: dto.profilePictureUrl,
+          teamId: 5,
         },
       });
     });

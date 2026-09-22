@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  HttpCode,
 } from "@nestjs/common";
 import { ApiTags, ApiBearerAuth, ApiQuery } from "@nestjs/swagger";
 import { UsersService } from "./users.service";
@@ -23,6 +24,7 @@ export class UsersController {
 
   @Public()
   @Post()
+  @HttpCode(201)
   async create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }

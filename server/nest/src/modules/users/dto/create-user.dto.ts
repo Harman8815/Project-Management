@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from "class-validator";
+import { IsInt, IsOptional, IsString } from "class-validator";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateUserDto {
@@ -14,4 +14,9 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   profilePictureUrl?: string;
+
+  @ApiPropertyOptional({ example: 1 })
+  @IsInt()
+  @IsOptional()
+  teamId?: number;
 }

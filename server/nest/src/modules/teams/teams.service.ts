@@ -19,21 +19,20 @@ export class TeamsService {
 
   async findAll(query: PaginationDto) {
     const { skip, take } = getPaginationParams(query);
-    const [data, total] = await Promise.all([
-      this.prisma.team.findMany({
-        skip,
-        take,
-        include: {
-          projectTeams: {
-            include: {
-              project: true,
-            },
+    const teams = await this.prisma.team.findMany({
+      skip,
+      take,
+      include: {
+        projectTeams: {
+          include: {
+            project: true,
           },
         },
-      }),
-      this.prisma.team.count(),
-    ]);
-    return { data, meta: { total, page: query.page || 1, limit: query.limit || 10 } };
+      },
+    });
+    const total = await this.prisma.team.count();
+    const teamsWithUsernames = await this.enrichWithUsernames(teams);
+    return { data: teamsWithUsernames, meta: { total, page: query.page || 1, limit: query.limit || 10 } };
   }
 
   async findOne(id: number) {
@@ -50,7 +49,7 @@ export class TeamsService {
     if (!team) {
       throw new NotFoundException(`Team with id ${id} not found`);
     }
-    return team;
+    return this.enrichTeamWithUsernames(team);
   }
 
   async update(id: number, updateTeamDto: UpdateTeamDto) {
@@ -76,5 +75,31 @@ export class TeamsService {
     return this.prisma.team.delete({
       where: { id },
     });
+  }
+
+  private async enrichWithUsernames(teams: any[]) {
+    return Promise.all(teams.map((team) => this.enrichTeamWithUsernames(team)));
+  }
+
+  private async enrichTeamWithUsernames(team: any) {
+    const [productOwner, projectManager] = await Promise.all([
+      team.productOwnerUserId
+        ? this.prisma.user.findUnique({
+            where: { userId: team.productOwnerUserId },
+            select: { username: true },
+          })
+        : null,
+      team.projectManagerUserId
+        ? this.prisma.user.findUnique({
+            where: { userId: team.projectManagerUserId },
+            select: { username: true },
+          })
+        : null,
+    ]);
+    return {
+      ...team,
+      productOwnerUsername: productOwner?.username ?? null,
+      projectManagerUsername: projectManager?.username ?? null,
+    };
   }
 }

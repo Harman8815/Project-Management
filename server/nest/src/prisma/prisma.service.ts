@@ -13,4 +13,12 @@ export class PrismaService
   async onModuleDestroy() {
     await this.$disconnect();
   }
+
+  async transaction<T>(
+    fn: (prisma: PrismaClient) => Promise<T>,
+  ): Promise<T> {
+    return (this as unknown as PrismaClient).$transaction(
+      fn as any,
+    ) as Promise<T>;
+  }
 }
