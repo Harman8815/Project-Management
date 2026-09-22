@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
 import { CreateMilestoneDto, UpdateMilestoneDto } from "./dto/create-milestone.dto";
 import { getPaginationParams } from "../../common/utils/pagination.util";
@@ -8,8 +8,17 @@ import { PaginationDto } from "../../common/dto/pagination.dto";
 export class MilestonesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createMilestoneDto: CreateMilestoneDto) {
+  async create(createMilestoneDto: CreateMilestoneDto, actorId?: number) {
     await this.ensureProjectExists(createMilestoneDto.projectId);
+    
+    // Check if user has access to the project
+    if (actorId) {
+      const hasAccess = await this.checkUserAccess(actorId, createMilestoneDto.projectId, ["ADMIN", "OWNER", "MANAGER"]);
+      if (!hasAccess) {
+        throw new ForbiddenException("You do not have permission to create milestones");
+      }
+    }
+
     return this.prisma.milestone.create({
       data: {
         name: createMilestoneDto.name,
@@ -27,12 +36,20 @@ export class MilestonesService {
     });
   }
 
-  async findAll(query: PaginationDto & { projectId?: number }) {
+  async findAll(query: PaginationDto & { projectId?: number }, userId?: number) {
     const { skip, take } = getPaginationParams(query);
 
     const where: any = {};
     if (query.projectId) {
       where.projectId = Number(query.projectId);
+      
+      // Check if user has access to the project
+      if (userId) {
+        const hasAccess = await this.checkUserAccess(userId, Number(query.projectId));
+        if (!hasAccess) {
+          throw new ForbiddenException("You do not have access to this project");
+        }
+      }
     }
 
     const [data, total] = await Promise.all([
@@ -50,7 +67,7 @@ export class MilestonesService {
     return { data, meta: { total, page: query.page || 1, limit: query.limit || 10 } };
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, userId?: number) {
     const milestone = await this.prisma.milestone.findUnique({
       where: { id },
       include: {
@@ -61,16 +78,33 @@ export class MilestonesService {
     if (!milestone) {
       throw new NotFoundException(`Milestone with id ${id} not found`);
     }
+
+    // Check if user has access to the project
+    if (userId) {
+      const hasAccess = await this.checkUserAccess(userId, milestone.projectId);
+      if (!hasAccess) {
+        throw new ForbiddenException("You do not have access to this project");
+      }
+    }
+
     return milestone;
   }
 
-  async getCompletion(id: number) {
+  async getCompletion(id: number, userId?: number) {
     const milestone = await this.prisma.milestone.findUnique({
       where: { id },
       include: { tasks: true },
     });
     if (!milestone) {
       throw new NotFoundException(`Milestone with id ${id} not found`);
+    }
+
+    // Check if user has access to the project
+    if (userId) {
+      const hasAccess = await this.checkUserAccess(userId, milestone.projectId);
+      if (!hasAccess) {
+        throw new ForbiddenException("You do not have access to this project");
+      }
     }
 
     const totalTasks = milestone.tasks.length;
@@ -88,13 +122,22 @@ export class MilestonesService {
     };
   }
 
-  async update(id: number, updateMilestoneDto: UpdateMilestoneDto) {
+  async update(id: number, updateMilestoneDto: UpdateMilestoneDto, actorId?: number) {
     const milestone = await this.prisma.milestone.findUnique({
       where: { id },
     });
     if (!milestone) {
       throw new NotFoundException(`Milestone with id ${id} not found`);
     }
+
+    // Check if user has access to the project
+    if (actorId) {
+      const hasAccess = await this.checkUserAccess(actorId, milestone.projectId, ["ADMIN", "OWNER", "MANAGER"]);
+      if (!hasAccess) {
+        throw new ForbiddenException("You do not have permission to update milestones");
+      }
+    }
+
     return this.prisma.milestone.update({
       where: { id },
       data: {
@@ -112,16 +155,38 @@ export class MilestonesService {
     });
   }
 
-  async remove(id: number) {
+  async remove(id: number, actorId?: number) {
     const milestone = await this.prisma.milestone.findUnique({
       where: { id },
     });
     if (!milestone) {
       throw new NotFoundException(`Milestone with id ${id} not found`);
     }
+
+    // Check if user has access to the project
+    if (actorId) {
+      const hasAccess = await this.checkUserAccess(actorId, milestone.projectId, ["ADMIN", "OWNER"]);
+      if (!hasAccess) {
+        throw new ForbiddenException("You do not have permission to delete milestones");
+      }
+    }
+
     return this.prisma.milestone.delete({
       where: { id },
     });
+  }
+
+  private async checkUserAccess(userId: number, projectId: number, requiredRoles: string[] = []): Promise<boolean> {
+    const membership = await this.prisma.projectMembership.findFirst({
+      where: { userId, projectId, status: "ACTIVE" },
+    });
+    if (!membership) {
+      return false;
+    }
+    if (requiredRoles.length > 0) {
+      return requiredRoles.includes(membership.role);
+    }
+    return true;
   }
 
   private async ensureProjectExists(projectId: number) {

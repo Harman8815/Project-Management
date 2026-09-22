@@ -130,7 +130,7 @@ export class ProjectMembershipsService {
     });
   }
 
-  async findAll(query: PaginationDto & { projectId?: number; search?: string }) {
+  async findAll(query: PaginationDto & { projectId?: number; search?: string }, userId?: number) {
     const { skip, take } = getPaginationParams(query);
 
     const where: any = {};
@@ -139,6 +139,15 @@ export class ProjectMembershipsService {
     }
     if (query.projectId) {
       where.projectId = Number(query.projectId);
+    }
+
+    // If userId is provided, only return memberships for projects the user has access to
+    if (userId) {
+      const userProjectIds = await this.prisma.projectMembership.findMany({
+        where: { userId, status: "ACTIVE" },
+        select: { projectId: true },
+      });
+      where.projectId = { in: userProjectIds.map(m => m.projectId) };
     }
 
     const [data, total] = await Promise.all([
@@ -160,7 +169,7 @@ export class ProjectMembershipsService {
     };
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, userId?: number) {
     const membership = await this.prisma.projectMembership.findUnique({
       where: { id },
       include: {
@@ -174,13 +183,30 @@ export class ProjectMembershipsService {
         `ProjectMembership with id ${id} not found`,
       );
     }
+
+    // Check if user has access to the project
+    if (userId) {
+      const hasAccess = await this.checkUserAccess(userId, membership.projectId);
+      if (!hasAccess) {
+        throw new ForbiddenException("You do not have access to this project");
+      }
+    }
+
     return membership;
   }
 
-  async findByProject(projectId: number, query: PaginationDto) {
+  async findByProject(projectId: number, query: PaginationDto, userId?: number) {
     const { skip, take } = getPaginationParams(query);
 
     await this.ensureProjectExists(projectId);
+
+    // Check if user has access to the project
+    if (userId) {
+      const hasAccess = await this.checkUserAccess(userId, projectId);
+      if (!hasAccess) {
+        throw new ForbiddenException("You do not have access to this project");
+      }
+    }
 
     const [data, total] = await Promise.all([
       this.prisma.projectMembership.findMany({
