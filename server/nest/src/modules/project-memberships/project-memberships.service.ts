@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
 import { CreateProjectMembershipDto } from "./dto/create-project-membership.dto";
@@ -13,23 +14,53 @@ import { PaginationDto } from "../../common/dto/pagination.dto";
 export class ProjectMembershipsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createProjectMembershipDto: CreateProjectMembershipDto) {
+  async create(
+    createProjectMembershipDto: CreateProjectMembershipDto,
+    requestingUserId?: number,
+  ) {
     await this.ensureProjectExists(createProjectMembershipDto.projectId);
     await this.ensureUserExists(createProjectMembershipDto.userId);
 
-    return this.prisma.projectMembership.create({
-      data: {
-        projectId: createProjectMembershipDto.projectId,
-        userId: createProjectMembershipDto.userId,
-        role: createProjectMembershipDto.role || "MEMBER",
-        status: createProjectMembershipDto.status || "ACTIVE",
-        invitedById: createProjectMembershipDto.invitedById,
-      },
-      include: {
-        user: true,
-        project: true,
-        invitedBy: true,
-      },
+    if (requestingUserId) {
+      const canManage = await this.checkUserAccess(
+        requestingUserId,
+        createProjectMembershipDto.projectId,
+        ["OWNER", "MANAGER"],
+      );
+      if (!canManage) {
+        throw new ForbiddenException(
+          "You do not have permission to manage project memberships",
+        );
+      }
+    }
+
+    return this.prisma.$transaction(async (prisma) => {
+      const existing = await prisma.projectMembership.findFirst({
+        where: {
+          projectId: createProjectMembershipDto.projectId,
+          userId: createProjectMembershipDto.userId,
+        },
+      });
+      if (existing) {
+        throw new BadRequestException(
+          "User is already a member of this project",
+        );
+      }
+
+      return prisma.projectMembership.create({
+        data: {
+          projectId: createProjectMembershipDto.projectId,
+          userId: createProjectMembershipDto.userId,
+          role: createProjectMembershipDto.role || "MEMBER",
+          status: createProjectMembershipDto.status || "ACTIVE",
+          invitedById: createProjectMembershipDto.invitedById,
+        },
+        include: {
+          user: true,
+          project: true,
+          invitedBy: true,
+        },
+      });
     });
   }
 
@@ -48,28 +79,54 @@ export class ProjectMembershipsService {
 
     await this.ensureProjectExists(projectId);
 
-    const existing = await this.prisma.projectMembership.findFirst({
-      where: { projectId, userId: user.userId },
-    });
-    if (existing) {
-      throw new BadRequestException(
-        `User ${user.username} is already a member of this project`,
+    if (invitedById) {
+      const canManage = await this.checkUserAccess(
+        invitedById,
+        projectId,
+        ["OWNER", "MANAGER"],
       );
+      if (!canManage) {
+        throw new ForbiddenException(
+          "You do not have permission to invite members",
+        );
+      }
     }
 
-    return this.prisma.projectMembership.create({
-      data: {
-        projectId,
-        userId: user.userId,
-        role,
-        status: "INVITED",
-        invitedById,
-      },
-      include: {
-        user: true,
-        project: true,
-        invitedBy: true,
-      },
+    return this.prisma.$transaction(async (prisma) => {
+      const existing = await prisma.projectMembership.findFirst({
+        where: { projectId, userId: user.userId },
+      });
+      if (existing) {
+        throw new BadRequestException(
+          `User ${user.username} is already a member of this project`,
+        );
+      }
+
+      const membership = await prisma.projectMembership.create({
+        data: {
+          projectId,
+          userId: user.userId,
+          role,
+          status: "INVITED",
+          invitedById,
+        },
+        include: {
+          user: true,
+          project: true,
+          invitedBy: true,
+        },
+      });
+
+      await prisma.notification.create({
+        data: {
+          userId: user.userId,
+          type: "INVITATION",
+          title: `You've been invited to a project`,
+          message: `You've been invited to join the project as a ${role}`,
+        },
+      });
+
+      return membership;
     });
   }
 
@@ -169,6 +226,7 @@ export class ProjectMembershipsService {
   async update(
     id: number,
     updateProjectMembershipDto: UpdateProjectMembershipDto,
+    requestingUserId?: number,
   ) {
     const membership = await this.prisma.projectMembership.findUnique({
       where: { id },
@@ -178,6 +236,20 @@ export class ProjectMembershipsService {
         `ProjectMembership with id ${id} not found`,
       );
     }
+
+    if (requestingUserId) {
+      const canManage = await this.checkUserAccess(
+        requestingUserId,
+        membership.projectId,
+        ["OWNER", "MANAGER"],
+      );
+      if (!canManage) {
+        throw new ForbiddenException(
+          "You do not have permission to update memberships",
+        );
+      }
+    }
+
     return this.prisma.projectMembership.update({
       where: { id },
       data: updateProjectMembershipDto,
@@ -189,7 +261,7 @@ export class ProjectMembershipsService {
     });
   }
 
-  async remove(id: number) {
+  async remove(id: number, requestingUserId?: number) {
     const membership = await this.prisma.projectMembership.findUnique({
       where: { id },
     });
@@ -198,6 +270,20 @@ export class ProjectMembershipsService {
         `ProjectMembership with id ${id} not found`,
       );
     }
+
+    if (requestingUserId && requestingUserId !== membership.userId) {
+      const canManage = await this.checkUserAccess(
+        requestingUserId,
+        membership.projectId,
+        ["OWNER", "MANAGER"],
+      );
+      if (!canManage) {
+        throw new ForbiddenException(
+          "You do not have permission to remove members",
+        );
+      }
+    }
+
     return this.prisma.projectMembership.delete({
       where: { id },
     });

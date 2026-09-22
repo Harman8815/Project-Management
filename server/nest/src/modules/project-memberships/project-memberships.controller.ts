@@ -17,6 +17,7 @@ import {
 import { UpdateProjectMembershipDto } from "./dto/update-project-membership.dto";
 import { PaginationDto } from "../../common/dto/pagination.dto";
 import { FilterSortDto } from "../../common/dto/filter-sort.dto";
+import { CurrentUser } from "../../common/decorators/current-user.decorator";
 
 @ApiTags("project-memberships")
 @ApiBearerAuth()
@@ -27,18 +28,26 @@ export class ProjectMembershipsController {
   ) {}
 
   @Post()
-  async create(@Body() createProjectMembershipDto: CreateProjectMembershipDto) {
-    return this.projectMembershipsService.create(createProjectMembershipDto);
+  async create(
+    @Body() createProjectMembershipDto: CreateProjectMembershipDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.projectMembershipsService.create(
+      createProjectMembershipDto,
+      user?.userId,
+    );
   }
 
   @Post("invite")
-  async invite(@Body() inviteDto: InviteProjectMemberDto) {
-    const invitedBy = 1;
+  async invite(
+    @Body() inviteDto: InviteProjectMemberDto,
+    @CurrentUser() user: any,
+  ) {
     return this.projectMembershipsService.invite(
       inviteDto.projectId,
       inviteDto.cognitoId,
       inviteDto.role,
-      invitedBy,
+      user?.userId,
     );
   }
 
@@ -85,15 +94,20 @@ export class ProjectMembershipsController {
   async update(
     @Param("id") id: string,
     @Body() updateProjectMembershipDto: UpdateProjectMembershipDto,
+    @CurrentUser() user: any,
   ) {
     return this.projectMembershipsService.update(
       Number(id),
       updateProjectMembershipDto,
+      user?.userId,
     );
   }
 
   @Delete(":id")
-  async remove(@Param("id") id: string) {
-    return this.projectMembershipsService.remove(Number(id));
+  async remove(
+    @Param("id") id: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.projectMembershipsService.remove(Number(id), user?.userId);
   }
 }

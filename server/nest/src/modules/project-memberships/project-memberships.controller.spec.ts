@@ -18,6 +18,8 @@ describe("ProjectMembershipsController", () => {
     },
     project: { findUnique: jest.fn() },
     user: { findUnique: jest.fn() },
+    notification: { create: jest.fn() },
+    $transaction: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -59,22 +61,41 @@ describe("ProjectMembershipsController", () => {
 
       mockPrismaService.project.findUnique.mockResolvedValue({ id: 1 });
       mockPrismaService.user.findUnique.mockResolvedValue({ userId: 1 });
-      mockPrismaService.projectMembership.create.mockResolvedValue(
-        expectedResult,
+      mockPrismaService.projectMembership.findFirst.mockResolvedValue({ role: "OWNER" });
+
+      const mockTxPrisma = {
+        projectMembership: {
+          findFirst: jest.fn().mockResolvedValue(null),
+          create: jest.fn().mockResolvedValue(expectedResult),
+        },
+      };
+      mockPrismaService.$transaction.mockImplementation(
+        async (fn: any) => fn(mockTxPrisma),
       );
 
-      const result = await controller.create(createDto);
+      const result = await controller.create(createDto, { userId: 1 });
 
       expect(result).toEqual(expectedResult);
+    });
+
+    it("should throw ForbiddenException when user lacks permission", async () => {
+      const createDto = { projectId: 1, userId: 1 };
+
+      mockPrismaService.project.findUnique.mockResolvedValue({ id: 1 });
+      mockPrismaService.user.findUnique.mockResolvedValue({ userId: 1 });
+      mockPrismaService.projectMembership.findFirst.mockResolvedValue(null);
+
+      await expect(controller.create(createDto, { userId: 999 })).rejects.toThrow(
+        "do not have permission",
+      );
     });
 
     it("should throw NotFoundException when project does not exist", async () => {
       const createDto = { projectId: 999, userId: 1 };
 
       mockPrismaService.project.findUnique.mockResolvedValue(null);
-      mockPrismaService.user.findUnique.mockResolvedValue({ userId: 1 });
 
-      await expect(controller.create(createDto)).rejects.toThrow(
+      await expect(controller.create(createDto, { userId: 1 })).rejects.toThrow(
         "Project with id 999 not found",
       );
     });
@@ -86,7 +107,6 @@ describe("ProjectMembershipsController", () => {
         projectId: 1,
         cognitoId: "123e4567-e89b-12d3-a456-426614174001",
         role: "MEMBER",
-        invitedById: 1,
       };
 
       const user = { userId: 1, username: "testuser" };
@@ -102,12 +122,20 @@ describe("ProjectMembershipsController", () => {
 
       mockPrismaService.user.findUnique.mockResolvedValue(user);
       mockPrismaService.project.findUnique.mockResolvedValue({ id: 1 });
-      mockPrismaService.projectMembership.findFirst.mockResolvedValue(null);
-      mockPrismaService.projectMembership.create.mockResolvedValue(
-        expectedResult,
+      mockPrismaService.projectMembership.findFirst.mockResolvedValue({ role: "OWNER" });
+
+      const mockTxPrisma = {
+        projectMembership: {
+          findFirst: jest.fn().mockResolvedValue(null),
+          create: jest.fn().mockResolvedValue(expectedResult),
+        },
+        notification: { create: jest.fn().mockResolvedValue({ id: 1 }) },
+      };
+      mockPrismaService.$transaction.mockImplementation(
+        async (fn: any) => fn(mockTxPrisma),
       );
 
-      const result = await controller.invite(inviteDto);
+      const result = await controller.invite(inviteDto, { userId: 1 });
 
       expect(result).toEqual(expectedResult);
     });
@@ -121,7 +149,7 @@ describe("ProjectMembershipsController", () => {
 
       mockPrismaService.user.findUnique.mockResolvedValue(null);
 
-      await expect(controller.invite(inviteDto)).rejects.toThrow(
+      await expect(controller.invite(inviteDto, { userId: 1 })).rejects.toThrow(
         "User with cognitoId non-existent-id not found",
       );
     });
@@ -136,13 +164,33 @@ describe("ProjectMembershipsController", () => {
       const user = { userId: 1, username: "testuser" };
       mockPrismaService.user.findUnique.mockResolvedValue(user);
       mockPrismaService.project.findUnique.mockResolvedValue({ id: 1 });
-      mockPrismaService.projectMembership.findFirst.mockResolvedValue({
-        id: 1,
-        userId: 1,
-      });
+      mockPrismaService.projectMembership.findFirst
+        .mockResolvedValue({ role: "OWNER" });
+      mockPrismaService.$transaction.mockImplementation(async (fn: any) =>
+        fn({
+          projectMembership: { findFirst: jest.fn().mockResolvedValue({ id: 1, userId: 1 }) },
+        }),
+      );
 
-      await expect(controller.invite(inviteDto)).rejects.toThrow(
+      await expect(controller.invite(inviteDto, { userId: 1 })).rejects.toThrow(
         "is already a member",
+      );
+    });
+
+    it("should throw ForbiddenException when inviter lacks permission", async () => {
+      const inviteDto = {
+        projectId: 1,
+        cognitoId: "123e4567-e89b-12d3-a456-426614174001",
+        role: "MEMBER",
+      };
+
+      const user = { userId: 1, username: "testuser" };
+      mockPrismaService.user.findUnique.mockResolvedValue(user);
+      mockPrismaService.project.findUnique.mockResolvedValue({ id: 1 });
+      mockPrismaService.projectMembership.findFirst.mockResolvedValue(null);
+
+      await expect(controller.invite(inviteDto, { userId: 999 })).rejects.toThrow(
+        "do not have permission",
       );
     });
   });
@@ -245,7 +293,7 @@ describe("ProjectMembershipsController", () => {
         expectedResult,
       );
 
-      const result = await controller.update("1", updateDto);
+      const result = await controller.update("1", updateDto, 1);
 
       expect(result).toEqual(expectedResult);
     });
@@ -255,12 +303,13 @@ describe("ProjectMembershipsController", () => {
     it("should remove a membership", async () => {
       mockPrismaService.projectMembership.findUnique.mockResolvedValue({
         id: 1,
+        userId: 1,
       });
       mockPrismaService.projectMembership.delete.mockResolvedValue({
         id: 1,
       });
 
-      const result = await controller.remove("1");
+      const result = await controller.remove("1", 1);
 
       expect(result).toEqual({ id: 1 });
     });
@@ -268,7 +317,7 @@ describe("ProjectMembershipsController", () => {
     it("should throw NotFoundException when membership does not exist", async () => {
       mockPrismaService.projectMembership.findUnique.mockResolvedValue(null);
 
-      await expect(controller.remove("999")).rejects.toThrow(
+      await expect(controller.remove("999", 1)).rejects.toThrow(
         "ProjectMembership with id 999 not found",
       );
     });
