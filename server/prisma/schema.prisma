@@ -73,6 +73,10 @@ model Project {
   organizationId Int?
   organization Organization? @relation(fields: [organizationId], references: [id])
   customFieldValues CustomFieldValue[]
+
+  @@index([status])
+  @@index([archived])
+  @@index([organizationId])
 }
 
 model ProjectTeam {
@@ -95,6 +99,12 @@ model ProjectMembership {
   invitedBy   User?    @relation("InvitedBy", fields: [invitedById], references: [userId])
   project     Project  @relation(fields: [projectId], references: [id])
   user        User     @relation(fields: [userId], references: [userId])
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([status])
+  @@index([projectId, status])
+  @@unique([userId, projectId])
 }
 
 model ProjectTemplate {
@@ -131,10 +141,10 @@ model Task {
   assignedUserId            Int?
   parentId                  Int?
   milestoneId               Int?
-   sprintId                  Int?
-   createdAt                 DateTime @default(now())
-   updatedAt                 DateTime @updatedAt
-   activityLogs              ActivityLog[]
+  sprintId                  Int?
+  createdAt                 DateTime            @default(now())
+  updatedAt                 DateTime         @updatedAt
+  activityLogs              ActivityLog[]
   attachments               Attachment[]
   comments                  Comment[]
   sprint                    Sprint?          @relation("SprintTasks", fields: [sprintId], references: [id])
@@ -150,6 +160,19 @@ model Task {
   history                   TaskHistory[]
   watchers                  TaskWatcher[]
   customFieldValues         CustomFieldValue[]
+
+  @@index([projectId])
+  @@index([status])
+  @@index([priority])
+  @@index([assignedUserId])
+  @@index([authorUserId])
+  @@index([projectId, status])
+  @@index([projectId, assignedUserId])
+  @@index([milestoneId])
+  @@index([sprintId])
+  @@index([parentId])
+  @@index([dueDate])
+  @@index([status, priority])
 }
 
 model Milestone {
@@ -199,6 +222,8 @@ model TaskDependency {
   blockedById Int
   blockedBy   Task @relation("BlockerTask", fields: [blockedById], references: [id])
   task        Task @relation("BlockedTask", fields: [taskId], references: [id])
+
+  @@unique([taskId, blockedById])
 }
 
 model TaskWatcher {
