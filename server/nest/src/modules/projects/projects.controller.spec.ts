@@ -18,6 +18,10 @@ describe("ProjectsController", () => {
     projectMembership: {
       findFirst: jest.fn(),
     },
+    activityLog: {
+      create: jest.fn(),
+    },
+    $transaction: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -54,6 +58,11 @@ describe("ProjectsController", () => {
       };
 
       mockPrismaService.project.create.mockResolvedValue(expectedResult);
+      mockPrismaService.activityLog.create.mockResolvedValue({ id: 1 });
+
+      mockPrismaService.$transaction.mockImplementation(
+        async (fn: any) => fn(mockPrismaService),
+      );
 
       const result = await controller.create(createProjectDto);
 
@@ -123,11 +132,19 @@ describe("ProjectsController", () => {
       mockPrismaService.project.findUnique.mockResolvedValue({ id: 1, status: "PLANNED" });
       mockPrismaService.project.update.mockResolvedValue({ id: 1, status: "ACTIVE" });
 
+      mockPrismaService.$transaction.mockImplementation(
+        async (fn: any) => fn(mockPrismaService),
+      );
+
       await expect(controller.update("1", { status: "ACTIVE" })).resolves.toEqual({ id: 1, status: "ACTIVE" });
     });
 
     it("rejects an invalid project status transition", async () => {
       mockPrismaService.project.findUnique.mockResolvedValue({ id: 1, status: "COMPLETED" });
+
+      mockPrismaService.$transaction.mockImplementation(
+        async (fn: any) => fn(mockPrismaService),
+      );
 
       await expect(controller.update("1", { status: "ACTIVE" })).rejects.toThrow("Invalid project status transition");
     });
@@ -140,6 +157,10 @@ describe("ProjectsController", () => {
 
       mockPrismaService.project.findUnique.mockResolvedValue(mockProject);
       mockPrismaService.project.update.mockResolvedValue(expectedResult);
+
+      mockPrismaService.$transaction.mockImplementation(
+        async (fn: any) => fn(mockPrismaService),
+      );
 
       const result = await controller.archive("1");
 
@@ -166,6 +187,10 @@ describe("ProjectsController", () => {
 
       mockPrismaService.project.findUnique.mockResolvedValue(mockProject);
       mockPrismaService.project.update.mockResolvedValue(expectedResult);
+
+      mockPrismaService.$transaction.mockImplementation(
+        async (fn: any) => fn(mockPrismaService),
+      );
 
       const result = await controller.restore("1");
 
