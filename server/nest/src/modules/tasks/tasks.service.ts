@@ -17,34 +17,50 @@ export class TasksService {
     private readonly workflowService: WorkflowService,
   ) {}
 
-  async create(createTaskDto: CreateTaskDto) {
-    return this.prisma.task.create({
-      data: {
-        identifier: createTaskDto.identifier,
-        title: createTaskDto.title,
-        description: createTaskDto.description,
-        status: createTaskDto.status,
-        priority: createTaskDto.priority,
-        severity: createTaskDto.severity,
-        type: createTaskDto.type || "TASK",
-        tags: createTaskDto.tags,
-        startDate: createTaskDto.startDate,
-        dueDate: createTaskDto.dueDate,
-        points: createTaskDto.points,
-        estimateHours: createTaskDto.estimateHours,
-        actualHours: createTaskDto.actualHours,
-        acceptanceCriteria: createTaskDto.acceptanceCriteria,
-        parentId: createTaskDto.parentId,
-        projectId: createTaskDto.projectId,
-        authorUserId: createTaskDto.authorUserId,
-        assignedUserId: createTaskDto.assignedUserId,
-      },
-      include: {
-        author: true,
-        assignee: true,
-        children: true,
-        watchers: { include: { user: true } },
-      },
+  async create(createTaskDto: CreateTaskDto, actorId?: number) {
+    return this.prisma.$transaction(async (prisma) => {
+      const task = await prisma.task.create({
+        data: {
+          identifier: createTaskDto.identifier,
+          title: createTaskDto.title,
+          description: createTaskDto.description,
+          status: createTaskDto.status,
+          priority: createTaskDto.priority,
+          severity: createTaskDto.severity,
+          type: createTaskDto.type || "TASK",
+          tags: createTaskDto.tags,
+          startDate: createTaskDto.startDate,
+          dueDate: createTaskDto.dueDate,
+          points: createTaskDto.points,
+          estimateHours: createTaskDto.estimateHours,
+          actualHours: createTaskDto.actualHours,
+          acceptanceCriteria: createTaskDto.acceptanceCriteria,
+          parentId: createTaskDto.parentId,
+          projectId: createTaskDto.projectId,
+          authorUserId: createTaskDto.authorUserId,
+          assignedUserId: createTaskDto.assignedUserId,
+        },
+        include: {
+          author: true,
+          assignee: true,
+          children: true,
+          watchers: { include: { user: true } },
+        },
+      });
+
+      if (actorId) {
+        await prisma.activityLog.create({
+          data: {
+            eventType: "TASK_CREATED",
+            message: `Task "${task.title}" created`,
+            actorId,
+            projectId: task.projectId,
+            taskId: task.id,
+          },
+        });
+      }
+
+      return task;
     });
   }
 
@@ -114,7 +130,7 @@ export class TasksService {
     return task;
   }
 
-  async updateStatus(id: number, updateTaskStatusDto: UpdateTaskStatusDto) {
+  async updateStatus(id: number, updateTaskStatusDto: UpdateTaskStatusDto, actorId?: number) {
     const task = await this.prisma.task.findUnique({
       where: { id },
     });
@@ -128,17 +144,43 @@ export class TasksService {
       task.projectId,
     );
 
-    return this.prisma.task.update({
-      where: { id },
-      data: { status: updateTaskStatusDto.status },
-      include: {
-        author: true,
-        assignee: true,
-      },
+    return this.prisma.$transaction(async (prisma) => {
+      const updatedTask = await prisma.task.update({
+        where: { id },
+        data: { status: updateTaskStatusDto.status },
+        include: {
+          author: true,
+          assignee: true,
+        },
+      });
+
+      await prisma.taskHistory.create({
+        data: {
+          taskId: id,
+          field: "status",
+          oldValue: task.status,
+          newValue: updateTaskStatusDto.status,
+          changedById: actorId,
+        },
+      });
+
+      if (actorId) {
+        await prisma.activityLog.create({
+          data: {
+            eventType: "TASK_STATUS_CHANGED",
+            message: `Task status changed from "${task.status}" to "${updateTaskStatusDto.status}"`,
+            actorId,
+            projectId: task.projectId,
+            taskId: id,
+          },
+        });
+      }
+
+      return updatedTask;
     });
   }
 
-  async update(id: number, updateTaskDto: UpdateTaskDto) {
+  async update(id: number, updateTaskDto: UpdateTaskDto, actorId?: number) {
     const task = await this.prisma.task.findUnique({
       where: { id },
     });

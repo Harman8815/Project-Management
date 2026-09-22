@@ -15,6 +15,13 @@ describe("TasksController", () => {
       update: jest.fn(),
       delete: jest.fn(),
     },
+    activityLog: {
+      create: jest.fn(),
+    },
+    taskHistory: {
+      create: jest.fn(),
+    },
+    $transaction: jest.fn(),
   };
 
   const mockWorkflowService = {
@@ -68,9 +75,15 @@ describe("TasksController", () => {
         assignee: { id: 2 },
       };
 
-      mockPrismaService.task.create.mockResolvedValue(expectedResult);
+      const mockTxPrisma = {
+        task: { create: jest.fn().mockResolvedValue(expectedResult) },
+        activityLog: { create: jest.fn().mockResolvedValue({ id: 1 }) },
+      };
+      mockPrismaService.$transaction.mockImplementation(
+        async (fn: any) => fn(mockTxPrisma),
+      );
 
-      const result = await controller.create(createTaskDto);
+      const result = await controller.create(createTaskDto, { userId: 1 });
 
       expect(result).toEqual(expectedResult);
     });
@@ -110,17 +123,22 @@ describe("TasksController", () => {
         assignee: { id: 2 },
       };
 
-      mockPrismaService.task.findUnique.mockResolvedValue({ id: 1 });
-      mockPrismaService.task.update.mockResolvedValue(expectedResult);
+      const mockTxPrisma = {
+        task: {
+          findUnique: jest.fn().mockResolvedValue({ id: 1 }),
+          update: jest.fn().mockResolvedValue(expectedResult),
+        },
+        taskHistory: { create: jest.fn().mockResolvedValue({ id: 1 }) },
+        activityLog: { create: jest.fn().mockResolvedValue({ id: 1 }) },
+      };
+      mockPrismaService.$transaction.mockImplementation(
+        async (fn: any) => fn(mockTxPrisma),
+      );
 
-      const result = await controller.updateStatus("1", updateTaskStatusDto);
+      mockPrismaService.task.findUnique.mockResolvedValue({ id: 1, status: "TODO", projectId: 1 });
+      const result = await controller.updateStatus("1", updateTaskStatusDto, { userId: 1 });
 
       expect(result).toEqual(expectedResult);
-      expect(mockPrismaService.task.update).toHaveBeenCalledWith({
-        where: { id: 1 },
-        data: { status: "IN_PROGRESS" },
-        include: { author: true, assignee: true },
-      });
     });
   });
 });

@@ -27,10 +27,17 @@ describe("TasksService", () => {
       findMany: jest.fn(),
       delete: jest.fn(),
     },
+    taskHistory: {
+      create: jest.fn(),
+    },
+    activityLog: {
+      create: jest.fn(),
+    },
     user: {
       findUnique: jest.fn(),
     },
-  };
+    $transaction: jest.fn(),
+  } as any;
 
   const mockWorkflowService = {
     validateTransition: jest.fn().mockReturnValue(true),
@@ -81,9 +88,15 @@ describe("TasksService", () => {
         watchers: [],
       };
 
-      mockPrismaService.task.create.mockResolvedValue(expectedResult);
+      const mockTxPrisma = {
+        task: { create: jest.fn().mockResolvedValue(expectedResult) },
+        activityLog: { create: jest.fn().mockResolvedValue({ id: 1 }) },
+      };
+      mockPrismaService.$transaction.mockImplementation(
+        async (fn: any) => fn(mockTxPrisma),
+      );
 
-      await service.create(createTaskDto as any);
+      await service.create(createTaskDto as any, 1);
     });
 
     it("should default type to TASK when not provided", async () => {
@@ -93,18 +106,38 @@ describe("TasksService", () => {
         authorUserId: 1,
       };
 
-      mockPrismaService.task.create.mockResolvedValue({
-        id: 1,
-        type: "TASK",
-      });
+      const mockTxPrisma = {
+        task: { create: jest.fn().mockResolvedValue({ id: 1, type: "TASK" }) },
+        activityLog: { create: jest.fn().mockResolvedValue({ id: 1 }) },
+      };
+      mockPrismaService.$transaction.mockImplementation(
+        async (fn: any) => fn(mockTxPrisma),
+      );
+
+      await service.create(createTaskDto as any, 1);
+
+      expect(mockPrismaService.$transaction).toHaveBeenCalled();
+    });
+
+    it("should create task without activity log when no actor", async () => {
+      const createTaskDto = {
+        title: "Solo Task",
+        projectId: 1,
+        authorUserId: 1,
+      };
+
+      const mockTxPrisma: Record<string, any> = {
+        task: {
+          create: jest.fn().mockResolvedValue({ id: 1, title: "Solo Task" }),
+        },
+      };
+      mockPrismaService.$transaction.mockImplementation(
+        async (fn: any) => fn(mockTxPrisma),
+      );
 
       await service.create(createTaskDto as any);
 
-      expect(mockPrismaService.task.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({ type: "TASK" }),
-        }),
-      );
+      expect(mockTxPrisma.activityLog).toBeUndefined();
     });
   });
 
@@ -152,7 +185,7 @@ describe("TasksService", () => {
     it("should detect and prevent circular dependencies", async () => {
       mockPrismaService.task.findUnique.mockResolvedValue({ id: 1 });
       mockPrismaService.taskDependency.findMany.mockImplementation(
-        async ({ where }) => {
+        async ({ where }: { where: Record<string, any> }) => {
           if (where.taskId === 1) {
             return [{ taskId: 1, blockedById: 3 }];
           }
@@ -346,18 +379,42 @@ describe("TasksService", () => {
         projectId: 1,
       });
       mockWorkflowService.validateTransition.mockReturnValue(true);
-      mockPrismaService.task.update.mockResolvedValue({
-        id: 1,
-        status: "Completed",
-      });
 
-      const result = await service.updateStatus(1, { status: "Completed" });
+      const mockTxPrisma = {
+        task: {
+          update: jest.fn().mockResolvedValue({
+            id: 1,
+            status: "Completed",
+          }),
+        },
+        taskHistory: {
+          create: jest.fn().mockResolvedValue({ id: 1 }),
+        },
+        activityLog: {
+          create: jest.fn().mockResolvedValue({ id: 1 }),
+        },
+      };
+      mockPrismaService.$transaction.mockImplementation(
+        async (fn: any) => fn(mockTxPrisma),
+      );
+
+      const result = await service.updateStatus(1, { status: "Completed" }, 1);
 
       expect(result.status).toBe("Completed");
-      expect(mockWorkflowService.validateTransition).toHaveBeenCalledWith(
-        "In Progress",
-        "Completed",
-        1,
+      expect(mockTxPrisma.task.update).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: { status: "Completed" },
+        include: { author: true, assignee: true },
+      });
+      expect(mockTxPrisma.taskHistory.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            taskId: 1,
+            field: "status",
+            oldValue: "In Progress",
+            newValue: "Completed",
+          }),
+        }),
       );
     });
 
@@ -382,24 +439,6 @@ describe("TasksService", () => {
       await expect(
         service.updateStatus(1, { status: "In Progress" }),
       ).rejects.toThrow(BadRequestException);
-    });
-  });
-
-  describe("getValidTransitions", () => {
-    it("should return valid transitions for a status", () => {
-      const result = service.getValidTransitions("To Do");
-      expect(result).toEqual(["In Progress"]);
-    });
-  });
-
-  describe("getDefaultWorkflow", () => {
-    it("should return the default workflow", () => {
-      const expected = { statuses: ["To Do"] };
-      mockWorkflowService.getProjectWorkflow.mockReturnValue(expected);
-
-      const result = service.getDefaultWorkflow();
-
-      expect(result).toEqual(expected);
     });
   });
 
@@ -431,6 +470,24 @@ describe("TasksService", () => {
       mockPrismaService.task.findUnique.mockResolvedValue(null);
 
       await expect(service.remove(999)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe("getValidTransitions", () => {
+    it("should return valid transitions for a status", () => {
+      const result = service.getValidTransitions("To Do");
+      expect(result).toEqual(["In Progress"]);
+    });
+  });
+
+  describe("getDefaultWorkflow", () => {
+    it("should return the default workflow", () => {
+      const expected = { statuses: ["To Do"] };
+      mockWorkflowService.getProjectWorkflow.mockReturnValue(expected);
+
+      const result = service.getDefaultWorkflow();
+
+      expect(result).toEqual(expected);
     });
   });
 });

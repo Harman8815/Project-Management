@@ -22,7 +22,7 @@ export class CreateTaskDto {
   @IsOptional()
   description?: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     enum: ["To Do", "In Progress", "In Review", "Completed", "Blocked"],
     default: "To Do",
   })
@@ -30,8 +30,9 @@ export class CreateTaskDto {
   @IsOptional()
   status?: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     enum: ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+    default: "MEDIUM",
   })
   @IsEnum(["LOW", "MEDIUM", "HIGH", "CRITICAL"])
   @IsOptional()

@@ -14,6 +14,7 @@ import { CreateTaskDto } from "./dto/create-task.dto";
 import { UpdateTaskDto } from "./dto/update-task.dto";
 import { UpdateTaskStatusDto } from "./dto/update-task-status.dto";
 import { FilterSortDto } from "../../common/dto/filter-sort.dto";
+import { CurrentUser } from "../../common/decorators/current-user.decorator";
 
 @ApiTags("tasks")
 @ApiBearerAuth()
@@ -22,8 +23,11 @@ export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Post()
-  async create(@Body() createTaskDto: CreateTaskDto) {
-    return this.tasksService.create(createTaskDto);
+  async create(
+    @Body() createTaskDto: CreateTaskDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.tasksService.create(createTaskDto, user?.userId);
   }
 
   @ApiQuery({ name: "projectId", required: true })
@@ -52,16 +56,18 @@ export class TasksController {
   async updateStatus(
     @Param("id") taskId: string,
     @Body() updateTaskStatusDto: UpdateTaskStatusDto,
+    @CurrentUser() user: any,
   ) {
-    return this.tasksService.updateStatus(Number(taskId), updateTaskStatusDto);
+    return this.tasksService.updateStatus(Number(taskId), updateTaskStatusDto, user?.userId);
   }
 
   @Patch(":id")
   async update(
     @Param("id") id: string,
     @Body() updateTaskDto: UpdateTaskDto,
+    @CurrentUser() user: any,
   ) {
-    return this.tasksService.update(Number(id), updateTaskDto);
+    return this.tasksService.update(Number(id), updateTaskDto, user?.userId);
   }
 
   @Delete(":id")
