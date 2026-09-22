@@ -1,16 +1,17 @@
 import { Button, Input, Textarea, Select } from "@/components/ui";
 import Modal from "@/components/Modal";
-import { useCreateProjectMutation } from "@/state/api";
-import React, { useState } from "react";
-import { formatISO } from "date-fns";
+import { useUpdateProjectMutation } from "@/state/api";
+import React, { useState, useEffect } from "react";
+import { formatISO, parseISO } from "date-fns";
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
+  project: any;
 };
 
-const ModalNewProject = ({ isOpen, onClose }: Props) => {
-  const [createProject, { isLoading }] = useCreateProjectMutation();
+const ModalEditProject = ({ isOpen, onClose, project }: Props) => {
+  const [updateProject, { isLoading }] = useUpdateProjectMutation();
   const [projectName, setProjectName] = useState("");
   const [projectKey, setProjectKey] = useState("");
   const [description, setDescription] = useState("");
@@ -19,6 +20,28 @@ const ModalNewProject = ({ isOpen, onClose }: Props) => {
   const [dueDate, setDueDate] = useState("");
   const [priority, setPriority] = useState("MEDIUM");
   const [objectives, setObjectives] = useState("");
+  const [status, setStatus] = useState("PLANNED");
+
+  useEffect(() => {
+    if (project) {
+      setProjectName(project.name || "");
+      setProjectKey(project.key || "");
+      setDescription(project.description || "");
+      setPriority(project.priority || "MEDIUM");
+      setObjectives(project.objectives || "");
+      setStatus(project.status || "PLANNED");
+      
+      if (project.startDate) {
+        setStartDate(parseISO(project.startDate).toISOString().split('T')[0]);
+      }
+      if (project.endDate) {
+        setEndDate(parseISO(project.endDate).toISOString().split('T')[0]);
+      }
+      if (project.dueDate) {
+        setDueDate(parseISO(project.dueDate).toISOString().split('T')[0]);
+      }
+    }
+  }, [project]);
 
   const handleSubmit = async () => {
     if (!projectName || !startDate || !endDate) return;
@@ -33,17 +56,19 @@ const ModalNewProject = ({ isOpen, onClose }: Props) => {
       representation: "complete",
     }) : undefined;
 
-    await createProject({
-      name: projectName,
-      key: projectKey || undefined,
-      description,
-      startDate: formattedStartDate,
-      endDate: formattedEndDate,
-      dueDate: formattedDueDate,
-      status: "PLANNED",
-      priority,
-      health: "ON_TRACK",
-      objectives,
+    await updateProject({
+      id: project.id,
+      updates: {
+        name: projectName,
+        key: projectKey || undefined,
+        description,
+        startDate: formattedStartDate,
+        endDate: formattedEndDate,
+        dueDate: formattedDueDate,
+        status,
+        priority,
+        objectives,
+      },
     }).then(() => {
       onClose();
     });
@@ -54,7 +79,7 @@ const ModalNewProject = ({ isOpen, onClose }: Props) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} name="Create New Project">
+    <Modal isOpen={isOpen} onClose={onClose} name="Edit Project">
       <form
         className="mt-4 space-y-6"
         onSubmit={(e) => {
@@ -113,28 +138,41 @@ const ModalNewProject = ({ isOpen, onClose }: Props) => {
             onChange={(e) => setDueDate(e.target.value)}
           />
         </div>
-        <Select
-          label="Priority"
-          value={priority}
-          onChange={(e) => setPriority(e.target.value)}
-        >
-          <option value="URGENT">Urgent</option>
-          <option value="HIGH">High</option>
-          <option value="MEDIUM">Medium</option>
-          <option value="LOW">Low</option>
-          <option value="BACKLOG">Backlog</option>
-        </Select>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-2">
+          <Select
+            label="Status"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+          >
+            <option value="PLANNED">Planned</option>
+            <option value="ACTIVE">Active</option>
+            <option value="ON_HOLD">On Hold</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="ARCHIVED">Archived</option>
+          </Select>
+          <Select
+            label="Priority"
+            value={priority}
+            onChange={(e) => setPriority(e.target.value)}
+          >
+            <option value="URGENT">Urgent</option>
+            <option value="HIGH">High</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="LOW">Low</option>
+            <option value="BACKLOG">Backlog</option>
+          </Select>
+        </div>
         <Button
           type="submit"
           variant="primary"
           disabled={!isFormValid() || isLoading}
           className="w-full"
         >
-          {isLoading ? "Creating..." : "Create Project"}
+          {isLoading ? "Updating..." : "Update Project"}
         </Button>
       </form>
     </Modal>
   );
 };
 
-export default ModalNewProject;
+export default ModalEditProject;

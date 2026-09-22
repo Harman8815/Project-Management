@@ -9,6 +9,7 @@ import {
   Search,
   Share2,
   Table,
+  LayoutDashboard,
 } from "lucide-react";
 import React, { useState } from "react";
 import ModalNewProject from "./ModalNewProject";
@@ -46,6 +47,12 @@ const ProjectHeader = ({ activeTab, setActiveTab, projectName = "Product Design 
       {/* TABS */}
       <div className="flex flex-wrap-reverse gap-2 border-y border-gray-200 pb-[8px] pt-2 dark:border-stroke-dark md:items-center">
         <div className="flex flex-1 items-center gap-2 md:gap-4">
+          <TabButton
+            name="Overview"
+            icon={<LayoutDashboard className="h-5 w-5" />}
+            setActiveTab={setActiveTab}
+            activeTab={activeTab}
+          />
           <TabButton
             name="Board"
             icon={<Grid3x3 className="h-5 w-5" />}

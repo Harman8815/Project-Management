@@ -1,7 +1,7 @@
 import React from "react";
 import { BorderRadiusToken, SpacingToken } from "@/styles/tokens";
 
-type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "danger";
+type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "danger" | "success";
 type ButtonSize = "sm" | "md" | "lg";
 
 interface ButtonProps
@@ -22,6 +22,8 @@ const variantClasses: Record<ButtonVariant, string> = {
     "text-gray-700 hover:bg-gray-100 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2",
   danger:
     "bg-red-600 text-white hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2",
+  success:
+    "bg-green-600 text-white hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {

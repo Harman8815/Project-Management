@@ -10,10 +10,12 @@ import Table from "../TableView";
 import ModalNewTask from "@/components/ModalNewTask";
 import { useGetProjectsQuery } from "@/state/api";
 import { useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const Project = () => {
   const params = useParams<{ id: string }>();
   const { id } = params;
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("Board");
   const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false);
   const { data: projects } = useGetProjectsQuery();
@@ -26,6 +28,14 @@ const Project = () => {
     { label: projectName },
   ];
 
+  const handleTabChange = (tab: string) => {
+    if (tab === "Overview") {
+      router.push(`/projects/${id}/overview`);
+    } else {
+      setActiveTab(tab);
+    }
+  };
+
   return (
     <div>
       <div className="p-4">
@@ -37,7 +47,7 @@ const Project = () => {
         />
         <ProjectHeader
           activeTab={activeTab}
-          setActiveTab={setActiveTab}
+          setActiveTab={handleTabChange}
           projectName={projectName}
         />
         {activeTab === "Board" && (

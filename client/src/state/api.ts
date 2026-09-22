@@ -3,10 +3,19 @@ import { fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
 
 export interface Project {
   id: number;
+  key?: string;
   name: string;
   description?: string;
   startDate?: string;
   endDate?: string;
+  dueDate?: string;
+  status?: string;
+  priority?: string;
+  health?: string;
+  objectives?: string;
+  archived?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export enum Priority {
@@ -68,10 +77,19 @@ export interface SearchResults {
 }
 
 export interface Team {
-  teamId: number;
+  id: number;
   teamName: string;
   productOwnerUserId?: number;
   projectManagerUserId?: number;
+  productOwnerUsername?: string;
+  projectManagerUsername?: string;
+  projectTeams?: Array<{
+    id: number;
+    project: {
+      id: number;
+      name: string;
+    };
+  }>;
 }
 
 export interface Organization {
@@ -135,6 +153,7 @@ export const api = createApi({
     }),
     getProjects: build.query<Project[], void>({
       query: () => "projects",
+      transformResponse: (response: { data: Project[]; meta: any }) => response.data,
       providesTags: ["Projects"],
     }),
     createProject: build.mutation<Project, Partial<Project>>({
@@ -142,6 +161,14 @@ export const api = createApi({
         url: "projects",
         method: "POST",
         body: project,
+      }),
+      invalidatesTags: ["Projects"],
+    }),
+    updateProject: build.mutation<Project, { id: number; updates: Partial<Project> }>({
+      query: ({ id, updates }) => ({
+        url: `projects/${id}`,
+        method: "PATCH",
+        body: updates,
       }),
       invalidatesTags: ["Projects"],
     }),
@@ -183,6 +210,7 @@ export const api = createApi({
     }),
     getTeams: build.query<Team[], void>({
       query: () => "teams",
+      transformResponse: (response: { data: Team[]; meta: any }) => response.data,
       providesTags: ["Teams"],
     }),
     search: build.query<SearchResults, string>({
@@ -232,6 +260,7 @@ export const api = createApi({
 export const {
   useGetProjectsQuery,
   useCreateProjectMutation,
+  useUpdateProjectMutation,
   useGetTasksQuery,
   useCreateTaskMutation,
   useUpdateTaskStatusMutation,
