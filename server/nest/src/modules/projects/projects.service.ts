@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException, ForbiddenException } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
 import { CreateProjectDto } from "./dto/create-project.dto";
 import { UpdateProjectDto } from "./dto/update-project.dto";
@@ -9,7 +9,7 @@ import { PaginationDto } from "../../common/dto/pagination.dto";
 export class ProjectsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createProjectDto: CreateProjectDto) {
+  async create(createProjectDto: CreateProjectDto, actorId?: number) {
     return this.prisma.$transaction(async (prisma) => {
       const project = await prisma.project.create({
         data: {
@@ -29,22 +29,54 @@ export class ProjectsService {
         },
       });
 
-      await prisma.activityLog.create({
-        data: {
-          eventType: "PROJECT_CREATED",
-          message: `Project "${project.name}" created`,
-          projectId: project.id,
-        },
-      });
+      // Add creator as project owner
+      if (actorId) {
+        await prisma.projectMembership.create({
+          data: {
+            userId: actorId,
+            projectId: project.id,
+            role: "OWNER",
+            status: "ACTIVE",
+          },
+        });
+
+        await prisma.activityLog.create({
+          data: {
+            eventType: "PROJECT_CREATED",
+            message: `Project "${project.name}" created`,
+            projectId: project.id,
+            actorId,
+          },
+        });
+      } else {
+        await prisma.activityLog.create({
+          data: {
+            eventType: "PROJECT_CREATED",
+            message: `Project "${project.name}" created`,
+            projectId: project.id,
+          },
+        });
+      }
 
       return project;
     });
   }
 
-  async findAll(query: PaginationDto) {
+  async findAll(query: PaginationDto, userId?: number) {
     const { skip, take } = getPaginationParams(query);
+    
+    const whereClause: any = {};
+    if (userId) {
+      const userMemberships = await this.prisma.projectMembership.findMany({
+        where: { userId, status: "ACTIVE" },
+        select: { projectId: true },
+      });
+      whereClause.id = { in: userMemberships.map(m => m.projectId) };
+    }
+
     const [data, total] = await Promise.all([
       this.prisma.project.findMany({
+        where: whereClause,
         skip,
         take,
         include: {
@@ -52,7 +84,7 @@ export class ProjectsService {
           projectTeams: true,
         },
       }),
-      this.prisma.project.count(),
+      this.prisma.project.count({ where: whereClause }),
     ]);
     return { data, meta: { total, page: query.page || 1, limit: query.limit || 10 } };
   }
@@ -71,7 +103,7 @@ export class ProjectsService {
     return project;
   }
 
-  async update(id: number, updateProjectDto: UpdateProjectDto) {
+  async update(id: number, updateProjectDto: UpdateProjectDto, actorId?: number) {
     return this.prisma.$transaction(async (prisma) => {
       const project = await prisma.project.findUnique({
         where: { id },
@@ -91,10 +123,24 @@ export class ProjectsService {
           throw new BadRequestException(`Invalid project status transition: ${project.status} -> ${updateProjectDto.status}`);
         }
       }
-      return prisma.project.update({
+      
+      const updatedProject = await prisma.project.update({
         where: { id },
         data: updateProjectDto,
       });
+
+      if (actorId) {
+        await prisma.activityLog.create({
+          data: {
+            eventType: "PROJECT_UPDATED",
+            message: `Project "${project.name}" updated`,
+            projectId: project.id,
+            actorId,
+          },
+        });
+      }
+
+      return updatedProject;
     });
   }
 
@@ -112,7 +158,7 @@ export class ProjectsService {
     });
   }
 
-  async archive(id: number) {
+  async archive(id: number, actorId?: number) {
     return this.prisma.$transaction(async (prisma) => {
       const project = await prisma.project.findUnique({
         where: { id },
@@ -120,13 +166,16 @@ export class ProjectsService {
       if (!project) {
         throw new NotFoundException(`Project with id ${id} not found`);
       }
+      
       await prisma.activityLog.create({
         data: {
           eventType: "PROJECT_ARCHIVED",
           message: `Project "${project.name}" archived`,
           projectId: project.id,
+          actorId,
         },
       });
+      
       return prisma.project.update({
         where: { id },
         data: { archived: true, status: "ARCHIVED" },
@@ -134,7 +183,7 @@ export class ProjectsService {
     });
   }
 
-  async restore(id: number) {
+  async restore(id: number, actorId?: number) {
     return this.prisma.$transaction(async (prisma) => {
       const project = await prisma.project.findUnique({
         where: { id, archived: true },
@@ -144,13 +193,16 @@ export class ProjectsService {
           `Archived project with id ${id} not found`,
         );
       }
+      
       await prisma.activityLog.create({
         data: {
           eventType: "PROJECT_RESTORED",
           message: `Project "${project.name}" restored`,
           projectId: project.id,
+          actorId,
         },
       });
+      
       return prisma.project.update({
         where: { id },
         data: { archived: false, status: "ACTIVE" },
