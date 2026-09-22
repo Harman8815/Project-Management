@@ -17,6 +17,8 @@ describe("ProjectsController", () => {
     },
     projectMembership: {
       findFirst: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
     },
     activityLog: {
       create: jest.fn(),
@@ -59,12 +61,13 @@ describe("ProjectsController", () => {
 
       mockPrismaService.project.create.mockResolvedValue(expectedResult);
       mockPrismaService.activityLog.create.mockResolvedValue({ id: 1 });
+      mockPrismaService.projectMembership.create.mockResolvedValue({ id: 1 });
 
       mockPrismaService.$transaction.mockImplementation(
         async (fn: any) => fn(mockPrismaService),
       );
 
-      const result = await controller.create(createProjectDto);
+      const result = await controller.create(createProjectDto, { userId: 1 });
 
       expect(result).toEqual(expectedResult);
     });
@@ -93,8 +96,9 @@ describe("ProjectsController", () => {
 
       mockPrismaService.project.findMany.mockResolvedValue(expectedResult.data);
       mockPrismaService.project.count.mockResolvedValue(1);
+      mockPrismaService.projectMembership.findMany.mockResolvedValue([{ id: 1, userId: 1, projectId: 1, status: "ACTIVE" }]);
 
-      const result = await controller.findAll({ page: 1, limit: 10 });
+      const result = await controller.findAll({ page: 1, limit: 10 }, { userId: 1 });
 
       expect(result).toEqual(expectedResult);
     });
@@ -136,7 +140,7 @@ describe("ProjectsController", () => {
         async (fn: any) => fn(mockPrismaService),
       );
 
-      await expect(controller.update("1", { status: "ACTIVE" })).resolves.toEqual({ id: 1, status: "ACTIVE" });
+      await expect(controller.update("1", { status: "ACTIVE" }, { userId: 1 })).resolves.toEqual({ id: 1, status: "ACTIVE" });
     });
 
     it("rejects an invalid project status transition", async () => {
@@ -146,7 +150,7 @@ describe("ProjectsController", () => {
         async (fn: any) => fn(mockPrismaService),
       );
 
-      await expect(controller.update("1", { status: "ACTIVE" })).rejects.toThrow("Invalid project status transition");
+      await expect(controller.update("1", { status: "ACTIVE" }, { userId: 1 })).rejects.toThrow("Invalid project status transition");
     });
   });
 
@@ -162,7 +166,7 @@ describe("ProjectsController", () => {
         async (fn: any) => fn(mockPrismaService),
       );
 
-      const result = await controller.archive("1");
+      const result = await controller.archive("1", { userId: 1 });
 
       expect(result).toEqual(expectedResult);
       expect(mockPrismaService.project.update).toHaveBeenCalledWith({
@@ -174,7 +178,7 @@ describe("ProjectsController", () => {
     it("should throw NotFoundException when project does not exist", async () => {
       mockPrismaService.project.findUnique.mockResolvedValue(null);
 
-      await expect(controller.archive("999")).rejects.toThrow(
+      await expect(controller.archive("999", { userId: 1 })).rejects.toThrow(
         "Project with id 999 not found",
       );
     });
@@ -192,7 +196,7 @@ describe("ProjectsController", () => {
         async (fn: any) => fn(mockPrismaService),
       );
 
-      const result = await controller.restore("1");
+      const result = await controller.restore("1", { userId: 1 });
 
       expect(result).toEqual(expectedResult);
       expect(mockPrismaService.project.update).toHaveBeenCalledWith({
@@ -204,7 +208,7 @@ describe("ProjectsController", () => {
     it("should throw NotFoundException when archived project does not exist", async () => {
       mockPrismaService.project.findUnique.mockResolvedValue(null);
 
-      await expect(controller.restore("999")).rejects.toThrow(
+      await expect(controller.restore("999", { userId: 1 })).rejects.toThrow(
         "Archived project with id 999 not found",
       );
     });

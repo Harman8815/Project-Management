@@ -18,6 +18,11 @@ describe("ProjectsService", () => {
     activityLog: {
       create: jest.fn(),
     },
+    projectMembership: {
+      findFirst: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
+    },
     $transaction: jest.fn(),
   } as any;
 
@@ -49,23 +54,26 @@ describe("ProjectsService", () => {
       const createdProject = { id: 1, ...createDto };
       mockPrismaService.project.create.mockResolvedValue(createdProject);
       mockPrismaService.activityLog.create.mockResolvedValue({ id: 1 });
+      mockPrismaService.projectMembership.create.mockResolvedValue({ id: 1 });
 
       mockPrismaService.$transaction.mockImplementation(
         async (fn: any) => fn(mockPrismaService),
       );
 
-      const result = await service.create(createDto);
+      const result = await service.create(createDto, 1);
 
       expect(result).toEqual(createdProject);
       expect(mockPrismaService.$transaction).toHaveBeenCalled();
       expect(mockPrismaService.project.create).toHaveBeenCalledWith(
         expect.objectContaining({ data: createDto }),
       );
+      expect(mockPrismaService.projectMembership.create).toHaveBeenCalled();
       expect(mockPrismaService.activityLog.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             eventType: "PROJECT_CREATED",
             projectId: 1,
+            actorId: 1,
           }),
         }),
       );
@@ -78,7 +86,7 @@ describe("ProjectsService", () => {
         },
       );
 
-      await expect(service.create({ name: "Test" })).rejects.toThrow(
+      await expect(service.create({ name: "Test" }, 1)).rejects.toThrow(
         "Transaction failed",
       );
     });
@@ -89,8 +97,9 @@ describe("ProjectsService", () => {
       const projects = [{ id: 1, name: "Project 1" }];
       mockPrismaService.project.findMany.mockResolvedValue(projects);
       mockPrismaService.project.count.mockResolvedValue(1);
+      mockPrismaService.projectMembership.findMany.mockResolvedValue([{ id: 1, userId: 1, projectId: 1, status: "ACTIVE" }]);
 
-      const result = await service.findAll({ page: 1, limit: 10 });
+      const result = await service.findAll({ page: 1, limit: 10 }, 1);
 
       expect(result.data).toEqual(projects);
       expect(result.meta).toEqual({ total: 1, page: 1, limit: 10 });
