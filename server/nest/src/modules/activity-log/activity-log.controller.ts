@@ -4,22 +4,33 @@ import {
   Post,
   Body,
   Param,
+  Delete,
   Query,
+  UseGuards,
 } from "@nestjs/common";
 import { ApiTags, ApiBearerAuth, ApiQuery } from "@nestjs/swagger";
 import { ActivityLogService } from "./activity-log.service";
 import { CreateActivityLogDto } from "./dto/create-activity-log.dto";
 import { PaginationDto } from "../../common/dto/pagination.dto";
+import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
+import { ProjectAccessGuard, RequireProjectAccess, RequireProjectRole } from "../../common/guards/project-access.guard";
 
 @ApiTags("activity-log")
 @ApiBearerAuth()
 @Controller("activity-log")
+@UseGuards(JwtAuthGuard)
 export class ActivityLogController {
   constructor(private readonly activityLogService: ActivityLogService) {}
 
   @Post()
-  async create(@Body() createActivityLogDto: CreateActivityLogDto) {
-    return this.activityLogService.create(createActivityLogDto);
+  @UseGuards(ProjectAccessGuard)
+  @RequireProjectAccess("projectId")
+  async create(
+    @Body() createActivityLogDto: CreateActivityLogDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.activityLogService.create(createActivityLogDto, user?.userId);
   }
 
   @ApiQuery({ name: "page", required: false })
@@ -39,12 +50,23 @@ export class ActivityLogController {
       actorId?: number;
       targetUserId?: number;
     },
+    @CurrentUser() user: any,
   ) {
-    return this.activityLogService.findAll(query);
+    return this.activityLogService.findAll(query, user?.userId);
   }
 
   @Get(":id")
-  async findOne(@Param("id") id: string) {
-    return this.activityLogService.findOne(Number(id));
+  @UseGuards(ProjectAccessGuard)
+  @RequireProjectAccess("projectId")
+  async findOne(@Param("id") id: string, @CurrentUser() user: any) {
+    return this.activityLogService.findOne(Number(id), user?.userId);
+  }
+
+  @Delete(":id")
+  @UseGuards(ProjectAccessGuard)
+  @RequireProjectAccess("projectId")
+  @RequireProjectRole("ADMIN", "OWNER")
+  async remove(@Param("id") id: string, @CurrentUser() user: any) {
+    return this.activityLogService.delete(Number(id), user?.userId);
   }
 }
