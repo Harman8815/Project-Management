@@ -33,6 +33,8 @@ async function main() {
     "attachment.json",
     "comment.json",
     "taskAssignment.json",
+    "calendarSync.json",
+    "calendarEvent.json",
   ];
 
   await deleteAllData(orderedFileNames);
