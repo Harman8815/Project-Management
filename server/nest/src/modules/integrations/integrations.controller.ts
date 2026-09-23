@@ -35,6 +35,16 @@ export class IntegrationsController {
     return this.service.importProject(request.user.userId, Number(organizationId), body);
   }
 
+  @Post("activity/link")
+  linkActivity(@Req() request: any, @Param("organizationId") organizationId: string, @Body() body: { taskId: number; type: string; title: string; url?: string }) {
+    return this.service.linkActivityToTask(request.user.userId, Number(organizationId), body.taskId, body);
+  }
+
+  @Post("calendar/parse")
+  parseCalendar(@Body() body: { ical: string }) {
+    return { events: this.service.parseCalendarEvents(body.ical) };
+  }
+
   @Post("webhook/verify")
   verify(@Body() body: { payload: string; signature: string; secret: string }) {
     return { valid: this.service.verifyWebhook(body.payload, body.signature, body.secret) };

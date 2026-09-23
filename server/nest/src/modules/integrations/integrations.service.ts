@@ -61,6 +61,23 @@ export class IntegrationsService {
     return response.json();
   }
 
+  async linkActivityToTask(userId: number, organizationId: number, taskId: number, event: { type: string; title: string; url?: string }) {
+    await this.organizations.assertRole(userId, organizationId);
+    const task = await this.prisma.task.findUnique({ where: { id: taskId }, include: { project: true } });
+    const membership = await this.prisma.projectMembership.findFirst({ where: { projectId: task?.projectId, userId, status: "ACTIVE" } });
+    if (!task || task.project.organizationId !== organizationId || !membership) throw new ForbiddenException("You do not have access to this task");
+    return this.prisma.activityLog.create({
+      data: { eventType: "EXTERNAL_ACTIVITY_LINKED", actorId: userId, projectId: task.projectId, taskId, message: `${event.type}: ${event.title}`, metadata: JSON.stringify({ url: event.url }) },
+    });
+  }
+
+  parseCalendarEvents(payload: string) {
+    return payload.split("BEGIN:VEVENT").slice(1).map((block) => {
+      const read = (key: string) => block.match(new RegExp(`\\n${key}(?:;[^:]*)?:([^\\n\\r]+)`))?.[1]?.trim() || null;
+      return { uid: read("UID"), title: read("SUMMARY"), start: read("DTSTART"), end: read("DTEND") };
+    }).filter((event) => event.uid && event.title && event.start);
+  }
+
   verifyWebhook(payload: string, signature: string, secret: string) {
     const expected = createHmac("sha256", secret).update(payload).digest("hex");
     const valid = signature.length === expected.length && timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
