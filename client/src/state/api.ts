@@ -120,7 +120,7 @@ export interface Notification {
 
 export const api = createApi({
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
+    baseUrl: `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1`,
     prepareHeaders: async (headers) => {
       const session = await fetchAuthSession();
       const { accessToken } = session.tokens ?? {};
@@ -281,8 +281,8 @@ export const api = createApi({
       query: ({ organizationId, ...body }) => ({ url: `organizations/${organizationId}/calendar/sync`, method: "POST", body }),
       invalidatesTags: ["Calendar"],
     }),
-    getCalendarEventsByIcal: build.mutation<{ events: any[] }, { ical: string }>({
-      query: ({ ical }) => ({ url: `organizations/0/calendar/parse-ical`, method: "POST", body: { ical } }),
+    getCalendarEventsByIcal: build.mutation<{ events: any[] }, { organizationId: number; ical: string }>({
+      query: ({ organizationId, ...body }) => ({ url: `organizations/${organizationId}/calendar/parse-ical`, method: "POST", body }),
     }),
     linkCalendarEventToTask: build.mutation<any, { organizationId: number; eventId: number; taskId: number }>({
       query: ({ organizationId, eventId, taskId }) => ({ url: `organizations/${organizationId}/calendar/events/${eventId}/link-task`, method: "POST", body: { taskId } }),
