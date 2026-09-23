@@ -1,41 +1,66 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, Logger } from "@nestjs/common";
 import { OrganizationsService } from "../organizations/organizations.service";
 import { PrismaService } from "../../prisma/prisma.service";
 
 export type AiRequest = { projectId?: number; prompt: string; confirmMutation?: boolean; feature?: string };
 export type AiModelConfig = { provider: string; model: string; apiKey?: string; maxTokens?: number; temperature?: number };
 
+interface FallbackResult {
+  status: "fallback";
+  requestId?: number;
+  answer: string;
+  sources: Array<{ type: string; id: number }>;
+  error?: string;
+}
+
 @Injectable()
 export class AiService {
+  private readonly logger = new Logger(AiService.name);
+
   constructor(private readonly organizations: OrganizationsService, private readonly prisma: PrismaService) {}
 
-  async answer(userId: number, organizationId: number, request: AiRequest) {
+  async answer(userId: number, organizationId: number, request: AiRequest): Promise<any> {
     await this.organizations.assertRole(userId, organizationId);
     if (!request.prompt || request.prompt.length > 4000) throw new BadRequestException("Prompt must be between 1 and 4000 characters");
     if (request.confirmMutation) throw new BadRequestException("AI mutations require an explicit action endpoint");
     if (/ignore\s+(all|previous|prior)\s+instructions|reveal\s+(the|your)\s+system\s+prompt|developer\s+message/i.test(request.prompt)) {
       throw new BadRequestException("Prompt contains a disallowed instruction override");
     }
-    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const requestCount = await this.prisma.aiRequestLog.count({ where: { userId, organizationId, createdAt: { gte: since } } });
-    if (requestCount >= 100) throw new BadRequestException("Daily AI request limit reached");
-    const normalized = request.prompt.toLowerCase();
-    const project = request.projectId
-      ? await this.prisma.project.findUnique({ where: { id: request.projectId }, include: { tasks: true, milestones: true, sprints: true } })
-      : null;
-    if (request.projectId && (!project || !(await this.prisma.projectMembership.findFirst({ where: { projectId: request.projectId, userId } })))) {
-      throw new BadRequestException("Project is outside your organization scope");
+    try {
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const requestCount = await this.prisma.aiRequestLog.count({ where: { userId, organizationId, createdAt: { gte: since } } });
+      if (requestCount >= 100) throw new BadRequestException("Daily AI request limit reached");
+      const normalized = request.prompt.toLowerCase();
+      const project = request.projectId
+        ? await this.prisma.project.findUnique({ where: { id: request.projectId }, include: { tasks: true, milestones: true, sprints: true } })
+        : null;
+      if (request.projectId && (!project || !(await this.prisma.projectMembership.findFirst({ where: { projectId: request.projectId, userId } })))) {
+        throw new BadRequestException("Project is outside your organization scope");
+      }
+      let answer = "I can help with project status, risks, tasks, milestones, and sprint planning.";
+      if (project && (normalized.includes("summary") || normalized.includes("status"))) {
+        const completed = project.tasks.filter((task) => task.status === "Completed" || task.status === "Done").length;
+        answer = `${project.name} has ${project.tasks.length} tasks, ${completed} completed, ${project.milestones.length} milestones, and ${project.sprints.length} sprints.`;
+      } else if (project && normalized.includes("risk")) {
+        const overdue = project.tasks.filter((task) => task.dueDate && task.dueDate < new Date() && task.status !== "Completed" && task.status !== "Done").length;
+        answer = `${project.name} currently has ${overdue} overdue open task${overdue === 1 ? "" : "s"}.`;
+      }
+      const log = await this.prisma.aiRequestLog.create({ data: { userId, organizationId, projectId: request.projectId, feature: request.feature || "answer", promptLength: request.prompt.length, status: "COMPLETED" } });
+      return { requestId: log.id, status: "completed", answer, sources: project ? [{ type: "project", id: project.id }] : [], projectId: request.projectId };
+    } catch (error) {
+      if (error instanceof BadRequestException || error instanceof ForbiddenException) throw error;
+      this.logger.error(`AI answer failed for user ${userId}: ${error instanceof Error ? error.message : "unknown error"}`);
+      return this.createFallbackAnswer(userId, organizationId, request);
     }
-    let answer = "I can help with project status, risks, tasks, milestones, and sprint planning.";
-    if (project && (normalized.includes("summary") || normalized.includes("status"))) {
-      const completed = project.tasks.filter((task) => task.status === "Completed" || task.status === "Done").length;
-      answer = `${project.name} has ${project.tasks.length} tasks, ${completed} completed, ${project.milestones.length} milestones, and ${project.sprints.length} sprints.`;
-    } else if (project && normalized.includes("risk")) {
-      const overdue = project.tasks.filter((task) => task.dueDate && task.dueDate < new Date() && task.status !== "Completed" && task.status !== "Done").length;
-      answer = `${project.name} currently has ${overdue} overdue open task${overdue === 1 ? "" : "s"}.`;
-    }
-    const log = await this.prisma.aiRequestLog.create({ data: { userId, organizationId, projectId: request.projectId, feature: request.feature || "answer", promptLength: request.prompt.length, status: "COMPLETED" } });
-    return { requestId: log.id, status: "completed", answer, sources: project ? [{ type: "project", id: project.id }] : [], projectId: request.projectId };
+  }
+
+  private createFallbackAnswer(userId: number, organizationId: number, request: AiRequest): FallbackResult {
+    return {
+      status: "fallback",
+      answer: "I'm temporarily unavailable. Please try again later. In the meantime, you can check project status, tasks, and milestones from the dashboard.",
+      sources: [],
+      error: "Service temporarily unavailable",
+    };
   }
 
   async feedback(userId: number, requestId: number, rating: number, comment?: string) {
@@ -93,120 +118,138 @@ export class AiService {
   }
 
   async naturalLanguageSearch(userId: number, organizationId: number, query: string, projectId?: number) {
-    await this.organizations.assertRole(userId, organizationId);
-    if (!query.trim()) throw new BadRequestException("Search query is required");
-    if (projectId) await this.assertProjectAccess(userId, organizationId, projectId);
-    
-    // Extract keywords from natural language query
-    const keywords = this.extractKeywords(query);
-    
-    // Search tasks using keywords
-    const tasks = await this.prisma.task.findMany({
-      where: {
-        projectId: projectId || undefined,
-        project: projectId ? undefined : { organizationId },
-        OR: [
-          ...keywords.flatMap((keyword) => [{ title: { contains: keyword } }, { description: { contains: keyword } }]),
-        ],
-      },
-      include: {
-        assignee: true,
-        project: true,
-      },
-      take: 10,
-    });
-    
-    return {
-      query,
-      keywords,
-      results: tasks,
-      count: tasks.length,
-    };
+    try {
+      await this.organizations.assertRole(userId, organizationId);
+      if (!query.trim()) throw new BadRequestException("Search query is required");
+      if (projectId) await this.assertProjectAccess(userId, organizationId, projectId);
+
+      const keywords = this.extractKeywords(query);
+
+      const tasks = await this.prisma.task.findMany({
+        where: {
+          projectId: projectId || undefined,
+          project: projectId ? undefined : { organizationId },
+          OR: [
+            ...keywords.flatMap((keyword) => [{ title: { contains: keyword } }, { description: { contains: keyword } }]),
+          ],
+        },
+        include: { assignee: true, project: true },
+        take: 10,
+      });
+
+      return { query, keywords, results: tasks, count: tasks.length };
+    } catch (error) {
+      if (error instanceof BadRequestException || error instanceof ForbiddenException) throw error;
+      this.logger.error(`AI search failed: ${error instanceof Error ? error.message : "unknown"}`);
+      return { query, keywords: [], results: [], count: 0, error: "Search temporarily unavailable", fallback: true };
+    }
   }
 
   async generateReport(userId: number, organizationId: number, projectId: number, reportType: string) {
-    await this.organizations.assertRole(userId, organizationId);
-    await this.assertProjectAccess(userId, organizationId, projectId);
-    if (!["status", "risk", "progress", "planning"].includes(reportType)) throw new BadRequestException("Unsupported report type");
-    
-    const project = await this.prisma.project.findUnique({
-      where: { id: projectId },
-      include: {
-        tasks: true,
-        milestones: true,
-        sprints: true,
-        members: {
-          include: {
-            user: true,
-          },
-        },
-      },
-    });
-    
-    if (!project) {
-      throw new NotFoundException("Project not found");
+    try {
+      await this.organizations.assertRole(userId, organizationId);
+      await this.assertProjectAccess(userId, organizationId, projectId);
+      if (!["status", "risk", "progress", "planning"].includes(reportType)) throw new BadRequestException("Unsupported report type");
+
+      const project = await this.prisma.project.findUnique({
+        where: { id: projectId },
+        include: { tasks: true, milestones: true, sprints: true, members: { include: { user: true } } },
+      });
+
+      if (!project) {
+        throw new NotFoundException("Project not found");
+      }
+
+      const report = this.generateProjectReport(project, reportType);
+
+      return {
+        projectId,
+        reportType,
+        generatedAt: new Date().toISOString(),
+        report,
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException || error instanceof ForbiddenException || error instanceof NotFoundException) throw error;
+      this.logger.error(`Report generation failed for project ${projectId}: ${error instanceof Error ? error.message : "unknown"}`);
+      return {
+        projectId,
+        reportType,
+        generatedAt: new Date().toISOString(),
+        report: null,
+        error: "Report generation temporarily unavailable",
+        fallback: true,
+      };
     }
-    
-    const report = this.generateProjectReport(project, reportType);
-    
-    return {
-      projectId,
-      reportType,
-      generatedAt: new Date().toISOString(),
-      report,
-    };
   }
 
   async suggestTaskBreakdown(userId: number, organizationId: number, projectId: number, taskTitle: string, taskDescription?: string) {
-    await this.organizations.assertRole(userId, organizationId);
-    await this.assertProjectAccess(userId, organizationId, projectId);
-    
-    const project = await this.prisma.project.findUnique({
-      where: { id: projectId },
-      include: {
-        tasks: true,
-      },
-    });
-    
-    if (!project) {
-      throw new NotFoundException("Project not found");
+    try {
+      await this.organizations.assertRole(userId, organizationId);
+      await this.assertProjectAccess(userId, organizationId, projectId);
+
+      const project = await this.prisma.project.findUnique({
+        where: { id: projectId },
+        include: { tasks: true },
+      });
+
+      if (!project) {
+        throw new NotFoundException("Project not found");
+      }
+
+      const suggestions = this.generateBreakdownSuggestions(taskTitle, taskDescription, project.tasks);
+
+      return {
+        projectId,
+        originalTask: { title: taskTitle, description: taskDescription },
+        suggestions,
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException || error instanceof ForbiddenException || error instanceof NotFoundException) throw error;
+      this.logger.error(`Task breakdown failed for project ${projectId}: ${error instanceof Error ? error.message : "unknown"}`);
+      return {
+        projectId,
+        originalTask: { title: taskTitle, description: taskDescription },
+        suggestions: [],
+        error: "Breakdown suggestions temporarily unavailable",
+        fallback: true,
+      };
     }
-    
-    // Generate task breakdown suggestions based on existing project structure
-    const suggestions = this.generateBreakdownSuggestions(taskTitle, taskDescription, project.tasks);
-    
-    return {
-      projectId,
-      originalTask: { title: taskTitle, description: taskDescription },
-      suggestions,
-    };
   }
 
   async assistPlanning(userId: number, organizationId: number, projectId: number, timeframe: string, capacity?: number) {
-    await this.organizations.assertRole(userId, organizationId);
-    await this.assertProjectAccess(userId, organizationId, projectId);
-    
-    const project = await this.prisma.project.findUnique({
-      where: { id: projectId },
-      include: {
-        tasks: true,
-        milestones: true,
-        sprints: true,
-      },
-    });
-    
-    if (!project) {
-      throw new NotFoundException("Project not found");
+    try {
+      await this.organizations.assertRole(userId, organizationId);
+      await this.assertProjectAccess(userId, organizationId, projectId);
+
+      const project = await this.prisma.project.findUnique({
+        where: { id: projectId },
+        include: { tasks: true, milestones: true, sprints: true },
+      });
+
+      if (!project) {
+        throw new NotFoundException("Project not found");
+      }
+
+      const suggestions = this.generatePlanningSuggestions(project, timeframe, capacity);
+
+      return {
+        projectId,
+        timeframe,
+        capacity,
+        suggestions,
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException || error instanceof ForbiddenException || error instanceof NotFoundException) throw error;
+      this.logger.error(`Planning assistance failed for project ${projectId}: ${error instanceof Error ? error.message : "unknown"}`);
+      return {
+        projectId,
+        timeframe,
+        capacity,
+        suggestions: [],
+        error: "Planning assistance temporarily unavailable",
+        fallback: true,
+      };
     }
-    
-    const suggestions = this.generatePlanningSuggestions(project, timeframe, capacity);
-    
-    return {
-      projectId,
-      timeframe,
-      capacity,
-      suggestions,
-    };
   }
 
   private extractKeywords(query: string): string[] {
