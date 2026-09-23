@@ -26,6 +26,8 @@ import { OrganizationsModule } from "./modules/organizations/organizations.modul
 import { CustomFieldsModule } from "./modules/custom-fields/custom-fields.module";
 import { IntegrationsModule } from "./modules/integrations/integrations.module";
 import { AiModule } from "./modules/ai/ai.module";
+import { CommentsModule } from "./modules/comments/comments.module";
+import { WorkflowsModule } from "./modules/workflows/workflows.module";
 
 @Module({
   imports: [
@@ -53,6 +55,8 @@ import { AiModule } from "./modules/ai/ai.module";
     CustomFieldsModule,
     IntegrationsModule,
     AiModule,
+    CommentsModule,
+    WorkflowsModule,
   ],
   providers: [
     PrismaService,
