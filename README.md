@@ -13,6 +13,12 @@ A full-stack project management application built with Next.js (frontend) and Ex
 - **State Management**: Redux Toolkit with RTK Query for API calls and redux-persist for state persistence
 - **Database**: SQLite (local dev) / PostgreSQL (production) via Prisma ORM
 - **Responsive UI**: Tailwind CSS + Material-UI components
+- **Customizable Workflows**: Configurable workflow definitions per organization
+- **Calendar Synchronization**: Sync with Google/Microsoft/Caldav providers, manage calendar events, link events to tasks
+- **External Integrations**: GitHub/GitLab activity sync, structured project import/export, webhook verification
+- **AI Assistant**: Natural-language task search, report generation, task breakdown suggestions, planning assistance
+- **AI Safety**: Fallback behavior for model failures, authorization boundaries, prompt injection protection, daily rate limiting
+- **Comments**: Comment system with mentions and replies
 
 ## Tech Stack
 
@@ -31,8 +37,12 @@ A full-stack project management application built with Next.js (frontend) and Ex
    - **Express.js** REST API
    - **TypeScript**
    - **Prisma ORM** with SQLite (local) / PostgreSQL (production)
-- **JWT/Cognito** authentication via AWS Amplify
-- **helmet**, **cors**, **morgan** for security and logging
+ - **JWT/Cognito** authentication via AWS Amplify
+ - **helmet**, **cors**, **morgan** for security and logging
+ - **NestJS** framework with modular architecture
+ - **Calendar sync** (Google, Microsoft, CalDAV)
+ - **Webhook verification** with HMAC signature validation
+ - **iCal parsing** for calendar events
 
 ## Project Structure
 
@@ -86,9 +96,10 @@ A full-stack project management application built with Next.js (frontend) and Ex
    ```
 
 5. Seed the database with sample data:
-   ```bash
-   npm run seed
-   ```
+  ```bash
+  npm run seed
+  ```
+  This seeds Teams, Projects, Users, Tasks, Attachments, Comments, TaskAssignments, CalendarEvents, and CalendarSync data.
 
 6. Start the backend server:
    ```bash
@@ -133,6 +144,24 @@ The backend exposes the following REST API endpoints:
 - `GET /users` - Get all users
 - `GET /teams` - Get all teams
 - `GET /search?query={query}` - Search tasks, projects, and users
+- `GET/POST/PUT/DELETE /organizations/:orgId/calendar/events` - Calendar event CRUD
+- `POST /organizations/:orgId/calendar/sync` - Sync calendar from provider
+- `POST /organizations/:orgId/calendar/parse-ical` - Parse iCal data
+- `POST /organizations/:orgId/calendar/events/:eventId/link-task` - Link event to task
+- `GET/PUT /organizations/:orgId/ai/model-config` - AI model configuration
+- `POST /organizations/:orgId/ai/answer` - AI assistant query
+- `POST /organizations/:orgId/ai/search` - Natural language task search
+- `POST /organizations/:orgId/ai/report` - Generate project report
+- `POST /organizations/:orgId/ai/task-breakdown` - Get task breakdown suggestions
+- `POST /organizations/:orgId/ai/planning` - Get planning assistance
+- `POST /organizations/:orgId/integrations` - Create integration
+- `POST/GET /organizations/:orgId/integrations/:id/credential` - Manage credentials
+- `POST /organizations/:orgId/integrations/activity/link` - Link external activity to task
+- `POST /organizations/:orgId/integrations/project/export` - Export project
+- `POST /organizations/:orgId/integrations/project/import` - Import project
+- `POST /organizations/:orgId/integrations/webhook/verify` - Verify webhook signature
+- `POST/DELETE /organizations/:orgId/workflows/:type` - Workflow definition CRUD
+- `POST /organizations/:orgId/workflows/:type/validate-transition` - Validate workflow transition
 
 ## Database Schema
 
@@ -145,6 +174,28 @@ The database uses Prisma with the following models:
 - **TaskAssignment**: Many-to-many relationship between users and tasks
 - **Attachment**: Files attached to tasks
 - **Comments**: Comments on tasks
+- **CalendarEvent**: Calendar events with optional task linking
+- **CalendarSync**: Calendar provider sync configuration
+- **Integration**: External service integrations (GitHub, GitLab)
+- **IntegrationEvent**: Queued integration events
+- **Organization**: Organization/company entity
+- **OrganizationMembership**: User roles within organizations
+- **OrganizationSetting**: Key-value org settings (workflows, AI config)
+- **ActivityLog**: Audit trail of system events
+- **Sprint**: Time-boxed work iterations
+- **Milestone**: Project milestones
+- **ProjectMembership**: User roles within projects
+- **ProjectTeam**: Team-project associations
+- **ProjectTemplate**: Reusable project templates
+- **CustomFieldDefinition**: Custom field schemas
+- **CustomFieldValue**: Custom field values
+- **Notification**: User notifications
+- **NotificationPreference**: User notification preferences
+- **TaskDependency**: Task dependencies
+- **TaskWatcher**: Task watchers
+- **TaskHistory**: Task field change history
+- **AiRequestLog**: AI usage tracking
+- **AiFeedback**: AI response ratings
 
 ## Deployment
 
