@@ -134,34 +134,34 @@ A full-stack project management application built with Next.js (frontend) and Ex
 
 ## API Endpoints
 
-The backend exposes the following REST API endpoints:
+The backend exposes the following REST API endpoints (all prefixed with `/api/v1`):
 
-- `GET /projects` - Get all projects
-- `POST /projects` - Create a new project
-- `GET /tasks?projectId={id}` - Get tasks for a project
-- `POST /tasks` - Create a new task
-- `PATCH /tasks/{taskId}/status` - Update task status
-- `GET /users` - Get all users
-- `GET /teams` - Get all teams
-- `GET /search?query={query}` - Search tasks, projects, and users
-- `GET/POST/PUT/DELETE /organizations/:orgId/calendar/events` - Calendar event CRUD
-- `POST /organizations/:orgId/calendar/sync` - Sync calendar from provider
-- `POST /organizations/:orgId/calendar/parse-ical` - Parse iCal data
-- `POST /organizations/:orgId/calendar/events/:eventId/link-task` - Link event to task
-- `GET/PUT /organizations/:orgId/ai/model-config` - AI model configuration
-- `POST /organizations/:orgId/ai/answer` - AI assistant query
-- `POST /organizations/:orgId/ai/search` - Natural language task search
-- `POST /organizations/:orgId/ai/report` - Generate project report
-- `POST /organizations/:orgId/ai/task-breakdown` - Get task breakdown suggestions
-- `POST /organizations/:orgId/ai/planning` - Get planning assistance
-- `POST /organizations/:orgId/integrations` - Create integration
-- `POST/GET /organizations/:orgId/integrations/:id/credential` - Manage credentials
-- `POST /organizations/:orgId/integrations/activity/link` - Link external activity to task
-- `POST /organizations/:orgId/integrations/project/export` - Export project
-- `POST /organizations/:orgId/integrations/project/import` - Import project
-- `POST /organizations/:orgId/integrations/webhook/verify` - Verify webhook signature
-- `POST/DELETE /organizations/:orgId/workflows/:type` - Workflow definition CRUD
-- `POST /organizations/:orgId/workflows/:type/validate-transition` - Validate workflow transition
+- `GET /api/v1/projects` - Get all projects
+- `POST /api/v1/projects` - Create a new project
+- `GET /api/v1/tasks?projectId={id}` - Get tasks for a project
+- `POST /api/v1/tasks` - Create a new task
+- `PATCH /api/v1/tasks/{taskId}/status` - Update task status
+- `GET /api/v1/users` - Get all users
+- `GET /api/v1/teams` - Get all teams
+- `GET /api/v1/search?query={query}` - Search tasks, projects, and users
+- `GET/POST/PUT/DELETE /api/v1/organizations/:orgId/calendar/events` - Calendar event CRUD
+- `POST /api/v1/organizations/:orgId/calendar/sync` - Sync calendar from provider
+- `POST /api/v1/organizations/:orgId/calendar/parse-ical` - Parse iCal data
+- `POST /api/v1/organizations/:orgId/calendar/events/:eventId/link-task` - Link event to task
+- `GET/PUT /api/v1/organizations/:orgId/ai/model-config` - AI model configuration
+- `POST /api/v1/organizations/:orgId/ai/answer` - AI assistant query
+- `POST /api/v1/organizations/:orgId/ai/search` - Natural language task search
+- `POST /api/v1/organizations/:orgId/ai/report` - Generate project report
+- `POST /api/v1/organizations/:orgId/ai/task-breakdown` - Get task breakdown suggestions
+- `POST /api/v1/organizations/:orgId/ai/planning` - Get planning assistance
+- `POST /api/v1/organizations/:orgId/integrations` - Create integration
+- `POST/GET /api/v1/organizations/:orgId/integrations/:id/credential` - Manage credentials
+- `POST /api/v1/organizations/:orgId/integrations/activity/link` - Link external activity to task
+- `POST /api/v1/organizations/:orgId/integrations/project/export` - Export project
+- `POST /api/v1/organizations/:orgId/integrations/project/import` - Import project
+- `POST /api/v1/organizations/:orgId/integrations/webhook/verify` - Verify webhook signature
+- `POST/DELETE /api/v1/organizations/:orgId/workflows/:type` - Workflow definition CRUD
+- `POST /api/v1/organizations/:orgId/workflows/:type/validate-transition` - Validate workflow transition
 
 ## Database Schema
 
