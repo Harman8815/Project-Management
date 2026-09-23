@@ -131,7 +131,7 @@ export const api = createApi({
     },
   }),
   reducerPath: "api",
-  tagTypes: ["Projects", "Tasks", "Users", "Teams", "Organization", "CustomFields", "Notifications"],
+  tagTypes: ["Projects", "Tasks", "Users", "Teams", "Organization", "CustomFields", "Notifications", "Calendar"],
   endpoints: (build) => ({
     getAuthUser: build.query({
       queryFn: async (_, _queryApi, _extraoptions, fetchWithBQ) => {
@@ -254,6 +254,58 @@ export const api = createApi({
       query: (userId) => ({ url: `notifications/user/${userId}/read-all`, method: "PATCH" }),
       invalidatesTags: ["Notifications"],
     }),
+    getCalendarEvents: build.query<any, { organizationId: number; calendarId?: string; startDate?: string; endDate?: string; page?: number; limit?: number }>({
+      query: ({ organizationId, calendarId, startDate, endDate, page, limit }) => {
+        const params = new URLSearchParams();
+        if (calendarId) params.set("calendarId", calendarId);
+        if (startDate) params.set("startDate", startDate);
+        if (endDate) params.set("endDate", endDate);
+        if (page) params.set("page", String(page));
+        if (limit) params.set("limit", String(limit));
+        return `organizations/${organizationId}/calendar/events?${params.toString()}`;
+      },
+    }),
+    createCalendarEvent: build.mutation<any, { organizationId: number; calendarId: string; title: string; startDate: string; endDate: string; description?: string; taskId?: number }>({
+      query: ({ organizationId, ...body }) => ({ url: `organizations/${organizationId}/calendar/events`, method: "POST", body }),
+      invalidatesTags: ["Calendar"],
+    }),
+    updateCalendarEvent: build.mutation<any, { organizationId: number; eventId: number; updates: any }>({
+      query: ({ organizationId, eventId, updates }) => ({ url: `organizations/${organizationId}/calendar/events/${eventId}`, method: "PUT", body: updates }),
+      invalidatesTags: ["Calendar"],
+    }),
+    deleteCalendarEvent: build.mutation<{ message: string }, { organizationId: number; eventId: number }>({
+      query: ({ organizationId, eventId }) => ({ url: `organizations/${organizationId}/calendar/events/${eventId}`, method: "DELETE" }),
+      invalidatesTags: ["Calendar"],
+    }),
+    syncCalendar: build.mutation<any, { organizationId: number; provider: string; calendarId: string; syncToken?: string }>({
+      query: ({ organizationId, ...body }) => ({ url: `organizations/${organizationId}/calendar/sync`, method: "POST", body }),
+      invalidatesTags: ["Calendar"],
+    }),
+    getCalendarEventsByIcal: build.mutation<{ events: any[] }, { ical: string }>({
+      query: ({ ical }) => ({ url: `organizations/0/calendar/parse-ical`, method: "POST", body: { ical } }),
+    }),
+    linkCalendarEventToTask: build.mutation<any, { organizationId: number; eventId: number; taskId: number }>({
+      query: ({ organizationId, eventId, taskId }) => ({ url: `organizations/${organizationId}/calendar/events/${eventId}/link-task`, method: "POST", body: { taskId } }),
+      invalidatesTags: ["Calendar", "Tasks"],
+    }),
+    getModelConfig: build.query<any, { organizationId: number }>({
+      query: ({ organizationId }) => `organizations/${organizationId}/ai/model-config`,
+    }),
+    setModelConfig: build.mutation<any, { organizationId: number; config: any }>({
+      query: ({ organizationId, ...body }) => ({ url: `organizations/${organizationId}/ai/model-config`, method: "PUT", body }),
+    }),
+    naturalLanguageSearch: build.mutation<any, { organizationId: number; query: string; projectId?: number }>({
+      query: ({ organizationId, ...body }) => ({ url: `organizations/${organizationId}/ai/search`, method: "POST", body }),
+    }),
+    generateReport: build.mutation<any, { organizationId: number; projectId: number; reportType: string }>({
+      query: ({ organizationId, ...body }) => ({ url: `organizations/${organizationId}/ai/report`, method: "POST", body }),
+    }),
+    suggestTaskBreakdown: build.mutation<any, { organizationId: number; projectId: number; taskTitle: string; taskDescription?: string }>({
+      query: ({ organizationId, ...body }) => ({ url: `organizations/${organizationId}/ai/task-breakdown`, method: "POST", body }),
+    }),
+    assistPlanning: build.mutation<any, { organizationId: number; projectId: number; timeframe: string; capacity?: number }>({
+      query: ({ organizationId, ...body }) => ({ url: `organizations/${organizationId}/ai/planning`, method: "POST", body }),
+    }),
   }),
 });
 
@@ -279,4 +331,17 @@ export const {
   useGetNotificationsQuery,
   useMarkNotificationReadMutation,
   useMarkAllNotificationsReadMutation,
+  useGetCalendarEventsQuery,
+  useCreateCalendarEventMutation,
+  useUpdateCalendarEventMutation,
+  useDeleteCalendarEventMutation,
+  useSyncCalendarMutation,
+  useGetCalendarEventsByIcalMutation,
+  useLinkCalendarEventToTaskMutation,
+  useGetModelConfigQuery,
+  useSetModelConfigMutation,
+  useNaturalLanguageSearchMutation,
+  useGenerateReportMutation,
+  useSuggestTaskBreakdownMutation,
+  useAssistPlanningMutation,
 } = api;

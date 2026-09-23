@@ -27,6 +27,7 @@ import { CustomFieldsModule } from "./modules/custom-fields/custom-fields.module
 import { IntegrationsModule } from "./modules/integrations/integrations.module";
 import { AiModule } from "./modules/ai/ai.module";
 import { CommentsModule } from "./modules/comments/comments.module";
+import { CalendarModule } from "./modules/calendar/calendar.module";
 import { WorkflowsModule } from "./modules/workflows/workflows.module";
 
 @Module({
@@ -57,6 +58,7 @@ import { WorkflowsModule } from "./modules/workflows/workflows.module";
     AiModule,
     CommentsModule,
     WorkflowsModule,
+    CalendarModule,
   ],
   providers: [
     PrismaService,
