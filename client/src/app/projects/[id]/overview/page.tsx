@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useParams } from "next/navigation";
-import { useGetProjectsQuery, useGetTasksQuery } from "@/state/api";
+import { useGetProjectsQuery, useGetTasksQuery, Status } from "@/state/api";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Button } from "@/components/ui";
 import ProjectHeader from "../../ProjectHeader";
@@ -28,9 +28,9 @@ const ProjectOverview = () => {
 
   const taskStats = {
     total: tasks?.length || 0,
-    completed: tasks?.filter(t => t.status === "COMPLETED").length || 0,
-    inProgress: tasks?.filter(t => t.status === "IN_PROGRESS").length || 0,
-    todo: tasks?.filter(t => t.status === "TODO").length || 0,
+    completed: tasks?.filter(t => t.status === Status.Completed).length || 0,
+    inProgress: tasks?.filter(t => t.status === Status.WorkInProgress).length || 0,
+    todo: tasks?.filter(t => t.status === Status.ToDo).length || 0,
   };
 
   return (

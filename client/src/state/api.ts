@@ -204,6 +204,16 @@ export const api = createApi({
         { type: "Tasks", id: taskId },
       ],
     }),
+    updateTask: build.mutation<Task, { id: number; updates: Partial<Task> }>({
+      query: ({ id, updates }) => ({
+        url: `tasks/${id}`,
+        method: "PATCH",
+        body: updates,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Tasks", id },
+      ],
+    }),
     getUsers: build.query<User[], void>({
       query: () => "users",
       providesTags: ["Users"],
@@ -315,6 +325,7 @@ export const {
   useUpdateProjectMutation,
   useGetTasksQuery,
   useCreateTaskMutation,
+  useUpdateTaskMutation,
   useUpdateTaskStatusMutation,
   useSearchQuery,
   useGetUsersQuery,

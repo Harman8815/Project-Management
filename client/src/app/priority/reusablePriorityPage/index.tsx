@@ -4,7 +4,7 @@ import { useAppSelector } from "@/app/redux";
 import Header from "@/components/Header";
 import { Button, EmptyState, LoadingState } from "@/components/ui";
 import TaskCard from "@/components/TaskCard";
-import ModalNewTask from "@/components/ModalNewTask";
+import TaskForm from "@/components/TaskForm";
 import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
 import {
   Priority,
@@ -61,7 +61,7 @@ const ReusablePriorityPage = ({ priority }: { priority: Priority }) => {
 
   return (
     <div className="m-5 p-4">
-      <ModalNewTask
+      <TaskForm
         isOpen={isModalNewTaskOpen}
         onClose={() => setIsModalNewTaskOpen(false)}
       />

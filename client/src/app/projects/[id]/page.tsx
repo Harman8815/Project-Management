@@ -7,7 +7,7 @@ import Board from "../BoardView";
 import List from "../ListView";
 import Timeline from "../TimelineView";
 import Table from "../TableView";
-import ModalNewTask from "@/components/ModalNewTask";
+import TaskForm from "@/components/TaskForm";
 import { useGetProjectsQuery } from "@/state/api";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
@@ -40,7 +40,7 @@ const Project = () => {
     <div>
       <div className="p-4">
         <Breadcrumbs items={breadcrumbItems} />
-        <ModalNewTask
+        <TaskForm
           isOpen={isModalNewTaskOpen}
           onClose={() => setIsModalNewTaskOpen(false)}
           id={id}
