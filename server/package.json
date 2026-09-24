@@ -14,7 +14,7 @@
     "typecheck": "npx tsc --project nest/tsconfig.json --noEmit",
     "build": "rimraf nest/dist && npx tsc --project nest/tsconfig.json",
     "start": "npm run build && node nest/dist/src/main.js",
-    "dev": "nest start --watch",
+    "dev": "cd nest && nest start --watch",
     "seed": "ts-node prisma/seed.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate:deploy": "prisma migrate deploy",
