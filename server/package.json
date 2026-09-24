@@ -13,7 +13,7 @@
     "format:check": "prettier --check \"nest/src/**/*.ts\"",
     "typecheck": "npx tsc --project nest/tsconfig.json --noEmit",
     "build": "rimraf nest/dist && npx tsc --project nest/tsconfig.json",
-    "start": "npm run build && node nest/dist/main.js",
+    "start": "npm run build && node nest/dist/src/main.js",
     "dev": "nest start --watch",
     "seed": "ts-node prisma/seed.ts",
     "prisma:generate": "prisma generate",
