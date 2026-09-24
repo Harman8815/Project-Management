@@ -5,7 +5,7 @@ import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter";
 import { LoggingInterceptor } from "./common/interceptors/logging.interceptor";
 import { ResponseInterceptor } from "./common/interceptors/response.interceptor";
 import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
-import { PrismaService } from "./prisma/prisma.service";
+import { PrismaModule } from "./prisma/prisma.module";
 import { envValidationSchema } from "./config/env.validation";
 import { UsersModule } from "./modules/users/users.module";
 import { ProjectsModule } from "./modules/projects/projects.module";
@@ -57,11 +57,11 @@ import { WorkflowsModule } from "./modules/workflows/workflows.module";
     IntegrationsModule,
     AiModule,
     CommentsModule,
+    PrismaModule,
     WorkflowsModule,
     CalendarModule,
   ],
   providers: [
-    PrismaService,
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,
