@@ -15,6 +15,7 @@ async function bootstrap() {
   app.enableVersioning({
     type: VersioningType.URI,
     prefix: "v",
+    defaultVersion: "1",
   });
 
   app.setGlobalPrefix("api");
