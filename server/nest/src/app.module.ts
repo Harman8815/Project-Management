@@ -3,7 +3,6 @@ import { ConfigModule } from "@nestjs/config";
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter";
 import { LoggingInterceptor } from "./common/interceptors/logging.interceptor";
-import { ResponseInterceptor } from "./common/interceptors/response.interceptor";
 import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
 import { PrismaModule } from "./prisma/prisma.module";
 import { envValidationSchema } from "./config/env.validation";
@@ -65,10 +64,6 @@ import { WorkflowsModule } from "./modules/workflows/workflows.module";
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,
-    },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: ResponseInterceptor,
     },
     {
       provide: APP_INTERCEPTOR,

@@ -17,6 +17,17 @@ export class JwtAuthGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    if (process.env.AUTH_DISABLED === "true") {
+      const request = context.switchToHttp().getRequest() as Request & {
+        user?: unknown;
+      };
+      request.user = {
+        username: "dev-user",
+        cognitoId: "dev-user",
+      };
+      return true;
+    }
+
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),

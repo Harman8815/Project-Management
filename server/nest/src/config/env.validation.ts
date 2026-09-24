@@ -11,4 +11,5 @@ export const envValidationSchema = Joi.object({
   COGNITO_CLIENT_ID: Joi.string().optional(),
   AWS_REGION: Joi.string().optional(),
   CORS_ORIGIN: Joi.string().default("*"),
+  AUTH_DISABLED: Joi.boolean().default(false),
 });
