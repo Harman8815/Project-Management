@@ -13,7 +13,6 @@ import {
   Home,
   Layers3,
   LockIcon,
-  LucideIcon,
   Search,
   Settings,
   ShieldAlert,
@@ -22,41 +21,38 @@ import {
   User,
   Users,
   X,
+  LucideIcon,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
 
-interface SidebarLinkProps {
+interface SidebarLinkConfig {
   href: string;
   icon: LucideIcon;
   label: string;
 }
 
-const SidebarLink = ({ href, icon: Icon, label }: SidebarLinkProps) => {
-  const pathname = usePathname();
-  const isActive =
-    pathname === href || (pathname === "/" && href === "/dashboard");
+const sidebarLinks: SidebarLinkConfig[] = [
+  { href: "/", icon: Home, label: "Home" },
+  { href: "/timeline", icon: Briefcase, label: "Timeline" },
+  { href: "/search", icon: Search, label: "Search" },
+  { href: "/settings", icon: Settings, label: "Settings" },
+  { href: "/organization", icon: ShieldAlert, label: "Organization" },
+  { href: "/assistant", icon: Sparkles, label: "Assistant" },
+  { href: "/notifications", icon: Bell, label: "Notifications" },
+  { href: "/users", icon: User, label: "Users" },
+  { href: "/teams", icon: Users, label: "Teams" },
+];
 
-  return (
-    <Link href={href} className="w-full">
-      <div
-        className={`relative flex cursor-pointer items-center gap-3 transition-colors hover:bg-gray-100 dark:bg-black dark:hover:bg-gray-700 ${
-          isActive ? "bg-gray-100 text-white dark:bg-gray-600" : ""
-        } justify-start px-8 py-3`}
-      >
-        {isActive && (
-          <div className="absolute left-0 top-0 h-[100%] w-[5px] bg-blue-200" />
-        )}
-        <Icon className="h-6 w-6 text-gray-800 dark:text-gray-100" />
-        <span className="font-medium text-gray-800 dark:text-gray-100">
-          {label}
-        </span>
-      </div>
-    </Link>
-  );
-};
+const priorityLinks: SidebarLinkConfig[] = [
+  { href: "/priority/urgent", icon: AlertCircle, label: "Urgent" },
+  { href: "/priority/high", icon: ShieldAlert, label: "High" },
+  { href: "/priority/medium", icon: AlertTriangle, label: "Medium" },
+  { href: "/priority/low", icon: AlertOctagon, label: "Low" },
+  { href: "/priority/backlog", icon: Layers3, label: "Backlog" },
+];
 
 const Sidebar = () => {
   const [showProjects, setShowProjects] = useState(true);
@@ -64,6 +60,7 @@ const Sidebar = () => {
 
   const { data: projects } = useGetProjectsQuery();
   const dispatch = useAppDispatch();
+  const pathname = usePathname();
   const isSidebarCollapsed = useAppSelector(
     (state) => state.global.isSidebarCollapsed,
   );
@@ -77,130 +74,164 @@ const Sidebar = () => {
   };
   const currentUserDetails = currentUser?.userDetails;
 
-  const sidebarClassNames = `fixed flex flex-col h-[100%] justify-between shadow-xl
-    transition-all duration-300 h-full z-40 dark:bg-black overflow-y-auto bg-white
-    ${isSidebarCollapsed ? "w-0 hidden" : "w-64"}
+  const sidebarClassNames = `fixed flex flex-col h-full justify-between shadow-xl
+    transition-all duration-300 z-40 dark:bg-black overflow-y-auto bg-white
+    ${isSidebarCollapsed ? "w-16" : "w-64"}
+    hidden md:flex
   `;
+
+  const SidebarLink = ({ href, icon: Icon, label }: SidebarLinkConfig) => {
+    const isActive =
+      pathname === href || (pathname === "/" && href === "/dashboard");
+
+    return (
+      <Link href={href} className="w-full">
+        <div
+          className={`relative flex cursor-pointer items-center gap-3 transition-colors hover:bg-gray-100 dark:bg-black dark:hover:bg-gray-700 group ${
+            isActive ? "bg-gray-100 text-white dark:bg-gray-600" : ""
+          } ${isSidebarCollapsed ? "justify-center px-2 py-3" : "justify-start px-8 py-3"}`}
+        >
+          {isActive && !isSidebarCollapsed && (
+            <div className="absolute left-0 top-0 h-[100%] w-[5px] bg-blue-200" />
+          )}
+          <Icon className="h-6 w-6 text-gray-800 dark:text-gray-100 group-hover:text-blue-600" />
+          {!isSidebarCollapsed && (
+            <span className="font-medium text-gray-800 dark:text-gray-100">
+              {label}
+            </span>
+          )}
+        </div>
+      </Link>
+    );
+  };
 
   return (
     <div className={sidebarClassNames}>
-      <div className="flex h-[100%] w-full flex-col justify-start">
-        <div className="z-50 flex min-h-[56px] w-64 items-center justify-between bg-white px-6 pt-3 dark:bg-black">
-          <div className="text-xl font-bold text-gray-800 dark:text-white">
-            Projex
-          </div>
+      <div className="flex h-full w-full flex-col justify-between">
+        <div className={`z-50 flex min-h-[56px] items-center bg-white px-4 pt-3 dark:bg-black ${isSidebarCollapsed ? "w-16 justify-center" : "w-64"}`}>
           {!isSidebarCollapsed && (
-            <button
-              className="py-3"
-              onClick={() => {
-                dispatch(setIsSidebarCollapsed(!isSidebarCollapsed));
-              }}
-              aria-label="Collapse sidebar"
-            >
-              <X className="h-6 w-6 text-gray-800 hover:text-gray-500 dark:text-white" />
-            </button>
-          )}
-        </div>
-        <div className="flex items-center gap-5 border-y-[1.5px] border-gray-200 px-8 py-4 dark:border-gray-700">
-          <Image src="/logo.png" alt="Logo" width={40} height={40} />
-          <div>
-            <h3 className="text-md font-bold tracking-wide dark:text-gray-200">
-              Projex TEAM
-            </h3>
-            <div className="mt-1 flex items-start gap-2">
-              <LockIcon className="mt-[0.1rem] h-3 w-3 text-gray-500 dark:text-gray-400" />
-              <p className="text-xs text-gray-500">Private</p>
+            <div className="text-xl font-bold text-gray-800 dark:text-white">
+              Projex
             </div>
-          </div>
+          )}
+          <button
+            className={`${isSidebarCollapsed ? "ml-auto" : "ml-auto"} py-3`}
+            onClick={() => {
+              dispatch(setIsSidebarCollapsed(!isSidebarCollapsed));
+            }}
+            aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {isSidebarCollapsed ? (
+              <ChevronDown className="h-6 w-6 text-gray-800 hover:text-gray-500 dark:text-white" />
+            ) : (
+              <X className="h-6 w-6 text-gray-800 hover:text-gray-500 dark:text-white" />
+            )}
+          </button>
+        </div>
+        <div className={`border-y-[1.5px] py-4 dark:border-gray-700 ${isSidebarCollapsed ? "flex justify-center px-2" : "flex items-center gap-5 px-8"}`}>
+          <Image src="/logo.png" alt="Logo" width={isSidebarCollapsed ? 30 : 40} height={isSidebarCollapsed ? 30 : 40} />
+          {!isSidebarCollapsed && (
+            <div>
+              <h3 className="text-md font-bold tracking-wide dark:text-gray-200">
+                Projex TEAM
+              </h3>
+              <div className="mt-1 flex items-start gap-2">
+                <LockIcon className="mt-[0.1rem] h-3 w-3 text-gray-500 dark:text-gray-400" />
+                <p className="text-xs text-gray-500">Private</p>
+              </div>
+            </div>
+          )}
         </div>
         <nav className="z-10 w-full">
-          <SidebarLink icon={Home} label="Home" href="/" />
-          <SidebarLink icon={Briefcase} label="Timeline" href="/timeline" />
-          <SidebarLink icon={Search} label="Search" href="/search" />
-          <SidebarLink icon={Settings} label="Settings" href="/settings" />
-          <SidebarLink icon={ShieldAlert} label="Organization" href="/organization" />
-          <SidebarLink icon={Sparkles} label="Assistant" href="/assistant" />
-          <SidebarLink icon={Bell} label="Notifications" href="/notifications" />
-          <SidebarLink icon={User} label="Users" href="/users" />
-          <SidebarLink icon={Users} label="Teams" href="/teams" />
-        </nav>
-
-        <button
-          onClick={() => setShowProjects((prev) => !prev)}
-          className="flex w-full items-center justify-between px-8 py-3 text-gray-500"
-          aria-expanded={showProjects}
-        >
-          <span className="">Projects</span>
-          {showProjects ? (
-            <ChevronUp className="h-5 w-5" />
-          ) : (
-            <ChevronDown className="h-5 w-5" />
-          )}
-        </button>
-        {showProjects &&
-          projects?.map((project) => (
-            <SidebarLink
-              key={project.id}
-              icon={Briefcase}
-              label={project.name}
-              href={`/projects/${project.id}`}
-            />
+          {sidebarLinks.map((link) => (
+            <SidebarLink key={link.href} {...link} />
           ))}
 
-        <button
-          onClick={() => setShowPriority((prev) => !prev)}
-          className="flex w-full items-center justify-between px-8 py-3 text-gray-500"
-          aria-expanded={showPriority}
-        >
-          <span className="">Priority</span>
-          {showPriority ? (
-            <ChevronUp className="h-5 w-5" />
-          ) : (
-            <ChevronDown className="h-5 w-5" />
-          )}
-        </button>
-        {showPriority && (
-          <>
-            <SidebarLink icon={AlertCircle} label="Urgent" href="/priority/urgent" />
-            <SidebarLink icon={ShieldAlert} label="High" href="/priority/high" />
-            <SidebarLink
-              icon={AlertTriangle}
-              label="Medium"
-              href="/priority/medium"
-            />
-            <SidebarLink icon={AlertOctagon} label="Low" href="/priority/low" />
-            <SidebarLink
-              icon={Layers3}
-              label="Backlog"
-              href="/priority/backlog"
-            />
-          </>
-        )}
-      </div>
-      <div className="z-10 mt-32 flex w-full flex-col items-center gap-4 bg-white px-8 py-4 dark:bg-black md:hidden">
-        <div className="flex w-full items-center">
-          <div className="align-center flex h-9 w-9 justify-center">
-            {!!currentUserDetails?.profilePictureUrl ? (
-              <Image
-                src={`/${currentUserDetails?.profilePictureUrl}`}
-                alt={currentUserDetails?.username || "User Profile Picture"}
-                width={100}
-                height={50}
-                className="h-full rounded-full object-cover"
-              />
-            ) : (
-              <User className="h-6 w-6 cursor-pointer self-center rounded-full dark:text-white" />
-            )}
-          </div>
-          <span className="mx-3 text-gray-800 dark:text-white">
-            {currentUserDetails?.username}
-          </span>
           <button
-            className="self-start rounded bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-blue-700"
-            onClick={handleSignOut}
+            onClick={() => setShowProjects((prev) => !prev)}
+            className={`flex w-full items-center py-3 text-gray-500 ${isSidebarCollapsed ? "justify-center px-2" : "justify-between px-8"}`}
+            aria-expanded={showProjects}
           >
-            Sign out
+            {!isSidebarCollapsed && <span>Projects</span>}
+            {!isSidebarCollapsed ? (
+              showProjects ? (
+                <ChevronUp className="h-5 w-5" />
+              ) : (
+                <ChevronDown className="h-5 w-5" />
+              )
+            ) : null}
           </button>
+          {!isSidebarCollapsed &&
+            showProjects &&
+            projects?.map((project) => (
+              <SidebarLink
+                key={project.id}
+                href={`/projects/${project.id}`}
+                icon={Briefcase}
+                label={project.name}
+              />
+            ))}
+
+          <button
+            onClick={() => setShowPriority((prev) => !prev)}
+            className={`flex w-full items-center py-3 text-gray-500 ${isSidebarCollapsed ? "justify-center px-2" : "justify-between px-8"}`}
+            aria-expanded={showPriority}
+          >
+            {!isSidebarCollapsed && <span>Priority</span>}
+            {!isSidebarCollapsed ? (
+              showPriority ? (
+                <ChevronUp className="h-5 w-5" />
+              ) : (
+                <ChevronDown className="h-5 w-5" />
+              )
+            ) : null}
+          </button>
+          {!isSidebarCollapsed &&
+            showPriority &&
+            priorityLinks.map((link) => <SidebarLink key={link.href} {...link} />)}
+        </nav>
+
+        <div className="z-10 flex w-full flex-col items-center gap-4 bg-white px-4 py-4 dark:bg-black md:hidden">
+          {!isSidebarCollapsed ? (
+            <div className="flex w-full items-center">
+              <div className="align-center flex h-9 w-9 justify-center">
+                {!!currentUserDetails?.profilePictureUrl ? (
+                  <Image
+                    src={`/${currentUserDetails?.profilePictureUrl}`}
+                    alt={currentUserDetails?.username || "User Profile Picture"}
+                    width={100}
+                    height={50}
+                    className="h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <User className="h-6 w-6 cursor-pointer self-center rounded-full dark:text-white" />
+                )}
+              </div>
+              <span className="mx-3 text-gray-800 dark:text-white">
+                {currentUserDetails?.username}
+              </span>
+              <button
+                className="self-start rounded bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-blue-700"
+                onClick={handleSignOut}
+              >
+                Sign out
+              </button>
+            </div>
+          ) : (
+            <div className="flex h-9 w-9 justify-center">
+              {!!currentUserDetails?.profilePictureUrl ? (
+                <Image
+                  src={`/${currentUserDetails?.profilePictureUrl}`}
+                  alt={currentUserDetails?.username || "User Profile Picture"}
+                  width={100}
+                  height={50}
+                  className="h-full rounded-full object-cover"
+                />
+              ) : (
+                <User className="h-6 w-6 cursor-pointer self-center rounded-full dark:text-white" />
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

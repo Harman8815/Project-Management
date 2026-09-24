@@ -16,7 +16,7 @@ const Navbar = () => {
   );
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
 
-  const { data: currentUser } = useGetAuthUserQuery({});
+  const { data: currentUser, isLoading } = useGetAuthUserQuery({});
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -25,7 +25,14 @@ const Navbar = () => {
     }
   };
 
-  if (!currentUser) return null;
+  if (isLoading) {
+    return (
+      <nav className="flex items-center justify-between bg-white px-4 py-3 dark:bg-black">
+        <div className="h-6 w-32 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
+      </nav>
+    );
+  }
+
   const currentUserDetails = currentUser?.userDetails;
 
   return (

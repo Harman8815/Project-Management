@@ -18,8 +18,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <ErrorBoundary>
+      <body className={`${inter.className} overflow-x-hidden`}>
+        <ErrorBoundary
+          fallback={
+            <div className="flex min-h-screen items-center justify-center">
+              <div className="text-center">
+                <h1 className="text-2xl font-bold">Something went wrong</h1>
+                <p className="text-gray-600">
+                  An unexpected error occurred. Please refresh the page or try again later.
+                </p>
+              </div>
+            </div>
+          }
+        >
           <DashboardWrapper>{children}</DashboardWrapper>
         </ErrorBoundary>
       </body>
