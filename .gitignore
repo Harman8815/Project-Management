@@ -4,10 +4,13 @@
 # Server
 server/node_modules/
 server/dist/
+server/nest/dist/
 server/.env
 server/.env.test
 server/prisma/dev.db
 server/prisma/*.db
+server/nest/prisma/dev.db
+server/nest/prisma/*.db
 server/prisma/test.db*
 server/test.db
 server/test.db*
