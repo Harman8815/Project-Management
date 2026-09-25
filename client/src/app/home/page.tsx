@@ -110,7 +110,7 @@ const HomePage = () => {
   }
 
   return (
-    <div className="container h-full w-full bg-gray-100 p-8 dark:bg-dark-bg">
+    <div className="container mx-auto w-full min-w-0 bg-gray-100 p-8 dark:bg-dark-bg">
       <Header name="Project Management Dashboard" />
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Card

@@ -74,8 +74,8 @@ const Sidebar = () => {
   };
   const currentUserDetails = currentUser?.userDetails;
 
-  const sidebarClassNames = `fixed flex flex-col h-full justify-between shadow-xl
-    transition-all duration-300 z-40 dark:bg-black overflow-y-auto bg-white
+  const sidebarClassNames = `fixed flex flex-col h-screen shadow-xl
+    transition-all duration-300 z-40 dark:bg-black bg-white
     ${isSidebarCollapsed ? "w-16" : "w-64"}
     hidden md:flex
   `;
@@ -107,7 +107,7 @@ const Sidebar = () => {
 
   return (
     <div className={sidebarClassNames}>
-      <div className="flex h-full w-full flex-col justify-between">
+      <div className="flex h-full w-full flex-col">
         <div className={`z-50 flex min-h-[56px] items-center bg-white px-4 pt-3 dark:bg-black ${isSidebarCollapsed ? "w-16 justify-center" : "w-64"}`}>
           {!isSidebarCollapsed && (
             <div className="text-xl font-bold text-gray-800 dark:text-white">
@@ -115,7 +115,7 @@ const Sidebar = () => {
             </div>
           )}
           <button
-            className={`${isSidebarCollapsed ? "ml-auto" : "ml-auto"} py-3`}
+            className="ml-auto py-3"
             onClick={() => {
               dispatch(setIsSidebarCollapsed(!isSidebarCollapsed));
             }}
@@ -142,7 +142,7 @@ const Sidebar = () => {
             </div>
           )}
         </div>
-        <nav className="z-10 w-full">
+        <nav className="z-10 w-full flex-1 overflow-y-auto">
           {sidebarLinks.map((link) => (
             <SidebarLink key={link.href} {...link} />
           ))}
@@ -191,7 +191,7 @@ const Sidebar = () => {
             priorityLinks.map((link) => <SidebarLink key={link.href} {...link} />)}
         </nav>
 
-        <div className="z-10 flex w-full flex-col items-center gap-4 bg-white px-4 py-4 dark:bg-black md:hidden">
+        <div className="z-10 flex w-full flex-shrink-0 flex-col items-center gap-4 bg-white px-4 py-4 dark:bg-black md:hidden">
           {!isSidebarCollapsed ? (
             <div className="flex w-full items-center">
               <div className="align-center flex h-9 w-9 justify-center">
