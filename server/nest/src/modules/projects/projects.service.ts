@@ -209,4 +209,43 @@ export class ProjectsService {
       });
     });
   }
+
+  async getTimeline(userId?: number) {
+    const whereClause: any = {};
+    if (userId) {
+      const userMemberships = await this.prisma.projectMembership.findMany({
+        where: { userId, status: "ACTIVE" },
+        select: { projectId: true },
+      });
+      whereClause.id = { in: userMemberships.map((m) => m.projectId) };
+    }
+
+    const projects = await this.prisma.project.findMany({
+      where: whereClause,
+      include: {
+        sprints: {
+          orderBy: { startDate: "asc" },
+        },
+      },
+    });
+
+    const now = new Date();
+    return projects.map((project) => {
+      const end = project.endDate ? new Date(project.endDate) : null;
+      const isCompleted = project.status === "COMPLETED" || project.status === "ARCHIVED";
+
+      let delayDays = 0;
+      let delayed = false;
+      if (!isCompleted && end && now > end) {
+        delayed = true;
+        delayDays = Math.ceil((now.getTime() - end.getTime()) / (1000 * 60 * 60 * 24));
+      }
+
+      return {
+        ...project,
+        delayed,
+        delayDays,
+      };
+    });
+  }
 }

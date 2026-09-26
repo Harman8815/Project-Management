@@ -29,6 +29,7 @@ import { AiModule } from "./modules/ai/ai.module";
 import { CommentsModule } from "./modules/comments/comments.module";
 import { CalendarModule } from "./modules/calendar/calendar.module";
 import { WorkflowsModule } from "./modules/workflows/workflows.module";
+import { TimelineModule } from "./modules/timeline/timeline.module";
 import { DevModule } from "./modules/dev/dev.module";
 
 @Module({
@@ -61,6 +62,7 @@ import { DevModule } from "./modules/dev/dev.module";
     PrismaModule,
     WorkflowsModule,
     CalendarModule,
+    TimelineModule,
     DevModule,
   ],
   providers: [
