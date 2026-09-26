@@ -1,7 +1,7 @@
 "use client";
 
 import Header from "@/components/Header";
-import { ErrorState, LoadingState } from "@/components/ui";
+import { ErrorState, LoadingState, TableSkeleton } from "@/components/ui";
 import {
   DataGrid,
   GridColDef,
@@ -36,7 +36,14 @@ const Teams = () => {
   const { data: teams, isLoading, isError } = useGetTeamsQuery();
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
 
-  if (isLoading) return <LoadingState message="Loading teams..." />;
+  if (isLoading) {
+    return (
+      <div className="flex w-full flex-col p-8">
+        <Header name="Teams" />
+        <TableSkeleton rows={5} cols={4} />
+      </div>
+    );
+  }
   if (isError || !teams)
     return (
       <ErrorState

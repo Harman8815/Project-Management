@@ -1,6 +1,7 @@
 "use client";
 
 import Header from "@/components/Header";
+import { CardSkeleton } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
 import {
   useCreateCustomFieldMutation,
@@ -29,9 +30,23 @@ export default function OrganizationPage() {
   const [fieldKey, setFieldKey] = useState("");
   const [fieldType, setFieldType] = useState("TEXT");
   const [provider, setProvider] = useState("github");
-  const [notice, setNotice] = useState("");
 
-  if (isLoading) return <main className="p-8">Loading organization...</main>;
+  if (userLoading || !orgId) {
+    return (
+      <main className="space-y-6 p-8">
+        <Header name="Organization admin" />
+        <CardSkeleton count={2} />
+      </main>
+    );
+  }
+  if (isLoading) {
+    return (
+      <main className="space-y-6 p-8">
+        <Header name="Organization admin" />
+        <CardSkeleton count={3} />
+      </main>
+    );
+  }
   if (isError || !organization) return <main className="p-8">Organization access is unavailable.</main>;
 
   const saveSettings = async () => {
@@ -68,7 +83,6 @@ export default function OrganizationPage() {
     <main className="space-y-6 p-8">
       <Header name="Organization admin" />
       <p className="text-sm text-gray-500">{organization.name} · {organization.slug}</p>
-      {notice && <div className="rounded border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">{notice}</div>}
       <section className="grid gap-6 xl:grid-cols-3">
         <Panel icon={ShieldCheck} title="Members and roles">
           <div className="space-y-2">{organization.memberships.map((member) => <div className="flex justify-between rounded bg-gray-50 p-3 text-sm dark:bg-gray-800" key={member.userId}><span>User {member.userId}</span><strong>{member.role}</strong></div>)}</div>

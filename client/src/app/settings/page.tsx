@@ -1,14 +1,21 @@
 "use client";
 
 import Header from "@/components/Header";
-import { Card, LoadingState, ErrorState } from "@/components/ui";
+import { Card, LoadingState, ErrorState, CardSkeleton } from "@/components/ui";
 import { useGetAuthUserQuery } from "@/state/api";
 import React from "react";
 
 const Settings = () => {
   const { data: currentUser, isLoading, isError } = useGetAuthUserQuery({});
 
-  if (isLoading) return <LoadingState message="Loading settings..." />;
+  if (isLoading) {
+    return (
+      <div className="p-8">
+        <Header name="Settings" />
+        <CardSkeleton count={2} />
+      </div>
+    );
+  }
   if (isError)
     return (
       <ErrorState

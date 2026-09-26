@@ -1,7 +1,7 @@
 "use client";
 
 import Header from "@/components/Header";
-import { Input, LoadingState, ErrorState, EmptyState } from "@/components/ui";
+import { Input, LoadingState, ErrorState, EmptyState, CardSkeleton } from "@/components/ui";
 import ProjectCard from "@/components/ProjectCard";
 import TaskCard from "@/components/TaskCard";
 import UserCard from "@/components/UserCard";
@@ -52,7 +52,7 @@ const Search = () => {
         />
       </div>
       <div className="p-5">
-        {isLoading && <LoadingState message="Searching..." />}
+        {isLoading && (searchTerm.length >= 3 ? <CardSkeleton count={3} /> : <LoadingState message="Searching..." />)}
         {isError && (
           <ErrorState
             message="Error occurred while fetching search results"

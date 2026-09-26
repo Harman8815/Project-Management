@@ -12,7 +12,7 @@ import React from "react";
 import { useAppSelector } from "../redux";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Header from "@/components/Header";
-import { Card, LoadingState, EmptyState, ErrorState } from "@/components/ui";
+import { Card, LoadingState, EmptyState, ErrorState, ChartSkeleton, TableSkeleton } from "@/components/ui";
 import {
   Bar,
   BarChart,
@@ -59,8 +59,24 @@ const HomePage = () => {
 
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
 
-  if (tasksLoading || isProjectsLoading)
-    return <LoadingState message="Loading dashboard..." />;
+  if (tasksLoading || isProjectsLoading) {
+    return (
+      <div className="container mx-auto w-full min-w-0 bg-gray-100 p-8 dark:bg-dark-bg">
+        <Header name="Project Management Dashboard" />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Card title="Task Priority Distribution" className="shadow dark:border-gray-700">
+            <ChartSkeleton />
+          </Card>
+          <Card title="Project Status" className="shadow dark:border-gray-700">
+            <ChartSkeleton />
+          </Card>
+          <Card title="Your Tasks" className="md:col-span-2 shadow dark:border-gray-700">
+            <TableSkeleton rows={5} cols={4} />
+          </Card>
+        </div>
+      </div>
+    );
+  }
   if (tasksError || projectsError)
     return (
       <ErrorState
