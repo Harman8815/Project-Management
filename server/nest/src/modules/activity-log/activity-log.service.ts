@@ -7,10 +7,14 @@ import { PrismaService } from "../../prisma/prisma.service";
 import { CreateActivityLogDto, ActivityEventType } from "./dto/create-activity-log.dto";
 import { getPaginationParams } from "../../common/utils/pagination.util";
 import { PaginationDto } from "../../common/dto/pagination.dto";
+import { NotificationEngineService } from "../notifications/notification-engine.service";
 
 @Injectable()
 export class ActivityLogService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationEngine: NotificationEngineService,
+  ) {}
 
   async create(createActivityLogDto: CreateActivityLogDto, actorId?: number) {
     // Check if user has access to the project
@@ -21,7 +25,7 @@ export class ActivityLogService {
       }
     }
 
-    return this.prisma.activityLog.create({
+    const log = await this.prisma.activityLog.create({
       data: {
         eventType: createActivityLogDto.eventType,
         message: createActivityLogDto.message,
@@ -42,6 +46,21 @@ export class ActivityLogService {
         },
       },
     });
+
+    const payload = {
+      taskId: createActivityLogDto.taskId,
+      projectId: createActivityLogDto.projectId,
+      actorId: createActivityLogDto.actorId || actorId,
+      authorName: log.actor?.username,
+      assigneeUserId: createActivityLogDto.targetUserId,
+      newStatus: createActivityLogDto.metadata?.newStatus,
+      daysRemaining: createActivityLogDto.metadata?.daysRemaining,
+      ...createActivityLogDto.metadata,
+    };
+
+    void this.notificationEngine.processEvent(createActivityLogDto.eventType, payload);
+
+    return log;
   }
 
   async logEvent(

@@ -1,5 +1,6 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ActivityLogService } from "./activity-log.service";
+import { NotificationEngineService } from "../notifications/notification-engine.service";
 import { PrismaService } from "../../prisma/prisma.service";
 import { NotFoundException } from "@nestjs/common";
 
@@ -15,6 +16,10 @@ describe("ActivityLogService", () => {
     },
   };
 
+  const mockNotificationEngineService = {
+    processEvent: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -22,6 +27,10 @@ describe("ActivityLogService", () => {
         {
           provide: PrismaService,
           useValue: mockPrismaService,
+        },
+        {
+          provide: NotificationEngineService,
+          useValue: mockNotificationEngineService,
         },
       ],
     }).compile();

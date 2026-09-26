@@ -10,6 +10,12 @@ export const NOTIFICATION_TYPES = [
   "OVERDUE_ALERT",
   "WORKFLOW_EVENT",
   "SYSTEM",
+  "TASK_DUE_SOON",
+  "TASK_OVERDUE",
+  "PROJECT_UPDATED",
+  "SPRINT_STARTED",
+  "SPRINT_ENDING",
+  "SCHEDULED_REMINDER",
 ] as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
