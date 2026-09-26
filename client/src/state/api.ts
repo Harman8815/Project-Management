@@ -131,6 +131,12 @@ export interface CustomFieldDefinition {
   required: boolean;
 }
 
+export interface TimelineProject extends Project {
+  sprints?: Sprint[];
+  delayed?: boolean;
+  delayDays?: number;
+}
+
 export interface Notification {
   id: number;
   title: string;
@@ -251,6 +257,10 @@ export const api = createApi({
     getProjects: build.query<Project[], void>({
       query: () => "projects",
       transformResponse: (response: { data: Project[]; meta: any }) => response.data,
+      providesTags: ["Projects"],
+    }),
+    getTimeline: build.query<TimelineProject[], void>({
+      query: () => "timeline",
       providesTags: ["Projects"],
     }),
     createProject: build.mutation<Project, Partial<Project>>({
@@ -447,6 +457,7 @@ export const api = createApi({
 
 export const {
   useGetProjectsQuery,
+  useGetTimelineQuery,
   useCreateProjectMutation,
   useUpdateProjectMutation,
   useGetTasksQuery,
