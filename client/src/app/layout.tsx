@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import DashboardWrapper from "./dashboardWrapper";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ToasterProvider } from "@/components/ui";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,6 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} overflow-x-hidden`}>
+        <ToasterProvider />
         <ErrorBoundary
           fallback={
             <div className="flex min-h-screen items-center justify-center">

@@ -93,14 +93,14 @@ export class NotificationsService {
     }
     return this.prisma.notification.update({
       where: { id },
-      data: { read: true },
+      data: { read: true, readAt: new Date() },
     });
   }
 
   async markAllAsRead(userId: number) {
     await this.prisma.notification.updateMany({
       where: { userId, read: false },
-      data: { read: true },
+      data: { read: true, readAt: new Date() },
     });
     return { count: await this.prisma.notification.count({ where: { userId, read: true } }) };
   }

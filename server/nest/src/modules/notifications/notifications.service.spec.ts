@@ -154,7 +154,7 @@ describe("NotificationsService", () => {
 
       expect(mockPrismaService.notification.updateMany).toHaveBeenCalledWith({
         where: { userId: 1, read: false },
-        data: { read: true },
+        data: { read: true, readAt: expect.any(Date) },
       });
       expect(result.count).toBe(8);
     });

@@ -1,6 +1,7 @@
 "use client";
 
 import Header from "@/components/Header";
+import { toast } from "@/components/ui/toast";
 import {
   useCreateCustomFieldMutation,
   useCreateIntegrationMutation,
@@ -34,21 +35,33 @@ export default function OrganizationPage() {
   if (isError || !organization) return <main className="p-8">Organization access is unavailable.</main>;
 
   const saveSettings = async () => {
-    await updateSettings({ organizationId: orgId, settings: { auditRetentionDays: retention } }).unwrap();
-    setNotice("Settings saved");
+    try {
+      await updateSettings({ organizationId: orgId, settings: { auditRetentionDays: retention } }).unwrap();
+      toast.success("Settings saved");
+    } catch {
+      toast.error("Failed to save settings");
+    }
   };
 
   const addField = async () => {
     if (!fieldName || !fieldKey) return;
-    await createField({ organizationId: orgId, name: fieldName, key: fieldKey, fieldType }).unwrap();
-    setFieldName("");
-    setFieldKey("");
-    setNotice("Custom field created");
+    try {
+      await createField({ organizationId: orgId, name: fieldName, key: fieldKey, fieldType }).unwrap();
+      setFieldName("");
+      setFieldKey("");
+      toast.success("Custom field created");
+    } catch {
+      toast.error("Failed to create custom field");
+    }
   };
 
   const connectIntegration = async () => {
-    await createIntegration({ organizationId: orgId, provider, name: `${provider} workspace` }).unwrap();
-    setNotice(`${provider} integration configured`);
+    try {
+      await createIntegration({ organizationId: orgId, provider, name: `${provider} workspace` }).unwrap();
+      toast.success(`${provider} integration configured`);
+    } catch {
+      toast.error(`Failed to configure ${provider} integration`);
+    }
   };
 
   return (

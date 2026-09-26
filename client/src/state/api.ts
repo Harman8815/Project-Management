@@ -1,5 +1,6 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery, BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 import { fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
+import { handleApiError } from "@/hooks/useGlobalErrorHandler";
 
 export interface Project {
   id: number;
@@ -168,18 +169,39 @@ export interface Milestone {
   ownerId?: number;
 }
 
+export const baseQuery = fetchBaseQuery({
+  baseUrl: `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1`,
+  prepareHeaders: async (headers) => {
+    const session = await fetchAuthSession();
+    const { accessToken } = session.tokens ?? {};
+    if (accessToken) {
+      headers.set("Authorization", `Bearer ${accessToken}`);
+    }
+    return headers;
+  },
+});
+
+const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
+  args,
+  api,
+  extraOptions,
+) => {
+  const result = await baseQuery(args, api, extraOptions);
+
+  if (result.data && typeof result.data === "object" && "success" in result.data && "data" in result.data) {
+    return { data: (result.data as { success: boolean; data: unknown; timestamp: string }).data };
+  }
+
+  if (result.error) {
+    const endpointName = typeof args === "string" ? args : (args as FetchArgs).url || "unknown";
+    handleApiError(result.error, endpointName);
+  }
+
+  return result;
+};
+
 export const api = createApi({
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1`,
-    prepareHeaders: async (headers) => {
-      const session = await fetchAuthSession();
-      const { accessToken } = session.tokens ?? {};
-      if (accessToken) {
-        headers.set("Authorization", `Bearer ${accessToken}`);
-      }
-      return headers;
-    },
-  }),
+  baseQuery: baseQueryWithReauth,
   reducerPath: "api",
   tagTypes: ["Projects", "Tasks", "Users", "Teams", "Organization", "CustomFields", "Notifications", "Calendar"],
   endpoints: (build) => ({
