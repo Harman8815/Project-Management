@@ -5,18 +5,26 @@ import { Reflector } from "@nestjs/core";
 describe("JwtAuthGuard", () => {
   let guard: JwtAuthGuard;
   let reflector: Reflector;
+  let prisma: any;
 
   beforeEach(() => {
     reflector = {
       getAllAndOverride: jest.fn(),
     } as any;
 
-    guard = new JwtAuthGuard(reflector);
+    prisma = {
+      user: {
+        findUnique: jest.fn().mockResolvedValue({ userId: 1, username: "dev-user", cognitoId: "dev-user" }),
+      },
+    };
+
+    guard = new JwtAuthGuard(reflector, prisma);
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
+    process.env.AUTH_DISABLED = "false";
   });
 
   const mockExecutionContext = (request: any): ExecutionContext => ({

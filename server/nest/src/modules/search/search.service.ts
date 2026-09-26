@@ -1,11 +1,15 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
+import { SearchHistoryService } from "./search-history.service";
 
 @Injectable()
 export class SearchService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly searchHistoryService: SearchHistoryService,
+  ) {}
 
-  async search(query: string) {
+  async search(query: string, userId?: number) {
     if (!query) return { tasks: [], projects: [], users: [] };
 
     const [tasks, projects, users] = await Promise.all([
@@ -35,6 +39,10 @@ export class SearchService {
         },
       }),
     ]);
+
+    if (userId && query.trim().length >= 3) {
+      void this.searchHistoryService.recordSearch(userId, query);
+    }
 
     return { tasks, projects, users };
   }

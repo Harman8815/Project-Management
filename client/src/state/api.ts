@@ -330,6 +330,20 @@ export const api = createApi({
     search: build.query<SearchResults, string>({
       query: (query) => `search?query=${query}`,
     }),
+    getRecentSearches: build.query<string[], number>({
+      query: (userId) => `search/recent?userId=${userId}`,
+      transformResponse: (response: string[]) => response,
+    }),
+    getTopSearches: build.query<Array<{ query: string; count: number }>, { period?: string; limit?: number }>({
+      query: ({ period = "week", limit = 10 }) => `search/top?period=${period}&limit=${limit}`,
+      transformResponse: (response: Array<{ query: string; count: number }>) => response,
+    }),
+    clearRecentSearches: build.mutation<{ success: boolean }, number>({
+      query: (userId) => ({
+        url: `search/recent?userId=${userId}`,
+        method: "DELETE",
+      }),
+    }),
     getOrganization: build.query<Organization, number>({
       query: (organizationId) => `organizations/${organizationId}`,
       providesTags: ["Organization"],
@@ -442,6 +456,9 @@ export const {
   useUpdateTaskStatusMutation,
   useGetSprintsQuery,
   useSearchQuery,
+  useGetRecentSearchesQuery,
+  useGetTopSearchesQuery,
+  useClearRecentSearchesMutation,
   useGetUsersQuery,
   useGetTeamsQuery,
   useGetAuthUserQuery,

@@ -8,23 +8,30 @@ import {
 import { Reflector } from "@nestjs/core";
 import { Request } from "express";
 import * as jwt from "jsonwebtoken";
+import { PrismaService } from "../../prisma/prisma.service";
 
 export const IS_PUBLIC_KEY = "isPublic";
 export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(
+    private reflector: Reflector,
+    private prisma: PrismaService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     if (process.env.AUTH_DISABLED === "true") {
       const request = context.switchToHttp().getRequest() as Request & {
         user?: unknown;
       };
-      request.user = {
-        username: "dev-user",
-        cognitoId: "dev-user",
-      };
+      const devUser = await this.prisma.user.findUnique({
+        where: { cognitoId: "dev-user" },
+        select: { userId: true, username: true, cognitoId: true },
+      });
+      request.user = devUser
+        ? { userId: devUser.userId, username: devUser.username, cognitoId: devUser.cognitoId }
+        : { username: "dev-user", cognitoId: "dev-user" };
       return true;
     }
 

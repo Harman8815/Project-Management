@@ -1,15 +1,17 @@
 "use client";
 
 import Header from "@/components/Header";
-import { Input, LoadingState, ErrorState, EmptyState, CardSkeleton } from "@/components/ui";
+import { Input, LoadingState, ErrorState, EmptyState, CardSkeleton, Skeleton } from "@/components/ui";
 import ProjectCard from "@/components/ProjectCard";
 import TaskCard from "@/components/TaskCard";
 import UserCard from "@/components/UserCard";
-import { useSearchQuery } from "@/state/api";
+import { useGetAuthUserQuery, useSearchQuery, useGetRecentSearchesQuery, useGetTopSearchesQuery, useClearRecentSearchesMutation } from "@/state/api";
 import { debounce } from "lodash";
 import React, { useEffect, useState } from "react";
 
 const Search = () => {
+  const { data: currentUser, isLoading: userLoading } = useGetAuthUserQuery({});
+  const userId = currentUser?.userDetails?.userId;
   const [searchTerm, setSearchTerm] = useState("");
   const {
     data: searchResults,
@@ -18,6 +20,12 @@ const Search = () => {
   } = useSearchQuery(searchTerm, {
     skip: searchTerm.length < 3,
   });
+
+  const { data: recentSearches = [], isLoading: recentLoading } = useGetRecentSearchesQuery(userId ?? 0, {
+    skip: !userId,
+  });
+  const { data: topSearches = [], isLoading: topLoading } = useGetTopSearchesQuery({ period: "week", limit: 10 });
+  const [clearRecent] = useClearRecentSearchesMutation();
 
   const handleSearch = debounce(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,7 +46,8 @@ const Search = () => {
       (searchResults.projects?.length ?? 0) > 0 ||
       (searchResults.users?.length ?? 0) > 0);
 
-  const shouldShowEmpty = !isLoading && !isError && !hasResults;
+  const shouldShowEmpty = !isLoading && !isError && !hasResults && searchTerm.length >= 3;
+  const showHints = searchTerm.length < 3;
 
   return (
     <div className="p-8">
@@ -51,6 +60,65 @@ const Search = () => {
           onChange={handleSearch}
         />
       </div>
+
+      {showHints && !userLoading && (
+        <div className="mt-6 space-y-6">
+          {recentSearches.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold dark:text-white">Recent searches</h2>
+                <button
+                  className="text-sm text-blue-600 hover:underline"
+                  onClick={async () => {
+                    if (userId) await clearRecent(userId).unwrap();
+                  }}
+                >
+                  Clear all
+                </button>
+              </div>
+              {recentLoading ? (
+                <Skeleton className="h-6 w-32" />
+              ) : (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {recentSearches.map((term) => (
+                    <button
+                      key={term}
+                      className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
+                      onClick={() => setSearchTerm(term)}
+                    >
+                      {term}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          <div>
+            <h2 className="text-lg font-semibold dark:text-white">Top searches this week</h2>
+            {topLoading ? (
+              <CardSkeleton count={3} />
+            ) : (
+              <div className="mt-2 space-y-2">
+                {topSearches.map((s, i) => (
+                  <div key={s.query} className="flex items-center gap-2">
+                    <span className="text-xs font-medium text-gray-400">#{i + 1}</span>
+                    <button
+                      className="text-left text-sm text-gray-700 hover:underline dark:text-gray-300"
+                      onClick={() => setSearchTerm(s.query)}
+                    >
+                      {s.query}
+                    </button>
+                    <span className="text-xs text-gray-400">({s.count} searches)</span>
+                  </div>
+                ))}
+                {topSearches.length === 0 && <p className="text-sm text-gray-500">No popular searches yet.</p>}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="p-5">
         {isLoading && (searchTerm.length >= 3 ? <CardSkeleton count={3} /> : <LoadingState message="Searching..." />)}
         {isError && (
