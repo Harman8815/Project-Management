@@ -35,6 +35,16 @@ async function main() {
     "taskAssignment.json",
     "calendarSync.json",
     "calendarEvent.json",
+    "organization.json",
+    "organizationMembership.json",
+    "projectMembership.json",
+    "sprint.json",
+    "milestone.json",
+    "notification.json",
+    "notificationPreference.json",
+    "customFieldDefinition.json",
+    "customFieldValue.json",
+    "integration.json",
   ];
 
   await deleteAllData(orderedFileNames);

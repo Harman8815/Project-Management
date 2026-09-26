@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "name": "TechVision",
+    "slug": "techvision",
+    "createdById": 1,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 2,
+    "name": "NexusCorp",
+    "slug": "nexuscorp",
+    "createdById": 1,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 3,
+    "name": "StellarWorks",
+    "slug": "stellarworks",
+    "createdById": 1,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  }
+]

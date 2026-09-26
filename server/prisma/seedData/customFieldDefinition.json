@@ -1,0 +1,200 @@
+[
+  {
+    "id": 1,
+    "organizationId": 1,
+    "name": "Business Unit",
+    "key": "business_unit",
+    "fieldType": "TEXT",
+    "options": null,
+    "required": true,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 2,
+    "organizationId": 1,
+    "name": "Budget (USD)",
+    "key": "budget",
+    "fieldType": "NUMBER",
+    "options": null,
+    "required": true,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 3,
+    "organizationId": 1,
+    "name": "Is External",
+    "key": "is_external",
+    "fieldType": "BOOLEAN",
+    "options": null,
+    "required": false,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 4,
+    "organizationId": 1,
+    "name": "Go Live Date",
+    "key": "go_live_date",
+    "fieldType": "DATE",
+    "options": null,
+    "required": false,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 5,
+    "organizationId": 1,
+    "name": "Compliance Level",
+    "key": "compliance_level",
+    "fieldType": "SELECT",
+    "options": "Standard,High,Critical",
+    "required": true,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 6,
+    "organizationId": 1,
+    "name": "Customer Tier",
+    "key": "customer_tier",
+    "fieldType": "SELECT",
+    "options": "Platinum,Gold,Silver,Bronze",
+    "required": false,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 7,
+    "organizationId": 2,
+    "name": "Business Unit",
+    "key": "business_unit",
+    "fieldType": "TEXT",
+    "options": null,
+    "required": false,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 8,
+    "organizationId": 2,
+    "name": "Budget (USD)",
+    "key": "budget",
+    "fieldType": "NUMBER",
+    "options": null,
+    "required": true,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 9,
+    "organizationId": 2,
+    "name": "Is External",
+    "key": "is_external",
+    "fieldType": "BOOLEAN",
+    "options": null,
+    "required": true,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 10,
+    "organizationId": 2,
+    "name": "Go Live Date",
+    "key": "go_live_date",
+    "fieldType": "DATE",
+    "options": null,
+    "required": false,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 11,
+    "organizationId": 2,
+    "name": "Compliance Level",
+    "key": "compliance_level",
+    "fieldType": "SELECT",
+    "options": "Standard,High,Critical",
+    "required": false,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 12,
+    "organizationId": 2,
+    "name": "Customer Tier",
+    "key": "customer_tier",
+    "fieldType": "SELECT",
+    "options": "Platinum,Gold,Silver,Bronze",
+    "required": true,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 13,
+    "organizationId": 3,
+    "name": "Business Unit",
+    "key": "business_unit",
+    "fieldType": "TEXT",
+    "options": null,
+    "required": false,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 14,
+    "organizationId": 3,
+    "name": "Budget (USD)",
+    "key": "budget",
+    "fieldType": "NUMBER",
+    "options": null,
+    "required": false,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 15,
+    "organizationId": 3,
+    "name": "Is External",
+    "key": "is_external",
+    "fieldType": "BOOLEAN",
+    "options": null,
+    "required": true,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 16,
+    "organizationId": 3,
+    "name": "Go Live Date",
+    "key": "go_live_date",
+    "fieldType": "DATE",
+    "options": null,
+    "required": true,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 17,
+    "organizationId": 3,
+    "name": "Compliance Level",
+    "key": "compliance_level",
+    "fieldType": "SELECT",
+    "options": "Standard,High,Critical",
+    "required": false,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 18,
+    "organizationId": 3,
+    "name": "Customer Tier",
+    "key": "customer_tier",
+    "fieldType": "SELECT",
+    "options": "Platinum,Gold,Silver,Bronze",
+    "required": false,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  }
+]

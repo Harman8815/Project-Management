@@ -42,6 +42,11 @@ export class UsersService {
       include: {
         assignedTasks: true,
         authoredTasks: true,
+        team: true,
+        organizationMemberships: {
+          include: { organization: true },
+        },
+        notificationPreference: true,
       },
     });
     if (!user) {

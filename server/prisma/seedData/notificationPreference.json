@@ -1,0 +1,162 @@
+[
+  {
+    "id": 1,
+    "userId": 1,
+    "notificationType": "ALL",
+    "emailEnabled": true,
+    "inAppEnabled": true,
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 2,
+    "userId": 2,
+    "notificationType": "ALL",
+    "emailEnabled": true,
+    "inAppEnabled": true,
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 3,
+    "userId": 3,
+    "notificationType": "ALL",
+    "emailEnabled": true,
+    "inAppEnabled": true,
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 4,
+    "userId": 4,
+    "notificationType": "ALL",
+    "emailEnabled": true,
+    "inAppEnabled": true,
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 5,
+    "userId": 5,
+    "notificationType": "ALL",
+    "emailEnabled": true,
+    "inAppEnabled": true,
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 6,
+    "userId": 6,
+    "notificationType": "ALL",
+    "emailEnabled": true,
+    "inAppEnabled": true,
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 7,
+    "userId": 7,
+    "notificationType": "ALL",
+    "emailEnabled": true,
+    "inAppEnabled": true,
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 8,
+    "userId": 8,
+    "notificationType": "ASSIGNMENTS",
+    "emailEnabled": true,
+    "inAppEnabled": true,
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 9,
+    "userId": 9,
+    "notificationType": "ALL",
+    "emailEnabled": true,
+    "inAppEnabled": true,
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 10,
+    "userId": 10,
+    "notificationType": "ALL",
+    "emailEnabled": false,
+    "inAppEnabled": true,
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 11,
+    "userId": 11,
+    "notificationType": "ALL",
+    "emailEnabled": false,
+    "inAppEnabled": true,
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 12,
+    "userId": 12,
+    "notificationType": "ALL",
+    "emailEnabled": true,
+    "inAppEnabled": true,
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 13,
+    "userId": 13,
+    "notificationType": "ALL",
+    "emailEnabled": true,
+    "inAppEnabled": false,
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 14,
+    "userId": 14,
+    "notificationType": "MENTIONS",
+    "emailEnabled": true,
+    "inAppEnabled": true,
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 15,
+    "userId": 15,
+    "notificationType": "ALL",
+    "emailEnabled": true,
+    "inAppEnabled": true,
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 16,
+    "userId": 16,
+    "notificationType": "ASSIGNMENTS",
+    "emailEnabled": true,
+    "inAppEnabled": true,
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 17,
+    "userId": 17,
+    "notificationType": "ALL",
+    "emailEnabled": true,
+    "inAppEnabled": true,
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 18,
+    "userId": 18,
+    "notificationType": "ALL",
+    "emailEnabled": true,
+    "inAppEnabled": true,
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 19,
+    "userId": 19,
+    "notificationType": "ASSIGNMENTS",
+    "emailEnabled": true,
+    "inAppEnabled": true,
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 20,
+    "userId": 20,
+    "notificationType": "ALL",
+    "emailEnabled": true,
+    "inAppEnabled": true,
+    "updatedAt": "2024-01-01T00:00:00Z"
+  }
+]

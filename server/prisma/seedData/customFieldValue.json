@@ -1,0 +1,1262 @@
+[
+  {
+    "id": 1,
+    "definitionId": 1,
+    "projectId": 1,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 2,
+    "definitionId": 1,
+    "projectId": 2,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 3,
+    "definitionId": 1,
+    "projectId": 3,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 4,
+    "definitionId": 1,
+    "projectId": 4,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 5,
+    "definitionId": 1,
+    "projectId": 5,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 6,
+    "definitionId": 1,
+    "projectId": 6,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 7,
+    "definitionId": 1,
+    "projectId": 7,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 8,
+    "definitionId": 1,
+    "projectId": 8,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 9,
+    "definitionId": 1,
+    "projectId": 9,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 10,
+    "definitionId": 1,
+    "projectId": 10,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 11,
+    "definitionId": 2,
+    "projectId": 1,
+    "taskId": null,
+    "value": "74138"
+  },
+  {
+    "id": 12,
+    "definitionId": 2,
+    "projectId": 2,
+    "taskId": null,
+    "value": "26029"
+  },
+  {
+    "id": 13,
+    "definitionId": 2,
+    "projectId": 3,
+    "taskId": null,
+    "value": "48200"
+  },
+  {
+    "id": 14,
+    "definitionId": 2,
+    "projectId": 4,
+    "taskId": null,
+    "value": "49193"
+  },
+  {
+    "id": 15,
+    "definitionId": 2,
+    "projectId": 5,
+    "taskId": null,
+    "value": "71599"
+  },
+  {
+    "id": 16,
+    "definitionId": 2,
+    "projectId": 6,
+    "taskId": null,
+    "value": "94345"
+  },
+  {
+    "id": 17,
+    "definitionId": 2,
+    "projectId": 7,
+    "taskId": null,
+    "value": "54564"
+  },
+  {
+    "id": 18,
+    "definitionId": 2,
+    "projectId": 8,
+    "taskId": null,
+    "value": "102658"
+  },
+  {
+    "id": 19,
+    "definitionId": 2,
+    "projectId": 9,
+    "taskId": null,
+    "value": "30333"
+  },
+  {
+    "id": 20,
+    "definitionId": 2,
+    "projectId": 10,
+    "taskId": null,
+    "value": "20661"
+  },
+  {
+    "id": 21,
+    "definitionId": 3,
+    "projectId": 1,
+    "taskId": null,
+    "value": "true"
+  },
+  {
+    "id": 22,
+    "definitionId": 3,
+    "projectId": 2,
+    "taskId": null,
+    "value": "true"
+  },
+  {
+    "id": 23,
+    "definitionId": 3,
+    "projectId": 3,
+    "taskId": null,
+    "value": "true"
+  },
+  {
+    "id": 24,
+    "definitionId": 3,
+    "projectId": 4,
+    "taskId": null,
+    "value": "false"
+  },
+  {
+    "id": 25,
+    "definitionId": 3,
+    "projectId": 5,
+    "taskId": null,
+    "value": "false"
+  },
+  {
+    "id": 26,
+    "definitionId": 3,
+    "projectId": 6,
+    "taskId": null,
+    "value": "true"
+  },
+  {
+    "id": 27,
+    "definitionId": 3,
+    "projectId": 7,
+    "taskId": null,
+    "value": "true"
+  },
+  {
+    "id": 28,
+    "definitionId": 3,
+    "projectId": 8,
+    "taskId": null,
+    "value": "false"
+  },
+  {
+    "id": 29,
+    "definitionId": 3,
+    "projectId": 9,
+    "taskId": null,
+    "value": "false"
+  },
+  {
+    "id": 30,
+    "definitionId": 3,
+    "projectId": 10,
+    "taskId": null,
+    "value": "true"
+  },
+  {
+    "id": 31,
+    "definitionId": 4,
+    "projectId": 1,
+    "taskId": null,
+    "value": "2025-09-16T00:00:00Z"
+  },
+  {
+    "id": 32,
+    "definitionId": 4,
+    "projectId": 2,
+    "taskId": null,
+    "value": "2024-10-14T00:00:00Z"
+  },
+  {
+    "id": 33,
+    "definitionId": 4,
+    "projectId": 3,
+    "taskId": null,
+    "value": "2026-05-17T00:00:00Z"
+  },
+  {
+    "id": 34,
+    "definitionId": 4,
+    "projectId": 4,
+    "taskId": null,
+    "value": "2026-03-20T00:00:00Z"
+  },
+  {
+    "id": 35,
+    "definitionId": 4,
+    "projectId": 5,
+    "taskId": null,
+    "value": "2024-07-06T00:00:00Z"
+  },
+  {
+    "id": 36,
+    "definitionId": 4,
+    "projectId": 6,
+    "taskId": null,
+    "value": "2026-02-03T00:00:00Z"
+  },
+  {
+    "id": 37,
+    "definitionId": 4,
+    "projectId": 7,
+    "taskId": null,
+    "value": "2024-08-02T00:00:00Z"
+  },
+  {
+    "id": 38,
+    "definitionId": 4,
+    "projectId": 8,
+    "taskId": null,
+    "value": "2024-10-06T00:00:00Z"
+  },
+  {
+    "id": 39,
+    "definitionId": 4,
+    "projectId": 9,
+    "taskId": null,
+    "value": "2025-01-19T00:00:00Z"
+  },
+  {
+    "id": 40,
+    "definitionId": 4,
+    "projectId": 10,
+    "taskId": null,
+    "value": "2026-10-25T00:00:00Z"
+  },
+  {
+    "id": 41,
+    "definitionId": 5,
+    "projectId": 1,
+    "taskId": null,
+    "value": "Standard"
+  },
+  {
+    "id": 42,
+    "definitionId": 5,
+    "projectId": 2,
+    "taskId": null,
+    "value": "High"
+  },
+  {
+    "id": 43,
+    "definitionId": 5,
+    "projectId": 3,
+    "taskId": null,
+    "value": "High"
+  },
+  {
+    "id": 44,
+    "definitionId": 5,
+    "projectId": 4,
+    "taskId": null,
+    "value": "High"
+  },
+  {
+    "id": 45,
+    "definitionId": 5,
+    "projectId": 5,
+    "taskId": null,
+    "value": "Standard"
+  },
+  {
+    "id": 46,
+    "definitionId": 5,
+    "projectId": 6,
+    "taskId": null,
+    "value": "High"
+  },
+  {
+    "id": 47,
+    "definitionId": 5,
+    "projectId": 7,
+    "taskId": null,
+    "value": "Critical"
+  },
+  {
+    "id": 48,
+    "definitionId": 5,
+    "projectId": 8,
+    "taskId": null,
+    "value": "High"
+  },
+  {
+    "id": 49,
+    "definitionId": 5,
+    "projectId": 9,
+    "taskId": null,
+    "value": "High"
+  },
+  {
+    "id": 50,
+    "definitionId": 5,
+    "projectId": 10,
+    "taskId": null,
+    "value": "High"
+  },
+  {
+    "id": 51,
+    "definitionId": 6,
+    "projectId": 1,
+    "taskId": null,
+    "value": "Silver"
+  },
+  {
+    "id": 52,
+    "definitionId": 6,
+    "projectId": 2,
+    "taskId": null,
+    "value": "Platinum"
+  },
+  {
+    "id": 53,
+    "definitionId": 6,
+    "projectId": 3,
+    "taskId": null,
+    "value": "Gold"
+  },
+  {
+    "id": 54,
+    "definitionId": 6,
+    "projectId": 4,
+    "taskId": null,
+    "value": "Silver"
+  },
+  {
+    "id": 55,
+    "definitionId": 6,
+    "projectId": 5,
+    "taskId": null,
+    "value": "Platinum"
+  },
+  {
+    "id": 56,
+    "definitionId": 6,
+    "projectId": 6,
+    "taskId": null,
+    "value": "Platinum"
+  },
+  {
+    "id": 57,
+    "definitionId": 6,
+    "projectId": 7,
+    "taskId": null,
+    "value": "Platinum"
+  },
+  {
+    "id": 58,
+    "definitionId": 6,
+    "projectId": 8,
+    "taskId": null,
+    "value": "Platinum"
+  },
+  {
+    "id": 59,
+    "definitionId": 6,
+    "projectId": 9,
+    "taskId": null,
+    "value": "Gold"
+  },
+  {
+    "id": 60,
+    "definitionId": 6,
+    "projectId": 10,
+    "taskId": null,
+    "value": "Platinum"
+  },
+  {
+    "id": 61,
+    "definitionId": 7,
+    "projectId": 1,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 62,
+    "definitionId": 7,
+    "projectId": 2,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 63,
+    "definitionId": 7,
+    "projectId": 3,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 64,
+    "definitionId": 7,
+    "projectId": 4,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 65,
+    "definitionId": 7,
+    "projectId": 5,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 66,
+    "definitionId": 7,
+    "projectId": 6,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 67,
+    "definitionId": 7,
+    "projectId": 7,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 68,
+    "definitionId": 7,
+    "projectId": 8,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 69,
+    "definitionId": 7,
+    "projectId": 9,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 70,
+    "definitionId": 7,
+    "projectId": 10,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 71,
+    "definitionId": 8,
+    "projectId": 1,
+    "taskId": null,
+    "value": "41329"
+  },
+  {
+    "id": 72,
+    "definitionId": 8,
+    "projectId": 2,
+    "taskId": null,
+    "value": "52932"
+  },
+  {
+    "id": 73,
+    "definitionId": 8,
+    "projectId": 3,
+    "taskId": null,
+    "value": "34255"
+  },
+  {
+    "id": 74,
+    "definitionId": 8,
+    "projectId": 4,
+    "taskId": null,
+    "value": "24500"
+  },
+  {
+    "id": 75,
+    "definitionId": 8,
+    "projectId": 5,
+    "taskId": null,
+    "value": "42054"
+  },
+  {
+    "id": 76,
+    "definitionId": 8,
+    "projectId": 6,
+    "taskId": null,
+    "value": "103176"
+  },
+  {
+    "id": 77,
+    "definitionId": 8,
+    "projectId": 7,
+    "taskId": null,
+    "value": "59135"
+  },
+  {
+    "id": 78,
+    "definitionId": 8,
+    "projectId": 8,
+    "taskId": null,
+    "value": "68744"
+  },
+  {
+    "id": 79,
+    "definitionId": 8,
+    "projectId": 9,
+    "taskId": null,
+    "value": "29591"
+  },
+  {
+    "id": 80,
+    "definitionId": 8,
+    "projectId": 10,
+    "taskId": null,
+    "value": "70162"
+  },
+  {
+    "id": 81,
+    "definitionId": 9,
+    "projectId": 1,
+    "taskId": null,
+    "value": "true"
+  },
+  {
+    "id": 82,
+    "definitionId": 9,
+    "projectId": 2,
+    "taskId": null,
+    "value": "true"
+  },
+  {
+    "id": 83,
+    "definitionId": 9,
+    "projectId": 3,
+    "taskId": null,
+    "value": "false"
+  },
+  {
+    "id": 84,
+    "definitionId": 9,
+    "projectId": 4,
+    "taskId": null,
+    "value": "false"
+  },
+  {
+    "id": 85,
+    "definitionId": 9,
+    "projectId": 5,
+    "taskId": null,
+    "value": "false"
+  },
+  {
+    "id": 86,
+    "definitionId": 9,
+    "projectId": 6,
+    "taskId": null,
+    "value": "false"
+  },
+  {
+    "id": 87,
+    "definitionId": 9,
+    "projectId": 7,
+    "taskId": null,
+    "value": "false"
+  },
+  {
+    "id": 88,
+    "definitionId": 9,
+    "projectId": 8,
+    "taskId": null,
+    "value": "false"
+  },
+  {
+    "id": 89,
+    "definitionId": 9,
+    "projectId": 9,
+    "taskId": null,
+    "value": "true"
+  },
+  {
+    "id": 90,
+    "definitionId": 9,
+    "projectId": 10,
+    "taskId": null,
+    "value": "false"
+  },
+  {
+    "id": 91,
+    "definitionId": 10,
+    "projectId": 1,
+    "taskId": null,
+    "value": "2026-09-21T00:00:00Z"
+  },
+  {
+    "id": 92,
+    "definitionId": 10,
+    "projectId": 2,
+    "taskId": null,
+    "value": "2025-05-23T00:00:00Z"
+  },
+  {
+    "id": 93,
+    "definitionId": 10,
+    "projectId": 3,
+    "taskId": null,
+    "value": "2024-03-04T00:00:00Z"
+  },
+  {
+    "id": 94,
+    "definitionId": 10,
+    "projectId": 4,
+    "taskId": null,
+    "value": "2024-12-10T00:00:00Z"
+  },
+  {
+    "id": 95,
+    "definitionId": 10,
+    "projectId": 5,
+    "taskId": null,
+    "value": "2026-09-21T00:00:00Z"
+  },
+  {
+    "id": 96,
+    "definitionId": 10,
+    "projectId": 6,
+    "taskId": null,
+    "value": "2024-03-19T00:00:00Z"
+  },
+  {
+    "id": 97,
+    "definitionId": 10,
+    "projectId": 7,
+    "taskId": null,
+    "value": "2025-01-31T00:00:00Z"
+  },
+  {
+    "id": 98,
+    "definitionId": 10,
+    "projectId": 8,
+    "taskId": null,
+    "value": "2026-01-08T00:00:00Z"
+  },
+  {
+    "id": 99,
+    "definitionId": 10,
+    "projectId": 9,
+    "taskId": null,
+    "value": "2024-11-02T00:00:00Z"
+  },
+  {
+    "id": 100,
+    "definitionId": 10,
+    "projectId": 10,
+    "taskId": null,
+    "value": "2026-12-20T00:00:00Z"
+  },
+  {
+    "id": 101,
+    "definitionId": 11,
+    "projectId": 1,
+    "taskId": null,
+    "value": "Critical"
+  },
+  {
+    "id": 102,
+    "definitionId": 11,
+    "projectId": 2,
+    "taskId": null,
+    "value": "Critical"
+  },
+  {
+    "id": 103,
+    "definitionId": 11,
+    "projectId": 3,
+    "taskId": null,
+    "value": "Standard"
+  },
+  {
+    "id": 104,
+    "definitionId": 11,
+    "projectId": 4,
+    "taskId": null,
+    "value": "Standard"
+  },
+  {
+    "id": 105,
+    "definitionId": 11,
+    "projectId": 5,
+    "taskId": null,
+    "value": "High"
+  },
+  {
+    "id": 106,
+    "definitionId": 11,
+    "projectId": 6,
+    "taskId": null,
+    "value": "High"
+  },
+  {
+    "id": 107,
+    "definitionId": 11,
+    "projectId": 7,
+    "taskId": null,
+    "value": "Critical"
+  },
+  {
+    "id": 108,
+    "definitionId": 11,
+    "projectId": 8,
+    "taskId": null,
+    "value": "Critical"
+  },
+  {
+    "id": 109,
+    "definitionId": 11,
+    "projectId": 9,
+    "taskId": null,
+    "value": "Standard"
+  },
+  {
+    "id": 110,
+    "definitionId": 11,
+    "projectId": 10,
+    "taskId": null,
+    "value": "Critical"
+  },
+  {
+    "id": 111,
+    "definitionId": 12,
+    "projectId": 1,
+    "taskId": null,
+    "value": "Platinum"
+  },
+  {
+    "id": 112,
+    "definitionId": 12,
+    "projectId": 2,
+    "taskId": null,
+    "value": "Platinum"
+  },
+  {
+    "id": 113,
+    "definitionId": 12,
+    "projectId": 3,
+    "taskId": null,
+    "value": "Silver"
+  },
+  {
+    "id": 114,
+    "definitionId": 12,
+    "projectId": 4,
+    "taskId": null,
+    "value": "Silver"
+  },
+  {
+    "id": 115,
+    "definitionId": 12,
+    "projectId": 5,
+    "taskId": null,
+    "value": "Bronze"
+  },
+  {
+    "id": 116,
+    "definitionId": 12,
+    "projectId": 6,
+    "taskId": null,
+    "value": "Platinum"
+  },
+  {
+    "id": 117,
+    "definitionId": 12,
+    "projectId": 7,
+    "taskId": null,
+    "value": "Platinum"
+  },
+  {
+    "id": 118,
+    "definitionId": 12,
+    "projectId": 8,
+    "taskId": null,
+    "value": "Platinum"
+  },
+  {
+    "id": 119,
+    "definitionId": 12,
+    "projectId": 9,
+    "taskId": null,
+    "value": "Silver"
+  },
+  {
+    "id": 120,
+    "definitionId": 12,
+    "projectId": 10,
+    "taskId": null,
+    "value": "Gold"
+  },
+  {
+    "id": 121,
+    "definitionId": 13,
+    "projectId": 1,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 122,
+    "definitionId": 13,
+    "projectId": 2,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 123,
+    "definitionId": 13,
+    "projectId": 3,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 124,
+    "definitionId": 13,
+    "projectId": 4,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 125,
+    "definitionId": 13,
+    "projectId": 5,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 126,
+    "definitionId": 13,
+    "projectId": 6,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 127,
+    "definitionId": 13,
+    "projectId": 7,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 128,
+    "definitionId": 13,
+    "projectId": 8,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 129,
+    "definitionId": 13,
+    "projectId": 9,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 130,
+    "definitionId": 13,
+    "projectId": 10,
+    "taskId": null,
+    "value": "Value for Business Unit"
+  },
+  {
+    "id": 131,
+    "definitionId": 14,
+    "projectId": 1,
+    "taskId": null,
+    "value": "69087"
+  },
+  {
+    "id": 132,
+    "definitionId": 14,
+    "projectId": 2,
+    "taskId": null,
+    "value": "23945"
+  },
+  {
+    "id": 133,
+    "definitionId": 14,
+    "projectId": 3,
+    "taskId": null,
+    "value": "100693"
+  },
+  {
+    "id": 134,
+    "definitionId": 14,
+    "projectId": 4,
+    "taskId": null,
+    "value": "56898"
+  },
+  {
+    "id": 135,
+    "definitionId": 14,
+    "projectId": 5,
+    "taskId": null,
+    "value": "78707"
+  },
+  {
+    "id": 136,
+    "definitionId": 14,
+    "projectId": 6,
+    "taskId": null,
+    "value": "92505"
+  },
+  {
+    "id": 137,
+    "definitionId": 14,
+    "projectId": 7,
+    "taskId": null,
+    "value": "108669"
+  },
+  {
+    "id": 138,
+    "definitionId": 14,
+    "projectId": 8,
+    "taskId": null,
+    "value": "60999"
+  },
+  {
+    "id": 139,
+    "definitionId": 14,
+    "projectId": 9,
+    "taskId": null,
+    "value": "86557"
+  },
+  {
+    "id": 140,
+    "definitionId": 14,
+    "projectId": 10,
+    "taskId": null,
+    "value": "87505"
+  },
+  {
+    "id": 141,
+    "definitionId": 15,
+    "projectId": 1,
+    "taskId": null,
+    "value": "false"
+  },
+  {
+    "id": 142,
+    "definitionId": 15,
+    "projectId": 2,
+    "taskId": null,
+    "value": "false"
+  },
+  {
+    "id": 143,
+    "definitionId": 15,
+    "projectId": 3,
+    "taskId": null,
+    "value": "true"
+  },
+  {
+    "id": 144,
+    "definitionId": 15,
+    "projectId": 4,
+    "taskId": null,
+    "value": "true"
+  },
+  {
+    "id": 145,
+    "definitionId": 15,
+    "projectId": 5,
+    "taskId": null,
+    "value": "false"
+  },
+  {
+    "id": 146,
+    "definitionId": 15,
+    "projectId": 6,
+    "taskId": null,
+    "value": "false"
+  },
+  {
+    "id": 147,
+    "definitionId": 15,
+    "projectId": 7,
+    "taskId": null,
+    "value": "false"
+  },
+  {
+    "id": 148,
+    "definitionId": 15,
+    "projectId": 8,
+    "taskId": null,
+    "value": "false"
+  },
+  {
+    "id": 149,
+    "definitionId": 15,
+    "projectId": 9,
+    "taskId": null,
+    "value": "false"
+  },
+  {
+    "id": 150,
+    "definitionId": 15,
+    "projectId": 10,
+    "taskId": null,
+    "value": "true"
+  },
+  {
+    "id": 151,
+    "definitionId": 16,
+    "projectId": 1,
+    "taskId": null,
+    "value": "2025-08-31T00:00:00Z"
+  },
+  {
+    "id": 152,
+    "definitionId": 16,
+    "projectId": 2,
+    "taskId": null,
+    "value": "2024-05-04T00:00:00Z"
+  },
+  {
+    "id": 153,
+    "definitionId": 16,
+    "projectId": 3,
+    "taskId": null,
+    "value": "2025-11-16T00:00:00Z"
+  },
+  {
+    "id": 154,
+    "definitionId": 16,
+    "projectId": 4,
+    "taskId": null,
+    "value": "2025-05-08T00:00:00Z"
+  },
+  {
+    "id": 155,
+    "definitionId": 16,
+    "projectId": 5,
+    "taskId": null,
+    "value": "2024-06-25T00:00:00Z"
+  },
+  {
+    "id": 156,
+    "definitionId": 16,
+    "projectId": 6,
+    "taskId": null,
+    "value": "2026-05-11T00:00:00Z"
+  },
+  {
+    "id": 157,
+    "definitionId": 16,
+    "projectId": 7,
+    "taskId": null,
+    "value": "2024-07-11T00:00:00Z"
+  },
+  {
+    "id": 158,
+    "definitionId": 16,
+    "projectId": 8,
+    "taskId": null,
+    "value": "2026-04-13T00:00:00Z"
+  },
+  {
+    "id": 159,
+    "definitionId": 16,
+    "projectId": 9,
+    "taskId": null,
+    "value": "2025-06-13T00:00:00Z"
+  },
+  {
+    "id": 160,
+    "definitionId": 16,
+    "projectId": 10,
+    "taskId": null,
+    "value": "2025-01-08T00:00:00Z"
+  },
+  {
+    "id": 161,
+    "definitionId": 17,
+    "projectId": 1,
+    "taskId": null,
+    "value": "Critical"
+  },
+  {
+    "id": 162,
+    "definitionId": 17,
+    "projectId": 2,
+    "taskId": null,
+    "value": "Standard"
+  },
+  {
+    "id": 163,
+    "definitionId": 17,
+    "projectId": 3,
+    "taskId": null,
+    "value": "Critical"
+  },
+  {
+    "id": 164,
+    "definitionId": 17,
+    "projectId": 4,
+    "taskId": null,
+    "value": "High"
+  },
+  {
+    "id": 165,
+    "definitionId": 17,
+    "projectId": 5,
+    "taskId": null,
+    "value": "Standard"
+  },
+  {
+    "id": 166,
+    "definitionId": 17,
+    "projectId": 6,
+    "taskId": null,
+    "value": "Standard"
+  },
+  {
+    "id": 167,
+    "definitionId": 17,
+    "projectId": 7,
+    "taskId": null,
+    "value": "Standard"
+  },
+  {
+    "id": 168,
+    "definitionId": 17,
+    "projectId": 8,
+    "taskId": null,
+    "value": "High"
+  },
+  {
+    "id": 169,
+    "definitionId": 17,
+    "projectId": 9,
+    "taskId": null,
+    "value": "Critical"
+  },
+  {
+    "id": 170,
+    "definitionId": 17,
+    "projectId": 10,
+    "taskId": null,
+    "value": "Standard"
+  },
+  {
+    "id": 171,
+    "definitionId": 18,
+    "projectId": 1,
+    "taskId": null,
+    "value": "Platinum"
+  },
+  {
+    "id": 172,
+    "definitionId": 18,
+    "projectId": 2,
+    "taskId": null,
+    "value": "Silver"
+  },
+  {
+    "id": 173,
+    "definitionId": 18,
+    "projectId": 3,
+    "taskId": null,
+    "value": "Platinum"
+  },
+  {
+    "id": 174,
+    "definitionId": 18,
+    "projectId": 4,
+    "taskId": null,
+    "value": "Gold"
+  },
+  {
+    "id": 175,
+    "definitionId": 18,
+    "projectId": 5,
+    "taskId": null,
+    "value": "Gold"
+  },
+  {
+    "id": 176,
+    "definitionId": 18,
+    "projectId": 6,
+    "taskId": null,
+    "value": "Silver"
+  },
+  {
+    "id": 177,
+    "definitionId": 18,
+    "projectId": 7,
+    "taskId": null,
+    "value": "Platinum"
+  },
+  {
+    "id": 178,
+    "definitionId": 18,
+    "projectId": 8,
+    "taskId": null,
+    "value": "Platinum"
+  },
+  {
+    "id": 179,
+    "definitionId": 18,
+    "projectId": 9,
+    "taskId": null,
+    "value": "Bronze"
+  },
+  {
+    "id": 180,
+    "definitionId": 18,
+    "projectId": 10,
+    "taskId": null,
+    "value": "Platinum"
+  }
+]

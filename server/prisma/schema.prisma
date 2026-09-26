@@ -32,12 +32,15 @@ model User {
   taskHistoryChanges  TaskHistory[]
   taskWatchers        TaskWatcher[]
   team                Team?               @relation(fields: [teamId], references: [id])
-  notifications       Notification[]
-  notificationPreference NotificationPreference?
-  organizationMemberships OrganizationMembership[]
-  createdOrganizations Organization[] @relation("OrganizationCreator")
-  aiRequestLogs       AiRequestLog[]
-  aiFeedback          AiFeedback[]
+   notifications       Notification[]
+   notificationPreference NotificationPreference?
+   organizationMemberships OrganizationMembership[]
+   createdOrganizations Organization[] @relation("OrganizationCreator")
+   aiRequestLogs       AiRequestLog[]
+   aiFeedback          AiFeedback[]
+   calendarEvents       CalendarEvent[]
+   calendarSyncs        CalendarSync[]
+   searchHistories      UserSearchHistory[]
 }
 
 model Team {
@@ -158,10 +161,11 @@ model Task {
   taskDependenciesAsBlocker TaskDependency[] @relation("BlockerTask")
   taskDependenciesAsBlocked TaskDependency[] @relation("BlockedTask")
   history                   TaskHistory[]
-  watchers                  TaskWatcher[]
-  customFieldValues         CustomFieldValue[]
+   watchers                  TaskWatcher[]
+   customFieldValues         CustomFieldValue[]
+   calendarEvents            CalendarEvent[]
 
-  @@index([projectId])
+   @@index([projectId])
   @@index([status])
   @@index([priority])
   @@index([assignedUserId])
@@ -311,9 +315,17 @@ model Notification {
   activityLogId Int?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  severity      String   @default("INFO")
+  status        String   @default("DELIVERED")
+  readAt        DateTime?
+  archived      Boolean  @default(false)
 
   user          User     @relation(fields: [userId], references: [userId])
   activityLog   ActivityLog? @relation(fields: [activityLogId], references: [id])
+
+  @@index([userId, read, createdAt])
+  @@index([status])
+  @@index([archived])
 }
 
 model NotificationPreference {
@@ -474,4 +486,32 @@ model AiFeedback {
   comment   String?
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [userId])
+}
+
+model SearchQuery {
+  id              Int                @id @default(autoincrement())
+  normalizedQuery   String
+  displayQuery      String
+  searchCount       Int                @default(0)
+  firstSearchedAt   DateTime           @default(now())
+  lastSearchedAt    DateTime           @default(now())
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  userHistories     UserSearchHistory[]
+
+  @@index([normalizedQuery])
+  @@index([lastSearchedAt])
+  @@index([searchCount])
+}
+
+model UserSearchHistory {
+  id            Int       @id @default(autoincrement())
+  userId        Int
+  searchQueryId Int
+  searchedAt    DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  searchQuery   SearchQuery @relation(fields: [searchQueryId], references: [id])
+  user          User      @relation(fields: [userId], references: [userId])
+
+  @@index([userId])
 }
