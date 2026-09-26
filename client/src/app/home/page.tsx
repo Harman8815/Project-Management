@@ -45,15 +45,16 @@ const HomePage = () => {
     isError: projectsError,
   } = useGetProjectsQuery();
 
-  const activeProjectId = projects && projects.length > 0 ? projects[0].id : null;
+  const activeProjectId = useAppSelector((state) => state.global.activeProjectId);
+  const projectId = activeProjectId ?? (projects && projects.length > 0 ? projects[0].id : null);
   const {
     data: tasks,
     isLoading: tasksLoading,
     isError: tasksError,
   } = useGetTasksQuery(
-    { projectId: activeProjectId ?? 0 },
+    { projectId: projectId ?? 0 },
     {
-      skip: !activeProjectId,
+      skip: !projectId,
     },
   );
 

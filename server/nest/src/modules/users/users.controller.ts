@@ -15,6 +15,7 @@ import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { PaginationDto } from "../../common/dto/pagination.dto";
 import { Public } from "../../common/guards/jwt-auth.guard";
+import { CurrentUser } from "../../common/decorators/current-user.decorator";
 
 @ApiTags("users")
 @ApiBearerAuth()
@@ -41,12 +42,26 @@ export class UsersController {
     return this.usersService.findOne(cognitoId);
   }
 
+  @Get("me")
+  async me(@CurrentUser() user: any) {
+    const cognitoId = user?.cognitoId ?? user?.sub;
+    return this.usersService.findOne(cognitoId);
+  }
+
   @Patch(":cognitoId")
   async update(
     @Param("cognitoId") cognitoId: string,
     @Body() updateUserDto: UpdateUserDto,
   ) {
     return this.usersService.update(cognitoId, updateUserDto);
+  }
+
+  @Patch(":userId/notification-preferences")
+  async updateNotificationPreferences(
+    @Param("userId") userId: string,
+    @Body() body: { emailEnabled?: boolean; inAppEnabled?: boolean; notificationType?: string },
+  ) {
+    return this.usersService.updateNotificationPreferences(Number(userId), body);
   }
 
   @Delete(":cognitoId")

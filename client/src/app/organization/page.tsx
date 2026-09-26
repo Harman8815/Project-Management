@@ -85,7 +85,17 @@ export default function OrganizationPage() {
       <p className="text-sm text-gray-500">{organization.name} · {organization.slug}</p>
       <section className="grid gap-6 xl:grid-cols-3">
         <Panel icon={ShieldCheck} title="Members and roles">
-          <div className="space-y-2">{organization.memberships.map((member) => <div className="flex justify-between rounded bg-gray-50 p-3 text-sm dark:bg-gray-800" key={member.userId}><span>User {member.userId}</span><strong>{member.role}</strong></div>)}</div>
+          <div className="space-y-2">
+            {organization.memberships.map((member) => (
+              <div
+                className="flex justify-between rounded bg-gray-50 p-3 text-sm dark:bg-gray-800"
+                key={member.userId}
+              >
+                <span>{member.user?.username ?? `User ${member.userId}`}</span>
+                <strong className="text-gray-600 dark:text-gray-300">{member.role}</strong>
+              </div>
+            ))}
+          </div>
         </Panel>
         <Panel icon={SlidersHorizontal} title="Organization settings">
           <label className="text-sm font-medium">Audit retention (days)<input className="mt-2 w-full rounded border p-2 dark:bg-gray-800" value={retention} onChange={(event) => setRetention(event.target.value)} type="number" min="1" /></label>
@@ -94,6 +104,30 @@ export default function OrganizationPage() {
         <Panel icon={Webhook} title="Integrations">
           <select className="w-full rounded border p-2 dark:bg-gray-800" value={provider} onChange={(event) => setProvider(event.target.value)}><option value="github">GitHub</option><option value="gitlab">GitLab</option><option value="calendar">Calendar</option></select>
           <button className="mt-4 rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white" onClick={connectIntegration} disabled={integrationState.isLoading}>Configure integration</button>
+          {organization.integrations && organization.integrations.length > 0 && (
+            <div className="mt-4 space-y-2">
+              <h3 className="text-sm font-medium dark:text-white">Configured integrations</h3>
+              {organization.integrations.map((integration) => (
+                <div
+                  className="flex items-center justify-between rounded bg-gray-50 p-3 text-sm dark:bg-gray-800"
+                  key={integration.id}
+                >
+                  <div>
+                    <span className="font-semibold">{integration.provider}</span>
+                    <span className="mx-2 text-gray-400">·</span>
+                    <span className="text-gray-600 dark:text-gray-300">{integration.name}</span>
+                  </div>
+                  <span
+                    className={`text-xs font-medium ${
+                      integration.enabled ? "text-green-600" : "text-gray-400"
+                    }`}
+                  >
+                    {integration.enabled ? "Active" : "Disabled"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </Panel>
       </section>
       <section className="rounded border bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900">

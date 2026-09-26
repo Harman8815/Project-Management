@@ -72,6 +72,17 @@ export class UsersService {
     });
   }
 
+  async updateNotificationPreferences(
+    userId: number,
+    prefs: { emailEnabled?: boolean; inAppEnabled?: boolean; notificationType?: string },
+  ) {
+    return this.prisma.notificationPreference.upsert({
+      where: { userId },
+      update: prefs,
+      create: { userId, ...prefs },
+    });
+  }
+
   async remove(cognitoId: string) {
     const user = await this.prisma.user.findUnique({
       where: { cognitoId },

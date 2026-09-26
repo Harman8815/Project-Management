@@ -3,6 +3,7 @@
 import { useAppDispatch, useAppSelector } from "@/app/redux";
 import { setIsDarkMode, setIsSidebarCollapsed } from "@/state";
 import { useGetAuthUserQuery } from "@/state/api";
+import ProjectSwitcher from "@/components/ProjectSwitcher";
 import { signOut } from "aws-amplify/auth";
 import { Menu, Moon, Search, Settings, Sun, User } from "lucide-react";
 import Link from "next/link";
@@ -47,6 +48,7 @@ const Navbar = () => {
             <Menu className="h-8 w-8 dark:text-white" />
           </button>
         )}
+        <ProjectSwitcher />
         <div className="relative flex h-min w-[240px]">
           <Search
             className="absolute left-[4px] top-1/2 mr-2 h-5 w-5 -translate-y-1/2 transform cursor-pointer dark:text-white"

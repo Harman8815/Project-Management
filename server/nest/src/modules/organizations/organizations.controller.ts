@@ -15,6 +15,16 @@ export class OrganizationsController {
     return this.service.get(Number(id), request.user.userId);
   }
 
+  @Get(":id/members")
+  getMembers(@Req() request: any, @Param("id") id: string) {
+    return this.service.findMembers(Number(id), request.user.userId);
+  }
+
+  @Get(":id/integrations")
+  getIntegrations(@Req() request: any, @Param("id") id: string) {
+    return this.service.findIntegrations(Number(id), request.user.userId);
+  }
+
   @Post(":id/members")
   addMember(@Req() request: any, @Param("id") id: string, @Body() body: { userId: number; role?: string }) {
     return this.service.addMember(request.user.userId, Number(id), body.userId, body.role);

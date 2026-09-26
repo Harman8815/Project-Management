@@ -40,10 +40,27 @@ export class OrganizationsService {
     await this.assertRole(userId, id);
     const organization = await this.prisma.organization.findUnique({
       where: { id },
-      include: { memberships: true, settings: true },
+      include: {
+        memberships: {
+          include: { user: { select: { userId: true, username: true } } },
+        },
+        settings: true,
+        customFields: true,
+        integrations: {
+          select: { id: true, provider: true, name: true, enabled: true },
+        },
+      },
     });
     if (!organization) throw new NotFoundException("Organization not found");
-    return organization;
+
+    const { integrations, ...orgRest } = organization;
+    const safeIntegrations = integrations.map((i) => ({
+      id: i.id,
+      provider: i.provider,
+      name: i.name,
+      enabled: i.enabled,
+    }));
+    return { ...orgRest, integrations: safeIntegrations };
   }
 
   async updateSettings(userId: number, organizationId: number, settings: Record<string, string>) {
@@ -55,6 +72,30 @@ export class OrganizationsService {
         create: { organizationId, key, value },
       }),
     ));
+  }
+
+  async findMembers(organizationId: number, userId: number) {
+    await this.assertRole(userId, organizationId);
+    const memberships = await this.prisma.organizationMembership.findMany({
+      where: { organizationId },
+      include: {
+        user: { select: { userId: true, username: true } },
+      },
+    });
+    return memberships.map((m) => ({
+      userId: m.userId,
+      username: m.user.username,
+      role: m.role,
+    }));
+  }
+
+  async findIntegrations(organizationId: number, userId: number) {
+    await this.assertRole(userId, organizationId);
+    const integrations = await this.prisma.integration.findMany({
+      where: { organizationId },
+      select: { id: true, provider: true, name: true, enabled: true },
+    });
+    return integrations;
   }
 
   async removeMember(actorId: number, organizationId: number, userId: number) {

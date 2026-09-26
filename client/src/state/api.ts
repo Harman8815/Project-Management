@@ -119,7 +119,7 @@ export interface Organization {
   memberships: Array<{ userId: number; role: string; user?: User }>;
   settings: Array<{ key: string; value: string }>;
   members?: Array<{ userId: number; username: string; role: string }>;
-  integrations?: Array<{ id: number; provider: string; name: string; enabled: boolean; status: string }>;
+  integrations?: Array<{ id: number; provider: string; name: string; enabled: boolean }>;
   customFields?: CustomFieldDefinition[];
 }
 
@@ -205,7 +205,7 @@ export const api = createApi({
   reducerPath: "api",
   tagTypes: ["Projects", "Tasks", "Users", "Teams", "Organization", "CustomFields", "Notifications", "Calendar"],
   endpoints: (build) => ({
-    getAuthUser: build.query({
+     getAuthUser: build.query({
       queryFn: async (_, _queryApi, _extraoptions, fetchWithBQ) => {
         try {
           const user = await getCurrentUser();
@@ -235,6 +235,18 @@ export const api = createApi({
           return { error: { status: 500, data: "Could not fetch user data" } };
         }
       },
+    }),
+    getAuthUserProfile: build.query<User, void>({
+      query: () => "users/me",
+      providesTags: ["Users"],
+    }),
+    updateNotificationPreferences: build.mutation<unknown, { userId: number; emailEnabled?: boolean; inAppEnabled?: boolean; notificationType?: string }>({
+      query: ({ userId, ...body }) => ({
+        url: `users/${userId}/notification-preferences`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["Users"],
     }),
     getProjects: build.query<Project[], void>({
       query: () => "projects",
@@ -433,6 +445,8 @@ export const {
   useGetUsersQuery,
   useGetTeamsQuery,
   useGetAuthUserQuery,
+  useGetAuthUserProfileQuery,
+  useUpdateNotificationPreferencesMutation,
   useGetOrganizationQuery,
   useUpdateOrganizationSettingsMutation,
   useAddOrganizationMemberMutation,
