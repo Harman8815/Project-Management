@@ -2,7 +2,7 @@
 
 import { useAppSelector } from "@/app/redux";
 import Header from "@/components/Header";
-import { Button, EmptyState, LoadingState } from "@/components/ui";
+import { Button, EmptyState, LoadingState, TaskListSkeleton, TableSkeleton } from "@/components/ui";
 import TaskCard from "@/components/TaskCard";
 import TaskForm from "@/components/TaskForm";
 import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
@@ -97,7 +97,7 @@ const ReusablePriorityPage = ({ priority }: { priority: Priority }) => {
         </Button>
       </div>
       {isLoading ? (
-        <LoadingState message="Loading tasks..." />
+        view === "list" ? <TaskListSkeleton count={4} /> : <TableSkeleton rows={5} cols={8} />
       ) : view === "list" ? (
         filteredTasks.length === 0 ? (
           <EmptyState message="No tasks found for this priority" />

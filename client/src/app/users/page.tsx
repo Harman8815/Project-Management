@@ -1,7 +1,7 @@
 "use client";
 
 import Header from "@/components/Header";
-import { ErrorState, LoadingState } from "@/components/ui";
+import { ErrorState, TableSkeleton } from "@/components/ui";
 import {
   DataGrid,
   GridColDef,
@@ -49,7 +49,15 @@ const Users = () => {
   const { data: users, isLoading, isError } = useGetUsersQuery();
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
 
-  if (isLoading) return <LoadingState message="Loading users..." />;
+  if (isLoading)
+    return (
+      <div className="flex w-full flex-col p-8">
+        <Header name="Users" />
+        <div style={{ height: 650, width: "100%" }}>
+          <TableSkeleton rows={8} cols={5} />
+        </div>
+      </div>
+    );
   if (isError || !users)
     return (
       <ErrorState
