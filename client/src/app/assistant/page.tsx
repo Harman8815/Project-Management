@@ -1,13 +1,13 @@
 "use client";
 
 import Header from "@/components/Header";
-import { useAskAiMutation } from "@/state/api";
+import { useAskAiMutation, useGetAuthUserQuery } from "@/state/api";
 import { Bot, Send, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 
-const organizationId = 1;
-
 export default function AssistantPage() {
+  const { data: currentUser } = useGetAuthUserQuery({});
+  const organizationId = currentUser?.userDetails?.organizationMemberships?.[0]?.organizationId ?? 0;
   const [prompt, setPrompt] = useState("");
   const [projectId, setProjectId] = useState("");
   const [answer, setAnswer] = useState<{ answer: string; sources: Array<{ type: string; id: number }> }>();
@@ -18,6 +18,15 @@ export default function AssistantPage() {
     const result = await ask({ organizationId, prompt, projectId: projectId ? Number(projectId) : undefined }).unwrap();
     setAnswer(result);
   };
+
+  if (!organizationId) {
+    return (
+      <main className="mx-auto max-w-4xl space-y-6 p-8">
+        <Header name="Project assistant" />
+        <p className="text-sm text-gray-500">No organization found. Create an organization to use the assistant.</p>
+      </main>
+    );
+  }
 
   return (
     <main className="mx-auto max-w-4xl space-y-6 p-8">

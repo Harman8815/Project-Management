@@ -18,11 +18,18 @@ const Settings = () => {
     );
 
   const userDetails = currentUser?.userDetails;
+  const teamName = userDetails?.team?.teamName ?? "No team assigned";
+  const roleName = userDetails?.organizationMemberships?.[0]?.role ?? "No role assigned";
+
   const settings = {
     username: userDetails?.username ?? "Unknown",
     email: userDetails?.email ?? "Unknown",
-    teamName: "Development Team",
-    roleName: "Developer",
+    teamName,
+    roleName,
+    profilePictureUrl: userDetails?.profilePictureUrl,
+    createdAt: userDetails?.createdAt,
+    notificationPreference: userDetails?.notificationPreference,
+    organizationMemberships: userDetails?.organizationMemberships ?? [],
   };
 
   const labelStyles = "block text-sm font-medium dark:text-white";

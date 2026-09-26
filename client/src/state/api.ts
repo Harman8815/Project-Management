@@ -40,6 +40,25 @@ export interface User {
   profilePictureUrl?: string;
   cognitoId?: string;
   teamId?: number;
+  capacityHoursPerWeek?: number;
+  capacityStoryPoints?: number;
+  team?: Team;
+  organizationMemberships?: Array<{
+    id: number;
+    organizationId: number;
+    userId: number;
+    role: string;
+    organization?: Organization;
+  }>;
+  notificationPreference?: {
+    id: number;
+    userId: number;
+    notificationType: string;
+    emailEnabled: boolean;
+    inAppEnabled: boolean;
+    updatedAt: string;
+  };
+  createdAt?: string;
 }
 
 export interface Attachment {
@@ -96,8 +115,11 @@ export interface Organization {
   id: number;
   name: string;
   slug: string;
-  memberships: Array<{ userId: number; role: string }>;
+  memberships: Array<{ userId: number; role: string; user?: User }>;
   settings: Array<{ key: string; value: string }>;
+  members?: Array<{ userId: number; username: string; role: string }>;
+  integrations?: Array<{ id: number; provider: string; name: string; enabled: boolean; status: string }>;
+  customFields?: CustomFieldDefinition[];
 }
 
 export interface CustomFieldDefinition {
@@ -114,8 +136,36 @@ export interface Notification {
   message: string;
   type: string;
   read: boolean;
+  readAt?: string | null;
+  severity?: string;
+  status?: string;
   createdAt: string;
   link?: string;
+}
+
+export interface Sprint {
+  id: number;
+  name: string;
+  projectId: number;
+  goal?: string;
+  startDate?: string;
+  endDate?: string;
+  status: string;
+  capacity?: number;
+  ownerId?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface Milestone {
+  id: number;
+  name: string;
+  description?: string;
+  projectId: number;
+  startDate?: string;
+  dueDate?: string;
+  status: string;
+  ownerId?: number;
 }
 
 export const api = createApi({
@@ -236,6 +286,13 @@ export const api = createApi({
       transformResponse: (response: { data: Team[]; meta: any }) => response.data,
       providesTags: ["Teams"],
     }),
+    getSprints: build.query<Sprint[], { projectId: number }>({
+      query: ({ projectId }) => `sprints?projectId=${projectId}`,
+      providesTags: (result) =>
+        result
+          ? result.map(({ id }) => ({ type: "Tasks" as const, id }))
+          : [{ type: "Tasks" as const }],
+    }),
     search: build.query<SearchResults, string>({
       query: (query) => `search?query=${query}`,
     }),
@@ -276,6 +333,14 @@ export const api = createApi({
     markAllNotificationsRead: build.mutation<unknown, number>({
       query: (userId) => ({ url: `notifications/user/${userId}/read-all`, method: "PATCH" }),
       invalidatesTags: ["Notifications"],
+    }),
+    archiveNotification: build.mutation<Notification, number>({
+      query: (id) => ({ url: `notifications/${id}/archive`, method: "PATCH" }),
+      invalidatesTags: ["Notifications"],
+    }),
+    getUnreadNotificationCount: build.query<{ count: number }, number>({
+      query: (userId) => `notifications/user/${userId}/unread-count`,
+      providesTags: ["Notifications"],
     }),
     getCalendarEvents: build.query<any, { organizationId: number; calendarId?: string; startDate?: string; endDate?: string; page?: number; limit?: number }>({
       query: ({ organizationId, calendarId, startDate, endDate, page, limit }) => {
@@ -337,13 +402,14 @@ export const {
   useCreateProjectMutation,
   useUpdateProjectMutation,
   useGetTasksQuery,
+  useGetTasksByUserQuery,
   useCreateTaskMutation,
   useUpdateTaskMutation,
   useUpdateTaskStatusMutation,
+  useGetSprintsQuery,
   useSearchQuery,
   useGetUsersQuery,
   useGetTeamsQuery,
-  useGetTasksByUserQuery,
   useGetAuthUserQuery,
   useGetOrganizationQuery,
   useUpdateOrganizationSettingsMutation,
@@ -355,6 +421,8 @@ export const {
   useGetNotificationsQuery,
   useMarkNotificationReadMutation,
   useMarkAllNotificationsReadMutation,
+  useArchiveNotificationMutation,
+  useGetUnreadNotificationCountQuery,
   useGetCalendarEventsQuery,
   useCreateCalendarEventMutation,
   useUpdateCalendarEventMutation,

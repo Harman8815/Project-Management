@@ -4,6 +4,7 @@ import {
   Priority,
   Project,
   Task,
+  useGetAuthUserQuery,
   useGetProjectsQuery,
   useGetTasksQuery,
 } from "@/state/api";
@@ -37,16 +38,24 @@ const taskColumns: GridColDef[] = [
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
 const HomePage = () => {
-  const {
-    data: tasks,
-    isLoading: tasksLoading,
-    isError: tasksError,
-  } = useGetTasksQuery({ projectId: 1 });
+  const { data: currentUser, isLoading: userLoading } = useGetAuthUserQuery({});
   const {
     data: projects,
     isLoading: isProjectsLoading,
     isError: projectsError,
   } = useGetProjectsQuery();
+
+  const activeProjectId = projects && projects.length > 0 ? projects[0].id : null;
+  const {
+    data: tasks,
+    isLoading: tasksLoading,
+    isError: tasksError,
+  } = useGetTasksQuery(
+    { projectId: activeProjectId ?? 0 },
+    {
+      skip: !activeProjectId,
+    },
+  );
 
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
 

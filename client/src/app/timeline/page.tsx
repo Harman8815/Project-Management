@@ -21,15 +21,27 @@ const Timeline = () => {
 
   const ganttTasks = useMemo(() => {
     return (
-      projects?.map((project) => ({
-        start: new Date(project.startDate as string),
-        end: new Date(project.endDate as string),
-        name: project.name,
-        id: `Project-${project.id}`,
-        type: "project" as TaskTypeItems,
-        progress: 50,
-        isDisabled: false,
-      })) || []
+      projects?.map((project) => {
+        const start = new Date(project.startDate as string);
+        const end = new Date(project.endDate as string);
+        const now = new Date();
+        const isCompleted = project.status === "COMPLETED" || project.status === "ARCHIVED";
+        const totalMs = end.getTime() - start.getTime();
+        const elapsedMs = now.getTime() - start.getTime();
+        const progress = totalMs > 0 ? Math.min(100, Math.max(0, Math.round((elapsedMs / totalMs) * 100))) : 0;
+        return {
+          start,
+          end,
+          name: project.name,
+          id: `Project-${project.id}`,
+          type: "project" as TaskTypeItems,
+          progress: isCompleted ? 100 : progress,
+          isDisabled: false,
+          ...(project.endDate && !isCompleted && now > end && (project.status !== "ARCHIVED")
+            ? { backgroundColor: "#ef4444", progressColor: "#ef4444" }
+            : {}),
+        };
+      }) || []
     );
   }, [projects]);
 

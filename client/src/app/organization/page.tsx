@@ -6,17 +6,20 @@ import {
   useCreateIntegrationMutation,
   useGetCustomFieldsQuery,
   useGetOrganizationQuery,
+  useGetAuthUserQuery,
   useUpdateOrganizationSettingsMutation,
 } from "@/state/api";
 import { Save, ShieldCheck, SlidersHorizontal, Webhook } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
 
-const organizationId = 1;
-
 export default function OrganizationPage() {
-  const { data: organization, isLoading, isError } = useGetOrganizationQuery(organizationId);
-  const { data: fields = [] } = useGetCustomFieldsQuery(organizationId);
+  const { data: currentUser, isLoading: userLoading } = useGetAuthUserQuery({});
+  const orgId = currentUser?.userDetails?.organizationMemberships?.[0]?.organizationId ?? 0;
+  const { data: organization, isLoading, isError } = useGetOrganizationQuery(orgId, {
+    skip: !orgId,
+  });
+  const { data: fields = [] } = useGetCustomFieldsQuery(orgId);
   const [updateSettings, settingsState] = useUpdateOrganizationSettingsMutation();
   const [createField, fieldState] = useCreateCustomFieldMutation();
   const [createIntegration, integrationState] = useCreateIntegrationMutation();
@@ -31,20 +34,20 @@ export default function OrganizationPage() {
   if (isError || !organization) return <main className="p-8">Organization access is unavailable.</main>;
 
   const saveSettings = async () => {
-    await updateSettings({ organizationId, settings: { auditRetentionDays: retention } }).unwrap();
+    await updateSettings({ organizationId: orgId, settings: { auditRetentionDays: retention } }).unwrap();
     setNotice("Settings saved");
   };
 
   const addField = async () => {
     if (!fieldName || !fieldKey) return;
-    await createField({ organizationId, name: fieldName, key: fieldKey, fieldType }).unwrap();
+    await createField({ organizationId: orgId, name: fieldName, key: fieldKey, fieldType }).unwrap();
     setFieldName("");
     setFieldKey("");
     setNotice("Custom field created");
   };
 
   const connectIntegration = async () => {
-    await createIntegration({ organizationId, provider, name: `${provider} workspace` }).unwrap();
+    await createIntegration({ organizationId: orgId, provider, name: `${provider} workspace` }).unwrap();
     setNotice(`${provider} integration configured`);
   };
 
