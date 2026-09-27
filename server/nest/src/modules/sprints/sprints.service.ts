@@ -262,30 +262,6 @@ export class SprintsService {
     });
   }
 
-  private async ensureProjectExists(projectId: number) {
-    const project = await this.prisma.project.findUnique({
-      where: { id: projectId },
-    });
-    if (!project) {
-      throw new NotFoundException(`Project with id ${projectId} not found`);
-    }
-  }
-
-  private validateSprintStatusTransition(currentStatus: string, newStatus: string): boolean {
-    const validTransitions: Record<string, string[]> = {
-      PLANNED: ["UPCOMING", "ACTIVE", "CANCELLED"],
-      UPCOMING: ["ACTIVE", "CANCELLED", "PLANNED"],
-      ACTIVE: ["NEAR_COMPLETION", "COMPLETED", "CANCELLED"],
-      NEAR_COMPLETION: ["COMPLETED", "ACTIVE", "CANCELLED"],
-      COMPLETED: ["CLOSED"],
-      CLOSED: [],
-      CANCELLED: ["PLANNED", "UPCOMING"],
-    };
-
-    const allowedTransitions = validTransitions[currentStatus] || [];
-    return allowedTransitions.includes(newStatus);
-  }
-
   async getLifecycle(sprintId: number, userId?: number) {
     const sprint = await this.findOne(sprintId, userId);
     
@@ -370,6 +346,28 @@ export class SprintsService {
   }
 
   private validateSprintStatusTransition(currentStatus: string, newStatus: string): boolean {
+    const validTransitions: Record<string, string[]> = {
+      PLANNED: ["UPCOMING", "ACTIVE", "CANCELLED"],
+      UPCOMING: ["ACTIVE", "CANCELLED", "PLANNED"],
+      ACTIVE: ["NEAR_COMPLETION", "COMPLETED", "CANCELLED"],
+      NEAR_COMPLETION: ["COMPLETED", "ACTIVE", "CANCELLED"],
+      COMPLETED: ["CLOSED"],
+      CLOSED: [],
+      CANCELLED: ["PLANNED", "UPCOMING"],
+    };
+
+    const allowedTransitions = validTransitions[currentStatus] || [];
+    return allowedTransitions.includes(newStatus);
+  }
+
+  private async ensureProjectExists(projectId: number) {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+    });
+    if (!project) {
+      throw new NotFoundException(`Project with id ${projectId} not found`);
+    }
+  }
 
   private async checkUserAccess(userId: number, projectId: number, requiredRoles: string[] = []): Promise<boolean> {
     const membership = await this.prisma.projectMembership.findFirst({
