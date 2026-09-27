@@ -35,7 +35,8 @@ export class ProjectDuplicationController {
         },
       },
       required: ["name", "key"],
-    })
+    },
+  })
   async duplicateProject(
     @Param("id") id: string,
     @Body() body: { name: string; key: string; include?: DuplicateOptions },

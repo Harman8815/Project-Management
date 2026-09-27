@@ -1,5 +1,5 @@
-import { Controller, Get, UseGuards, Query } from "@nestjs/common";
-import { ApiTags, ApiBearerAuth, ApiQuery } from "@nestjs/swagger";
+import { Controller, Get, UseGuards } from "@nestjs/common";
+import { ApiTags, ApiBearerAuth } from "@nestjs/swagger";
 import { ResourcesService } from "./resources.service";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";

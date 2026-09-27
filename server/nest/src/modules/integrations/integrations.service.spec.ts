@@ -1,11 +1,12 @@
 import { UnauthorizedException } from "@nestjs/common";
 import { IntegrationsService } from "./integrations.service";
+import * as crypto from "crypto";
 
 describe("IntegrationsService", () => {
   it("verifies valid webhook signatures and rejects invalid ones", () => {
     const service = new IntegrationsService({} as any, {} as any);
     const payload = "event-payload";
-    const signature = require("crypto").createHmac("sha256", "secret").update(payload).digest("hex");
+    const signature = crypto.createHmac("sha256", "secret").update(payload).digest("hex");
     expect(service.verifyWebhook(payload, signature, "secret")).toBe(true);
     expect(() => service.verifyWebhook(payload, "bad", "secret")).toThrow(UnauthorizedException);
   });

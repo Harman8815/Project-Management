@@ -50,10 +50,10 @@ export class ProjectDuplicationService {
       const sourceProject = await prisma.project.findUnique({
         where: { id: sourceProjectId },
         include: {
-          tasks: options.includeTasks ? { include: { children: true } } : false,
-          sprints: options.includeSprints ? true : false,
-          milestones: options.includeMilestones ? true : false,
-          customFieldValues: options.includeCustomFields ? { include: { definition: true } } : false,
+          tasks: options.include.includeTasks ? { include: { children: true } } : false,
+          sprints: options.include.includeSprints ? true : false,
+          milestones: options.include.includeMilestones ? true : false,
+          customFieldValues: options.include.includeCustomFields ? { include: { definition: true } } : false,
         },
       });
 
@@ -88,8 +88,8 @@ export class ProjectDuplicationService {
       });
 
       // Duplicate tasks if requested
-      let taskIdMap = new Map<number, number>();
-      if (options.includeTasks && sourceProject.tasks) {
+      const taskIdMap = new Map<number, number>();
+      if (options.include.includeTasks && sourceProject.tasks) {
         // First pass: create all tasks without relationships
         for (const task of sourceProject.tasks) {
           const newTask = await prisma.task.create({
@@ -117,7 +117,7 @@ export class ProjectDuplicationService {
         }
 
         // Second pass: update parent-child relationships
-        if (options.includeTaskStructure) {
+        if (options.include.includeTaskStructure) {
           for (const task of sourceProject.tasks) {
             if (task.parentId && taskIdMap.has(task.parentId)) {
               await prisma.task.update({
@@ -147,8 +147,8 @@ export class ProjectDuplicationService {
       }
 
       // Duplicate sprints if requested
-      let sprintIdMap = new Map<number, number>();
-      if (options.includeSprints && sourceProject.sprints) {
+      const sprintIdMap = new Map<number, number>();
+      if (options.include.includeSprints && sourceProject.sprints) {
         for (const sprint of sourceProject.sprints) {
           const newSprint = await prisma.sprint.create({
             data: {
@@ -166,7 +166,7 @@ export class ProjectDuplicationService {
         }
 
         // Update task sprint assignments
-        if (options.includeTasks) {
+        if (options.include.includeTasks) {
           for (const [oldTaskId, newTaskId] of taskIdMap.entries()) {
             const oldTask = sourceProject.tasks.find(t => t.id === oldTaskId);
             if (oldTask?.sprintId && sprintIdMap.has(oldTask.sprintId)) {
@@ -180,8 +180,8 @@ export class ProjectDuplicationService {
       }
 
       // Duplicate milestones if requested
-      let milestoneIdMap = new Map<number, number>();
-      if (options.includeMilestones && sourceProject.milestones) {
+      const milestoneIdMap = new Map<number, number>();
+      if (options.include.includeMilestones && sourceProject.milestones) {
         for (const milestone of sourceProject.milestones) {
           const newMilestone = await prisma.milestone.create({
             data: {
@@ -198,7 +198,7 @@ export class ProjectDuplicationService {
         }
 
         // Update task milestone assignments
-        if (options.includeTasks) {
+        if (options.include.includeTasks) {
           for (const [oldTaskId, newTaskId] of taskIdMap.entries()) {
             const oldTask = sourceProject.tasks.find(t => t.id === oldTaskId);
             if (oldTask?.milestoneId && milestoneIdMap.has(oldTask.milestoneId)) {
@@ -212,7 +212,7 @@ export class ProjectDuplicationService {
       }
 
       // Duplicate custom field values if requested
-      if (options.includeCustomFields && sourceProject.customFieldValues) {
+      if (options.include.includeCustomFields && sourceProject.customFieldValues) {
         for (const cfv of sourceProject.customFieldValues) {
           await prisma.customFieldValue.create({
             data: {

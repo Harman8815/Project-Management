@@ -78,7 +78,14 @@ export class MethodologyService {
     }
 
     const config = await this.getMethodology(project.methodology as MethodologyKey);
-    return config || await this.getDefaultMethodology();
+    if (!config) {
+      const defaultConfig = await this.getDefaultMethodology();
+      if (!defaultConfig) {
+        throw new NotFoundException("No default methodology configured");
+      }
+      return defaultConfig;
+    }
+    return config;
   }
 
   async setProjectMethodology(

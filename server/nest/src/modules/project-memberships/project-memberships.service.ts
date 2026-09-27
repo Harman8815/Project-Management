@@ -10,7 +10,7 @@ import { UpdateProjectMembershipDto } from "./dto/update-project-membership.dto"
 import { getPaginationParams } from "../../common/utils/pagination.util";
 import { PaginationDto } from "../../common/dto/pagination.dto";
 
-interface TransferResult {
+export interface TransferResult {
   success: boolean;
   message: string;
   previousProjectId?: number;
@@ -25,206 +25,6 @@ export class ProjectMembershipsService {
     createProjectMembershipDto: CreateProjectMembershipDto,
     requestingUserId?: number,
   ) {
-    await this.ensureProjectExists(createProjectMembershipDto.projectId);
-    await this.ensureUserExists(createProjectMembershipDto.userId);
-
-    if (requestingUserId) {
-      const canManage = await this.checkUserAccess(
-        requestingUserId,
-        createProjectMembershipDto.projectId,
-        ["OWNER", "MANAGER"],
-      );
-      if (!canManage) {
-        throw new ForbiddenException(
-          "You do not have permission to manage project memberships",
-        );
-      }
-    }
-
-    return this.prisma.$transaction(async (prisma) => {
-      const existing = await prisma.projectMembership.findFirst({
-        where: {
-          projectId: createProjectMembershipDto.projectId,
-          userId: createProjectMembershipDto.userId,
-        },
-      });
-      if (existing) {
-        throw new BadRequestException(
-          "User is already a member of this project",
-        );
-      }
-
-      return prisma.projectMembership.create({
-        data: {
-          projectId: createProjectMembershipDto.projectId,
-          userId: createProjectMembershipDto.userId,
-          role: createProjectMembershipDto.role || "MEMBER",
-          status: createProjectMembershipDto.status || "ACTIVE",
-          invitedById: createProjectMembershipDto.invitedById,
-        },
-        include: {
-          user: true,
-          project: true,
-          invitedBy: true,
-        },
-      });
-    });
-  }
-
-  async transferEmployee(
-    userId: number,
-    targetProjectId: number,
-    actorId: number,
-    role: string = "MEMBER",
-  ): Promise<TransferResult> {
-    // Validate actor has ADMIN/OWNER on BOTH source and target projects
-    const sourceMemberships = await this.prisma.projectMembership.findMany({
-      where: { userId, status: "ACTIVE" },
-      include: { project: true },
-    });
-
-    const sourceProjectIds = sourceMemberships.map(m => m.projectId);
-
-    if (sourceProjectIds.length === 0) {
-      throw new BadRequestException("Employee is not assigned to any project");
-    }
-
-    // Check if already in target project
-    if (sourceProjectIds.includes(targetProjectId)) {
-      throw new BadRequestException("Employee is already a member of the target project");
-    }
-
-    // Validate actor has ADMIN/OWNER on target project
-    const targetAccess = await this.checkUserAccess(actorId, targetProjectId, ["OWNER", "ADMIN"]);
-    if (!targetAccess) {
-      throw new ForbiddenException("You do not have permission to manage the target project");
-    }
-
-    // Check target project capacity
-    const targetProject = await this.prisma.project.findUnique({
-      where: { id: targetProjectId },
-    });
-    if (!targetProject) {
-      throw new NotFoundException("Target project not found");
-    }
-
-    const targetMemberCount = await this.prisma.projectMembership.count({
-      where: { projectId: targetProjectId, status: "ACTIVE" },
-    });
-
-    // Default capacity of 10
-    const capacity = 10;
-    if (targetMemberCount >= capacity) {
-      throw new BadRequestException("Target project has reached maximum capacity");
-    }
-
-    // Validate actor has ADMIN/OWNER on at least one source project
-    let hasSourceAccess = false;
-    for (const pid of sourceProjectIds) {
-      const access = await this.checkUserAccess(actorId, pid, ["OWNER", "ADMIN"]);
-      if (access) {
-        hasSourceAccess = true;
-        break;
-      }
-    }
-    if (!hasSourceAccess) {
-      throw new ForbiddenException("You do not have permission to manage the employee's current project(s)");
-    }
-
-    // Perform the transfer in a transaction
-    return this.prisma.$transaction(async (prisma) => {
-      const sourceProjectId = sourceProjectIds[0]; // Transfer from first active project
-      
-      // Deactivate old membership
-      await prisma.projectMembership.updateMany({
-        where: { userId, projectId: sourceProjectId, status: "ACTIVE" },
-        data: { status: "INACTIVE" },
-      });
-
-      // Create new membership
-      const newMembership = await prisma.projectMembership.create({
-        data: {
-          userId,
-          projectId: targetProjectId,
-          role,
-          status: "ACTIVE",
-        },
-      });
-
-      // Update user's currentProjectId
-      await prisma.user.update({
-        where: { userId },
-        data: { currentProjectId: targetProjectId },
-      });
-
-      // Create activity log
-      await prisma.activityLog.create({
-        data: {
-          eventType: "RESOURCE_TRANSFER",
-          actorId,
-          projectId: targetProjectId,
-          targetUserId: userId,
-          message: `Employee transferred from project ${sourceProjectId} to project ${targetProjectId}`,
-          metadata: JSON.stringify({ 
-            sourceProjectId, 
-            targetProjectId, 
-            role,
-            transferredBy: actorId 
-          }),
-        },
-      });
-
-      // Create notification for the employee
-      const user = await prisma.user.findUnique({ where: { userId } });
-      await prisma.notification.create({
-        data: {
-          userId,
-          type: "TRANSFER",
-          title: "Project Transfer",
-          message: `You have been transferred to ${targetProject.name}`,
-          link: `/projects/${targetProjectId}`,
-        },
-      });
-
-      return {
-        success: true,
-        message: "Employee transferred successfully",
-        previousProjectId: sourceProjectId,
-        newProjectId: targetProjectId,
-      };
-    });
-  }
-
-  async getTransferHistory(userId: number) {
-    const logs = await this.prisma.activityLog.findMany({
-      where: {
-        eventType: "RESOURCE_TRANSFER",
-        targetUserId: userId,
-      },
-      orderBy: { createdAt: "desc" },
-      include: {
-        actor: { select: { username: true } },
-        project: { select: { name: true, key: true } },
-      },
-    });
-
-    return logs.map(log => {
-      const meta = JSON.parse(log.metadata || "{}");
-      return {
-        id: log.id,
-        employeeId: userId,
-        fromProjectId: meta.sourceProjectId,
-        toProjectId: meta.targetProjectId,
-        actorName: log.actor?.username,
-        projectName: log.project?.name,
-        projectKey: log.project?.key,
-        date: log.createdAt,
-        role: meta.role,
-      };
-    });
-  }
-
-  // ... rest of the existing methods
     await this.ensureProjectExists(createProjectMembershipDto.projectId);
     await this.ensureUserExists(createProjectMembershipDto.userId);
 
@@ -519,6 +319,159 @@ export class ProjectMembershipsService {
 
     return this.prisma.projectMembership.delete({
       where: { id },
+    });
+  }
+
+  async transferEmployee(
+    userId: number,
+    targetProjectId: number,
+    actorId: number,
+    role: string = "MEMBER",
+  ): Promise<TransferResult> {
+    // Validate actor has ADMIN/OWNER on BOTH source and target projects
+    const sourceMemberships = await this.prisma.projectMembership.findMany({
+      where: { userId, status: "ACTIVE" },
+      include: { project: true },
+    });
+
+    const sourceProjectIds = sourceMemberships.map(m => m.projectId);
+
+    if (sourceProjectIds.length === 0) {
+      throw new BadRequestException("Employee is not assigned to any project");
+    }
+
+    // Check if already in target project
+    if (sourceProjectIds.includes(targetProjectId)) {
+      throw new BadRequestException("Employee is already a member of the target project");
+    }
+
+    // Validate actor has ADMIN/OWNER on target project
+    const targetAccess = await this.checkUserAccess(actorId, targetProjectId, ["OWNER", "ADMIN"]);
+    if (!targetAccess) {
+      throw new ForbiddenException("You do not have permission to manage the target project");
+    }
+
+    // Check target project capacity
+    const targetProject = await this.prisma.project.findUnique({
+      where: { id: targetProjectId },
+    });
+    if (!targetProject) {
+      throw new NotFoundException("Target project not found");
+    }
+
+    const targetMemberCount = await this.prisma.projectMembership.count({
+      where: { projectId: targetProjectId, status: "ACTIVE" },
+    });
+
+    // Default capacity of 10
+    const capacity = 10;
+    if (targetMemberCount >= capacity) {
+      throw new BadRequestException("Target project has reached maximum capacity");
+    }
+
+    // Validate actor has ADMIN/OWNER on at least one source project
+    let hasSourceAccess = false;
+    for (const pid of sourceProjectIds) {
+      const access = await this.checkUserAccess(actorId, pid, ["OWNER", "ADMIN"]);
+      if (access) {
+        hasSourceAccess = true;
+        break;
+      }
+    }
+    if (!hasSourceAccess) {
+      throw new ForbiddenException("You do not have permission to manage the employee's current project(s)");
+    }
+
+    // Perform the transfer in a transaction
+    return this.prisma.$transaction(async (prisma) => {
+      const sourceProjectId = sourceProjectIds[0]; // Transfer from first active project
+      
+      // Deactivate old membership
+      await prisma.projectMembership.updateMany({
+        where: { userId, projectId: sourceProjectId, status: "ACTIVE" },
+        data: { status: "INACTIVE" },
+      });
+
+      // Create new membership
+      await prisma.projectMembership.create({
+        data: {
+          userId,
+          projectId: targetProjectId,
+          role,
+          status: "ACTIVE",
+        },
+      });
+
+      // Update user's currentProjectId
+      await prisma.user.update({
+        where: { userId },
+        data: { currentProjectId: targetProjectId },
+      });
+
+      // Create activity log
+      await prisma.activityLog.create({
+        data: {
+          eventType: "RESOURCE_TRANSFER",
+          actorId,
+          projectId: targetProjectId,
+          targetUserId: userId,
+          message: `Employee transferred from project ${sourceProjectId} to project ${targetProjectId}`,
+          metadata: JSON.stringify({ 
+            sourceProjectId, 
+            targetProjectId, 
+            role,
+            transferredBy: actorId 
+          }),
+        },
+      });
+
+      // Create notification for the employee
+      await prisma.user.findUnique({ where: { userId } });
+      await prisma.notification.create({
+        data: {
+          userId,
+          type: "TRANSFER",
+          title: "Project Transfer",
+          message: `You have been transferred to ${targetProject.name}`,
+          link: `/projects/${targetProjectId}`,
+        },
+      });
+
+      return {
+        success: true,
+        message: "Employee transferred successfully",
+        previousProjectId: sourceProjectId,
+        newProjectId: targetProjectId,
+      };
+    });
+  }
+
+  async getTransferHistory(userId: number) {
+    const logs = await this.prisma.activityLog.findMany({
+      where: {
+        eventType: "RESOURCE_TRANSFER",
+        targetUserId: userId,
+      },
+      orderBy: { createdAt: "desc" },
+      include: {
+        actor: { select: { username: true } },
+        project: { select: { name: true, key: true } },
+      },
+    });
+
+    return logs.map(log => {
+      const meta = JSON.parse(log.metadata || "{}");
+      return {
+        id: log.id,
+        employeeId: userId,
+        fromProjectId: meta.sourceProjectId,
+        toProjectId: meta.targetProjectId,
+        actorName: log.actor?.username,
+        projectName: log.project?.name,
+        projectKey: log.project?.key,
+        date: log.createdAt,
+        role: meta.role,
+      };
     });
   }
 

@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, InternalServerErrorException } from "@nestjs/common";
+import { Injectable, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
 import * as XLSX from "xlsx";
 
@@ -29,7 +29,15 @@ export interface ImportSummary {
 export class BulkImportService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private readonly ENTITY_SCHEMAS = {
+  private readonly ENTITY_SCHEMAS: Record<
+    string,
+    {
+      required: string[];
+      optional: string[];
+      types: Record<string, string>;
+      enumValues?: Record<string, string[]>;
+    }
+  > = {
     employees: {
       required: ["username", "email"],
       optional: ["experienceLevel", "availability", "teamId", "capacityHoursPerWeek"],
@@ -247,7 +255,7 @@ export class BulkImportService {
           await this.prisma.user.update({
             where: { userId: existing.userId },
             data: {
-              email: row.email,
+              cognitoId: row.email,
               experienceLevel: row.experienceLevel,
               availability: row.availability,
               teamId: row.teamId ? Number(row.teamId) : null,
@@ -259,8 +267,7 @@ export class BulkImportService {
           await this.prisma.user.create({
             data: {
               username: row.username,
-              email: row.email,
-              cognitoId: `imported-${row.username}`,
+              cognitoId: row.email,
               experienceLevel: row.experienceLevel,
               availability: row.availability || "FULL_TIME",
               teamId: row.teamId ? Number(row.teamId) : null,
@@ -502,8 +509,8 @@ export class BulkImportService {
           availability: u.availability,
           teamId: u.teamId,
           capacityHoursPerWeek: u.capacityHoursPerWeek,
-          skills: u.employeeSkills.map((es) => es.skill.name).join("; "),
-          projects: u.projectMemberships.map((pm) => pm.project.name).join("; "),
+          skills: u.employeeSkills.map((es: { skill: { name: string } }) => es.skill.name).join("; "),
+          projects: u.projectMemberships.map((pm: { project: { name: string } }) => pm.project.name).join("; "),
         }));
         headers = ["username", "email", "experienceLevel", "availability", "teamId", "capacityHoursPerWeek", "skills", "projects"];
         break;

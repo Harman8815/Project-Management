@@ -37,15 +37,16 @@ model User {
   taskWatchers         TaskWatcher[]
   employeeSkills       EmployeeSkill[]
   team                 Team?               @relation(fields: [teamId], references: [id])
-   notifications       Notification[]
-   notificationPreference NotificationPreference?
-   organizationMemberships OrganizationMembership[]
-   createdOrganizations Organization[] @relation("OrganizationCreator")
-   aiRequestLogs       AiRequestLog[]
-   aiFeedback          AiFeedback[]
-   calendarEvents       CalendarEvent[]
-   calendarSyncs        CalendarSync[]
-   searchHistories      UserSearchHistory[]
+  notifications       Notification[]
+  notificationPreference NotificationPreference?
+  organizationMemberships OrganizationMembership[]
+  createdOrganizations Organization[] @relation("OrganizationCreator")
+  aiRequestLogs       AiRequestLog[]
+  aiFeedback          AiFeedback[]
+  calendarEvents       CalendarEvent[]
+  calendarSyncs        CalendarSync[]
+  searchHistories      UserSearchHistory[]
+  savedViews          SavedView[]
 }
 
 model Team {
@@ -557,4 +558,21 @@ model MethodologyConfig {
   isDefault     Boolean @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model SavedView {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  viewName      String
+  viewType      String
+  filters       String   // JSON
+  sortConfig    String?  // JSON
+  columnConfig  String?  // JSON
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [userId])
+
+  @@index([userId])
+  @@index([userId, viewType])
 }

@@ -5,7 +5,7 @@ import {
   Logger,
 } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
-import { DataGenerator } from "./data-generator";
+import { DataGenerator } from "../../modules/dev/data-generator";
 
 type Scale = "small" | "medium" | "large";
 

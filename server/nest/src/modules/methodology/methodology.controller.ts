@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, UseGuards, Query } from "@nestjs/common";
-import { ApiTags, ApiBearerAuth, ApiQuery } from "@nestjs/swagger";
+import { Controller, Get, Post, Body, Patch, Param, UseGuards, Delete } from "@nestjs/common";
+import { ApiTags, ApiBearerAuth } from "@nestjs/swagger";
 import { MethodologyService, MethodologyKey, MethodologyConfig } from "./methodology.service";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";

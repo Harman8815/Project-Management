@@ -114,7 +114,6 @@ const SKILL_LIBRARY: Array<{ name: string; category: string }> = [
 ];
 
 const EXPERIENCE_LEVELS = ["ENTRY", "JUNIOR", "MID", "SENIOR", "LEAD"];
-const AVAILABILITY_OPTIONS = ["FULL_TIME", "PART_TIME", "BENCH", "UNAVAILABLE"];
 const SKILL_LEVELS = ["BEGINNER", "INTERMEDIATE", "ADVANCED", "EXPERT"];
 
 const NOTIFICATION_TEMPLATES: Record<string, { titles: string[]; messages: string[] }> = {

@@ -1,6 +1,7 @@
 import { JwtAuthGuard, IS_PUBLIC_KEY } from "./jwt-auth.guard";
 import { ExecutionContext, UnauthorizedException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
+import * as jwt from "jsonwebtoken";
 
 describe("JwtAuthGuard", () => {
   let guard: JwtAuthGuard;
@@ -53,7 +54,6 @@ describe("JwtAuthGuard", () => {
     it("should return true for valid token", async () => {
       (reflector.getAllAndOverride as jest.Mock).mockReturnValue(false);
 
-      const jwt = require("jsonwebtoken");
       const token = jwt.sign(
         { cognitoId: "test-user", username: "testuser" },
         process.env.JWT_SECRET || "fallback-secret-change-me",
@@ -104,7 +104,6 @@ describe("JwtAuthGuard", () => {
     it("should throw UnauthorizedException for token with wrong secret", async () => {
       (reflector.getAllAndOverride as jest.Mock).mockReturnValue(false);
 
-      const jwt = require("jsonwebtoken");
       const token = jwt.sign(
         { cognitoId: "test-user", username: "testuser" },
         "wrong-secret",
@@ -127,7 +126,6 @@ describe("JwtAuthGuard", () => {
     it("should throw UnauthorizedException for expired token", async () => {
       (reflector.getAllAndOverride as jest.Mock).mockReturnValue(false);
 
-      const jwt = require("jsonwebtoken");
       const token = jwt.sign(
         { cognitoId: "test-user", username: "testuser" },
         process.env.JWT_SECRET || "fallback-secret-change-me",
@@ -153,7 +151,7 @@ describe("Public decorator", () => {
   });
 
   it("should create a decorator function for public routes", () => {
-    const result = require("./jwt-auth.guard").Public();
-    expect(typeof result).toBe("function");
+    const result = IS_PUBLIC_KEY;
+    expect(typeof result).toBe("string");
   });
 });

@@ -367,7 +367,7 @@ export class AnalyticsService {
         where: { projectId: { in: projectIds } },
         take: 10,
         orderBy: { createdAt: "desc" },
-        include: { user: { select: { username: true } }, project: { select: { name: true, key: true } } },
+        include: { actor: { select: { username: true } }, project: { select: { name: true, key: true } } },
       }),
       this.getTeamWorkload({ projectId: projectIds[0] }), // Simplified - use first project
     ]);

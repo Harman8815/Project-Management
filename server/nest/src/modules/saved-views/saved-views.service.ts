@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from "@nestjs/common";
+import { Injectable, NotFoundException, ForbiddenException } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
 
 export interface SavedViewData {
@@ -61,7 +61,7 @@ export class SavedViewsService {
   }
 
   async update(id: number, userId: number, data: Partial<SavedViewData>) {
-    const view = await this.findOne(id, userId);
+    await this.findOne(id, userId);
     
     if (data.isDefault && data.viewType) {
       await this.prisma.savedView.updateMany({
@@ -94,7 +94,7 @@ export class SavedViewsService {
     const view = await this.findOne(id, userId);
     
     // Apply project filter if provided
-    const filters = { ...view.filters };
+    const filters = { ...JSON.parse(view.filters) };
     if (query?.projectId) {
       filters.projectId = query.projectId;
     }
