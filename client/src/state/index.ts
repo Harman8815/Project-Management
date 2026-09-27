@@ -4,12 +4,14 @@ export interface initialStateTypes {
   isSidebarCollapsed: boolean;
   isDarkMode: boolean;
   activeProjectId: number | null;
+  allProjectsSelected: boolean;
 }
 
 const initialState: initialStateTypes = {
   isSidebarCollapsed: false,
   isDarkMode: false,
   activeProjectId: null,
+  allProjectsSelected: false,
 };
 
 export const globalSlice = createSlice({
@@ -25,8 +27,11 @@ export const globalSlice = createSlice({
     setActiveProjectId: (state, action: PayloadAction<number | null>) => {
       state.activeProjectId = action.payload;
     },
+    setAllProjectsSelected: (state, action: PayloadAction<boolean>) => {
+      state.allProjectsSelected = action.payload;
+    },
   },
 });
 
-export const { setIsSidebarCollapsed, setIsDarkMode, setActiveProjectId } = globalSlice.actions;
+export const { setIsSidebarCollapsed, setIsDarkMode, setActiveProjectId, setAllProjectsSelected } = globalSlice.actions;
 export default globalSlice.reducer;

@@ -300,4 +300,89 @@ export class AnalyticsService {
       })),
     };
   }
+
+  async getAllProjectsDashboard(userId: number) {
+    // Get all projects user has access to
+    const memberships = await this.prisma.projectMembership.findMany({
+      where: { userId, status: "ACTIVE" },
+      select: { projectId: true },
+    });
+    const projectIds = memberships.map((m) => m.projectId);
+
+    if (projectIds.length === 0) {
+      return {
+        totalProjects: 0,
+        activeProjects: 0,
+        totalTasks: 0,
+        completedTasks: 0,
+        inProgressTasks: 0,
+        overdueTasks: 0,
+        upcomingDeadlines: [],
+        activeSprints: [],
+        recentActivity: [],
+        teamWorkload: [],
+      };
+    }
+
+    const [
+      totalProjects,
+      activeProjects,
+      totalTasks,
+      completedTasks,
+      inProgressTasks,
+      overdueTasks,
+      upcomingDeadlines,
+      activeSprints,
+      recentActivity,
+      teamWorkload,
+    ] = await Promise.all([
+      this.prisma.project.count({ where: { id: { in: projectIds } } }),
+      this.prisma.project.count({ where: { id: { in: projectIds }, archived: false, status: { not: "ARCHIVED" } } }),
+      this.prisma.task.count({ where: { projectId: { in: projectIds } } }),
+      this.prisma.task.count({ where: { projectId: { in: projectIds }, status: { in: ["Completed", "Done"] } } }),
+      this.prisma.task.count({ where: { projectId: { in: projectIds }, status: "In Progress" } }),
+      this.prisma.task.count({
+        where: {
+          projectId: { in: projectIds },
+          dueDate: { lt: new Date() },
+          status: { not: { in: ["Completed", "Done"] } },
+        },
+      }),
+      this.prisma.task.findMany({
+        where: {
+          projectId: { in: projectIds },
+          dueDate: { gte: new Date(), lte: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+          status: { not: { in: ["Completed", "Done"] } },
+        },
+        take: 10,
+        orderBy: { dueDate: "asc" },
+        select: { id: true, title: true, dueDate: true, projectId: true, project: { select: { name: true, key: true } } },
+      }),
+      this.prisma.sprint.findMany({
+        where: { projectId: { in: projectIds }, status: "ACTIVE" },
+        take: 5,
+        include: { project: { select: { name: true, key: true } } },
+      }),
+      this.prisma.activityLog.findMany({
+        where: { projectId: { in: projectIds } },
+        take: 10,
+        orderBy: { createdAt: "desc" },
+        include: { user: { select: { username: true } }, project: { select: { name: true, key: true } } },
+      }),
+      this.getTeamWorkload({ projectId: projectIds[0] }), // Simplified - use first project
+    ]);
+
+    return {
+      totalProjects,
+      activeProjects,
+      totalTasks,
+      completedTasks,
+      inProgressTasks,
+      overdueTasks,
+      upcomingDeadlines,
+      activeSprints,
+      recentActivity,
+      teamWorkload,
+    };
+  }
 }

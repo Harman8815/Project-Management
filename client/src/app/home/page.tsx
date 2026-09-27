@@ -7,6 +7,7 @@ import {
   useGetAuthUserQuery,
   useGetProjectsQuery,
   useGetTasksQuery,
+  useGetTasksByUserQuery,
 } from "@/state/api";
 import React from "react";
 import { useAppSelector } from "../redux";
@@ -46,7 +47,13 @@ const HomePage = () => {
   } = useGetProjectsQuery();
 
   const activeProjectId = useAppSelector((state) => state.global.activeProjectId);
-  const projectId = activeProjectId ?? (projects && projects.length > 0 ? projects[0].id : null);
+  const allProjectsSelected = useAppSelector((state) => state.global.allProjectsSelected);
+  const userId = currentUser?.userDetails?.userId;
+
+  const projectId = allProjectsSelected
+    ? null
+    : activeProjectId ?? (projects && projects.length > 0 ? projects[0].id : null);
+
   const {
     data: tasks,
     isLoading: tasksLoading,
@@ -54,13 +61,23 @@ const HomePage = () => {
   } = useGetTasksQuery(
     { projectId: projectId ?? 0 },
     {
-      skip: !projectId,
+      skip: !projectId || allProjectsSelected,
     },
   );
 
+  const {
+    data: userTasks,
+    isLoading: userTasksLoading,
+  } = useGetTasksByUserQuery(userId ?? 0, {
+    skip: !userId || !allProjectsSelected,
+  });
+
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
 
-  if (tasksLoading || isProjectsLoading) {
+  const tasksLoadingAll = allProjectsSelected ? userTasksLoading : tasksLoading;
+  const tasksList = (allProjectsSelected ? userTasks : tasks) || [];
+
+  if (tasksLoadingAll || isProjectsLoading) {
     return (
       <div className="container mx-auto w-full min-w-0 bg-gray-100 p-8 dark:bg-dark-bg">
         <Header name="Project Management Dashboard" />
@@ -86,7 +103,6 @@ const HomePage = () => {
       />
     );
 
-  const tasksList = tasks || [];
   const projectsList = projects || [];
 
   const priorityCount = tasksList.reduce(
@@ -103,7 +119,7 @@ const HomePage = () => {
     count: priorityCount[key],
   }));
 
-  const statusCount = projectsList.reduce(
+  const statusCount = (allProjectsSelected ? projectsList : projectsList).reduce(
     (acc: Record<string, number>, project: Project) => {
       const status = project.endDate ? "Completed" : "Active";
       acc[status] = (acc[status] || 0) + 1;
@@ -131,13 +147,19 @@ const HomePage = () => {
         text: "#000000",
       };
 
+  const dashboardTitle = allProjectsSelected
+    ? "All Projects Dashboard"
+    : tasksList.length > 0
+      ? `${projectsList.find((p) => p.id === projectId)?.name ?? "Project"} Dashboard`
+      : "Project Management Dashboard";
+
   if (tasksList.length === 0 && projectsList.length === 0) {
     return <EmptyState message="No tasks or projects found" />;
   }
 
   return (
     <div className="container mx-auto w-full min-w-0 bg-gray-100 p-8 dark:bg-dark-bg">
-      <Header name="Project Management Dashboard" />
+      <Header name={dashboardTitle} />
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Card
           title="Task Priority Distribution"

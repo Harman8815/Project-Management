@@ -9,7 +9,7 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
-import { ApiTags, ApiBearerAuth, ApiQuery } from "@nestjs/swagger";
+import { ApiTags, ApiBearerAuth, ApiQuery, ApiBody } from "@nestjs/swagger";
 import { ProjectMembershipsService } from "./project-memberships.service";
 import {
   CreateProjectMembershipDto,
@@ -59,6 +59,42 @@ export class ProjectMembershipsController {
       inviteDto.role,
       user?.userId,
     );
+  }
+
+  @Post("transfer")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        userId: { type: "number" },
+        targetProjectId: { type: "number" },
+        role: { type: "string", enum: ["OWNER", "ADMIN", "MEMBER"], default: "MEMBER" },
+      },
+      required: ["userId", "targetProjectId"],
+    },
+  })
+  async transferEmployee(
+    @Body() body: { userId: number; targetProjectId: number; role?: string },
+    @CurrentUser() user: any,
+  ) {
+    return this.projectMembershipsService.transferEmployee(
+      body.userId,
+      body.targetProjectId,
+      user?.userId,
+      body.role || "MEMBER",
+    );
+  }
+
+  @Get("transfer-history/:userId")
+  async getTransferHistory(
+    @Param("userId") userId: string,
+    @CurrentUser() user: any,
+  ) {
+    // Users can only see their own transfer history, admins can see any
+    if (user?.userId !== Number(userId) && !["ADMIN", "OWNER"].includes(user?.role || "")) {
+      throw new Error("Unauthorized");
+    }
+    return this.projectMembershipsService.getTransferHistory(Number(userId));
   }
 
   @ApiQuery({ name: "page", required: false })

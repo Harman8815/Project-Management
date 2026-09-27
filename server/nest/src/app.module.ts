@@ -31,6 +31,11 @@ import { CalendarModule } from "./modules/calendar/calendar.module";
 import { WorkflowsModule } from "./modules/workflows/workflows.module";
 import { TimelineModule } from "./modules/timeline/timeline.module";
 import { DevModule } from "./modules/dev/dev.module";
+import { ResourcesModule } from "./modules/resources/resources.module";
+import { BulkImportModule } from "./modules/bulk-import/bulk-import.module";
+import { SavedViewsModule } from "./modules/saved-views/saved-views.module";
+import { ProjectDuplicationModule } from "./modules/project-duplication/project-duplication.module";
+import { MethodologyModule } from "./modules/methodology/methodology.module";
 
 @Module({
   imports: [
@@ -64,6 +69,11 @@ import { DevModule } from "./modules/dev/dev.module";
     CalendarModule,
     TimelineModule,
     DevModule,
+    ResourcesModule,
+    BulkImportModule,
+    SavedViewsModule,
+    ProjectDuplicationModule,
+    MethodologyModule,
   ],
   providers: [
     {

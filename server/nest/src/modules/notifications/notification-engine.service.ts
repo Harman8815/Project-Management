@@ -36,30 +36,46 @@ export class NotificationEngineService {
     let totalCreated = 0;
 
     for (const rule of rules) {
-      const targetUserIds = await this.resolveTargetUsers(rule, payload);
-      for (const targetUserId of targetUserIds) {
-        if (await this.shouldSuppress(rule, payload, targetUserId)) {
-          continue;
-        }
+      let attempts = 0;
+      const maxAttempts = 3;
 
-        if (await this.isDuplicate(rule, payload, targetUserId)) {
-          continue;
-        }
+      while (attempts < maxAttempts) {
+        try {
+          const targetUserIds = await this.resolveTargetUsers(rule, payload);
+          for (const targetUserId of targetUserIds) {
+            if (await this.shouldSuppress(rule, payload, targetUserId)) {
+              continue;
+            }
 
-        await this.prisma.notification.create({
-          data: {
-            userId: targetUserId,
-            type: rule.notificationType as string,
-            title: interpolateTemplate(rule.titleTemplate, payload),
-            message: interpolateTemplate(rule.messageTemplate, payload),
-            link: rule.actionUrlTemplate
-              ? interpolateTemplate(rule.actionUrlTemplate, payload)
-              : null,
-            severity: this.getSeverity(rule.notificationType),
-            status: "DELIVERED",
-          },
-        });
-        totalCreated++;
+            if (await this.isDuplicate(rule, payload, targetUserId)) {
+              continue;
+            }
+
+            await this.prisma.notification.create({
+              data: {
+                userId: targetUserId,
+                type: rule.notificationType as string,
+                title: interpolateTemplate(rule.titleTemplate, payload),
+                message: interpolateTemplate(rule.messageTemplate, payload),
+                link: rule.actionUrlTemplate
+                  ? interpolateTemplate(rule.actionUrlTemplate, payload)
+                  : null,
+                severity: this.getSeverity(rule.notificationType),
+                status: "DELIVERED",
+              },
+            });
+            totalCreated++;
+          }
+          break;
+        } catch (error) {
+          attempts++;
+          if (attempts >= maxAttempts) {
+            console.error(
+              `[NotificationEngine] Failed to process event ${eventType} after ${maxAttempts} attempts:`,
+              error instanceof Error ? error.message : error,
+            );
+          }
+        }
       }
     }
 

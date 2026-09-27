@@ -2,10 +2,10 @@ import { PrismaClient } from "@prisma/client";
 
 type Scale = "small" | "medium" | "large";
 
-const SCALE_PRESETS: Record<Scale, { users: number; projects: number; tasks: number; sprints: number; milestones: number; notifications: number }> = {
-  small: { users: 5, projects: 3, tasks: 10, sprints: 5, milestones: 3, notifications: 10 },
-  medium: { users: 10, projects: 6, tasks: 30, sprints: 15, milestones: 10, notifications: 50 },
-  large: { users: 20, projects: 10, tasks: 40, sprints: 30, milestones: 25, notifications: 200 },
+const SCALE_PRESETS: Record<Scale, { users: number; projects: number; tasks: number; sprints: number; milestones: number; notifications: number; skills: number; skillAssignments: number }> = {
+  small: { users: 20, projects: 3, tasks: 50, sprints: 10, milestones: 8, notifications: 50, skills: 30, skillAssignments: 60 },
+  medium: { users: 50, projects: 6, tasks: 120, sprints: 20, milestones: 15, notifications: 150, skills: 60, skillAssignments: 200 },
+  large: { users: 80, projects: 10, tasks: 200, sprints: 30, milestones: 25, notifications: 200, skills: 80, skillAssignments: 400 },
 };
 
 function seededRandom(seed: number) {
@@ -47,6 +47,76 @@ const NOTIFICATION_SEVERITIES = ["INFO", "WARNING", "ERROR"] as const;
 const TASK_TAGS = ["Design", "Coding", "Testing", "Review", "Documentation", "Bug", "Feature", "Refactor"];
 const ORG_NAMES = ["TechVision", "NexusCorp", "StellarWorks", "QuantumLabs", "ApexDynamics"];
 
+// Skill library: name -> category
+const SKILL_LIBRARY: Array<{ name: string; category: string }> = [
+  // Backend
+  { name: "Java", category: "Backend" },
+  { name: "Spring Boot", category: "Backend" },
+  { name: "Node.js", category: "Backend" },
+  { name: "Python", category: "Backend" },
+  { name: "Django", category: "Backend" },
+  { name: "Go", category: "Backend" },
+  { name: "C#", category: "Backend" },
+  { name: ".NET", category: "Backend" },
+  { name: "PHP", category: "Backend" },
+  { name: "Ruby", category: "Backend" },
+  { name: "Rust", category: "Backend" },
+  { name: "Kotlin", category: "Backend" },
+  // Frontend
+  { name: "React", category: "Frontend" },
+  { name: "Next.js", category: "Frontend" },
+  { name: "Vue.js", category: "Frontend" },
+  { name: "Angular", category: "Frontend" },
+  { name: "TypeScript", category: "Frontend" },
+  { name: "JavaScript", category: "Frontend" },
+  { name: "HTML/CSS", category: "Frontend" },
+  { name: "Sass", category: "Frontend" },
+  { name: "Redux", category: "Frontend" },
+  // QA
+  { name: "QA Engineering", category: "QA" },
+  { name: "Manual Testing", category: "QA" },
+  { name: "Automation Testing", category: "QA" },
+  { name: "Cypress", category: "QA" },
+  { name: "Jest", category: "QA" },
+  { name: "Selenium", category: "QA" },
+  // DevOps
+  { name: "DevOps", category: "DevOps" },
+  { name: "Docker", category: "DevOps" },
+  { name: "Kubernetes", category: "DevOps" },
+  { name: "AWS", category: "DevOps" },
+  { name: "GCP", category: "DevOps" },
+  { name: "Azure", category: "DevOps" },
+  { name: "CI/CD", category: "DevOps" },
+  { name: "Terraform", category: "DevOps" },
+  // Data/ML
+  { name: "Machine Learning", category: "Data/ML" },
+  { name: "Data Science", category: "Data/ML" },
+  { name: "Python (Data)", category: "Data/ML" },
+  { name: "TensorFlow", category: "Data/ML" },
+  { name: "PyTorch", category: "Data/ML" },
+  { name: "SQL", category: "Data/ML" },
+  { name: "Big Data", category: "Data/ML" },
+  // Design
+  { name: "UI/UX Design", category: "Design" },
+  { name: "Figma", category: "Design" },
+  { name: "Adobe Creative Suite", category: "Design" },
+  { name: "Prototyping", category: "Design" },
+  // Marketing
+  { name: "Digital Marketing", category: "Marketing" },
+  { name: "Content Strategy", category: "Marketing" },
+  { name: "SEO/SEM", category: "Marketing" },
+  { name: "Social Media", category: "Marketing" },
+  // Product
+  { name: "Product Management", category: "Product" },
+  { name: "Business Analysis", category: "Product" },
+  { name: "Agile/Scrum", category: "Product" },
+  { name: "Roadmapping", category: "Product" },
+];
+
+const EXPERIENCE_LEVELS = ["ENTRY", "JUNIOR", "MID", "SENIOR", "LEAD"];
+const AVAILABILITY_OPTIONS = ["FULL_TIME", "PART_TIME", "BENCH", "UNAVAILABLE"];
+const SKILL_LEVELS = ["BEGINNER", "INTERMEDIATE", "ADVANCED", "EXPERT"];
+
 const NOTIFICATION_TEMPLATES: Record<string, { titles: string[]; messages: string[] }> = {
   ASSIGNMENT: { titles: ["New task assigned", "Task reassigned to you"], messages: ["You have been assigned a new task.", "A task has been assigned to you for review."] },
   MENTION: { titles: ["You were mentioned", "New mention in comment"], messages: ["You were mentioned in a comment.", "Someone mentioned you in the discussion."] },
@@ -68,11 +138,13 @@ export interface GenerationResult {
   milestones: number;
   comments: number;
   notifications: number;
+  skills: number;
+  employeeSkills: number;
 }
 
 export class DataGenerator {
   private readonly rng: () => number;
-  private readonly scale: { users: number; projects: number; tasks: number; sprints: number; milestones: number; notifications: number };
+  private readonly scale: { users: number; projects: number; tasks: number; sprints: number; milestones: number; notifications: number; skills: number; skillAssignments: number };
   private readonly baseTime: Date;
 
   constructor(seed: number = 42, scaleName: Scale = "large") {
@@ -133,6 +205,8 @@ export class DataGenerator {
             cognitoId: `dev-user-${i + 1}`,
             teamId: teams[i % teamCount].id,
             capacityHoursPerWeek: 30 + (i % 5) * 5,
+            experienceLevel: randomFrom(EXPERIENCE_LEVELS, this.rng),
+            availability: this.rng() < 0.15 ? "BENCH" : this.rng() < 0.1 ? "PART_TIME" : this.rng() < 0.05 ? "UNAVAILABLE" : "FULL_TIME",
           },
         });
         users.push({ userId: user.userId, username });
@@ -161,6 +235,45 @@ export class DataGenerator {
             inAppEnabled: this.rng() > 0.1,
           },
         });
+      }
+
+      // Create skill library
+      const skillCount = Math.min(this.scale.skills, SKILL_LIBRARY.length);
+      const skills: { id: number; name: string; category: string }[] = [];
+      for (let i = 0; i < skillCount; i++) {
+        const def = SKILL_LIBRARY[i];
+        const skill = await tx.skill.create({
+          data: {
+            name: def.name,
+            category: def.category,
+          },
+        });
+        skills.push({ id: skill.id, name: skill.name, category: def.category });
+      }
+
+      // Assign skills to employees (each employee gets 1-5 skills)
+      let employeeSkillCount = 0;
+      const assignments = new Set<string>();
+      for (let i = 0; i < this.scale.skillAssignments; i++) {
+        const userIdx = Math.floor(this.rng() * users.length);
+        const skillIdx = Math.floor(this.rng() * skills.length);
+        const key = `${userIdx}-${skillIdx}`;
+        if (assignments.has(key)) continue;
+        assignments.add(key);
+        const level = randomFrom(SKILL_LEVELS, this.rng);
+        const yearsExp = level === "BEGINNER" ? 0
+          : level === "INTERMEDIATE" ? randomInt(1, 3, this.rng)
+          : level === "ADVANCED" ? randomInt(3, 6, this.rng)
+          : randomInt(6, 15, this.rng);
+        await tx.employeeSkill.create({
+          data: {
+            userId: users[userIdx].userId,
+            skillId: skills[skillIdx].id,
+            level,
+            yearsExp,
+          },
+        });
+        employeeSkillCount++;
       }
 
       const projects: { id: number; name: string }[] = [];
@@ -223,6 +336,21 @@ export class DataGenerator {
         }
 
         projects.push({ id: project.id, name });
+      }
+
+      // Set currentProjectId for allocated employees (first active project membership)
+      const userActiveProjects: Record<number, number> = {};
+      const memberships = await tx.projectMembership.findMany({ where: { status: "ACTIVE" } });
+      for (const pm of memberships) {
+        if (!(pm.userId in userActiveProjects)) {
+          userActiveProjects[pm.userId] = pm.projectId;
+        }
+      }
+      for (const [userId, projectId] of Object.entries(userActiveProjects)) {
+        await tx.user.update({
+          where: { userId: Number(userId) },
+          data: { currentProjectId: projectId },
+        });
       }
 
       let taskCount = 0;
@@ -370,7 +498,7 @@ export class DataGenerator {
       }
 
       console.log(
-        `[DataGenerator] Generated: ${userCount} users, ${projects.length} projects, ${taskCount} tasks, ${sprintCount} sprints, ${milestoneCount} milestones, ${commentCount} comments, ${notificationCount} notifications across ${orgCount} organizations`,
+        `[DataGenerator] Generated: ${userCount} users, ${projects.length} projects, ${taskCount} tasks, ${sprintCount} sprints, ${milestoneCount} milestones, ${commentCount} comments, ${notificationCount} notifications, ${skills.length} skills, ${employeeSkillCount} employeeSkills across ${orgCount} organizations`,
       );
 
       return {
@@ -383,6 +511,8 @@ export class DataGenerator {
         milestones: milestoneCount,
         comments: commentCount,
         notifications: notificationCount,
+        skills: skills.length,
+        employeeSkills: employeeSkillCount,
       };
     });
 

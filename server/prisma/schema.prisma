@@ -16,22 +16,27 @@ model User {
   teamId              Int?
   capacityHoursPerWeek Int?               @default(40)
   capacityStoryPoints  Int?
-  activityTarget      ActivityLog[]       @relation("ActivityTarget")
-  activityActor       ActivityLog[]       @relation("ActivityActor")
-  attachments         Attachment[]
-  comments            Comment[]
-  mentionedInComments CommentMention[]
-  ownedMilestones     Milestone[]
-  invitedMembers      ProjectMembership[] @relation("InvitedBy")
-  projectMemberships  ProjectMembership[]
-  createdTemplates    ProjectTemplate[]
-  ownedSprints        Sprint[]
-  assignedTasks       Task[]              @relation("TaskAssignee")
-  authoredTasks       Task[]              @relation("TaskAuthor")
-  taskAssignments     TaskAssignment[]
-  taskHistoryChanges  TaskHistory[]
-  taskWatchers        TaskWatcher[]
-  team                Team?               @relation(fields: [teamId], references: [id])
+  experienceLevel      String?             // ENTRY, JUNIOR, MID, SENIOR, LEAD
+  availability         String?             // FULL_TIME, PART_TIME, BENCH, UNAVAILABLE
+  benchDate            DateTime?
+  currentProjectId     Int?
+  activityTarget       ActivityLog[]       @relation("ActivityTarget")
+  activityActor        ActivityLog[]       @relation("ActivityActor")
+  attachments          Attachment[]
+  comments             Comment[]
+  mentionedInComments  CommentMention[]
+  ownedMilestones      Milestone[]
+  invitedMembers       ProjectMembership[] @relation("InvitedBy")
+  projectMemberships   ProjectMembership[]
+  createdTemplates     ProjectTemplate[]
+  ownedSprints         Sprint[]
+  assignedTasks        Task[]              @relation("TaskAssignee")
+  authoredTasks        Task[]              @relation("TaskAuthor")
+  taskAssignments      TaskAssignment[]
+  taskHistoryChanges   TaskHistory[]
+  taskWatchers         TaskWatcher[]
+  employeeSkills       EmployeeSkill[]
+  team                 Team?               @relation(fields: [teamId], references: [id])
    notifications       Notification[]
    notificationPreference NotificationPreference?
    organizationMemberships OrganizationMembership[]
@@ -65,6 +70,9 @@ model Project {
   health       String              @default("ON_TRACK")
   objectives   String?
   archived     Boolean             @default(false)
+  methodology  String              @default("KANBAN") // KANBAN, WATERFALL
+  iconName     String?             // name of icon from icon library (e.g. "database", "server")
+  color        String?             // hex color code (e.g. "#3b82f6")
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
   activityLogs ActivityLog[]
@@ -202,7 +210,7 @@ model Sprint {
   goal        String?
   startDate   DateTime?
   endDate     DateTime?
-  status      String    @default("PLANNED")
+  status      String    @default("PLANNED") // PLANNED, UPCOMING, ACTIVE, NEAR_COMPLETION, COMPLETED, CLOSED
   capacity    Int?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -514,4 +522,39 @@ model UserSearchHistory {
   user          User      @relation(fields: [userId], references: [userId])
 
   @@index([userId])
+}
+
+model Skill {
+  id            Int             @id @default(autoincrement())
+  name          String          @unique
+  category      String?         // e.g. "Backend", "Frontend", "QA", "DevOps"
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  employeeSkills EmployeeSkill[]
+}
+
+model EmployeeSkill {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  skillId   Int
+  level     String   @default("INTERMEDIATE") // BEGINNER, INTERMEDIATE, ADVANCED, EXPERT
+  yearsExp  Int?
+  user      User     @relation(fields: [userId], references: [userId])
+  skill     Skill    @relation(fields: [skillId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, skillId])
+  @@index([userId])
+  @@index([skillId])
+}
+
+model MethodologyConfig {
+  id            Int    @id @default(autoincrement())
+  name          String // "Kanban", "Waterfall", "Scrum"
+  key           String @unique // "KANBAN", "WATERFALL", "SCRUM"
+  config        String // JSON string - workflow states, required fields, visible sections
+  isDefault     Boolean @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

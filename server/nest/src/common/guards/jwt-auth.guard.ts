@@ -13,6 +13,12 @@ import { PrismaService } from "../../prisma/prisma.service";
 export const IS_PUBLIC_KEY = "isPublic";
 export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 
+export enum ErrorCode {
+  AUTH_TOKEN_EXPIRED = "AUTH_TOKEN_EXPIRED",
+  AUTH_TOKEN_INVALID = "AUTH_TOKEN_INVALID",
+  AUTH_TOKEN_REVOKED = "AUTH_TOKEN_REVOKED",
+}
+
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
@@ -50,9 +56,10 @@ export class JwtAuthGuard implements CanActivate {
     const authHeader = (request as Request).headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      throw new UnauthorizedException(
-        "Missing or invalid authorization header",
-      );
+      throw new UnauthorizedException({
+        message: "Missing or invalid authorization header",
+        errorCode: ErrorCode.AUTH_TOKEN_INVALID,
+      });
     }
 
     const token = authHeader.substring(7);
@@ -65,7 +72,22 @@ export class JwtAuthGuard implements CanActivate {
       request.user = decoded;
       return true;
     } catch (error) {
-      throw new UnauthorizedException("Invalid or expired token");
+      if (error instanceof jwt.TokenExpiredError) {
+        throw new UnauthorizedException({
+          message: "Token has expired",
+          errorCode: ErrorCode.AUTH_TOKEN_EXPIRED,
+        });
+      }
+      if (error instanceof jwt.NotBeforeError) {
+        throw new UnauthorizedException({
+          message: "Token not yet valid",
+          errorCode: ErrorCode.AUTH_TOKEN_INVALID,
+        });
+      }
+      throw new UnauthorizedException({
+        message: "Invalid or revoked token",
+        errorCode: ErrorCode.AUTH_TOKEN_REVOKED,
+      });
     }
   }
 }

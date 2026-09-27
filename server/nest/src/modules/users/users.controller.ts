@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   HttpCode,
+  UseGuards,
 } from "@nestjs/common";
 import { ApiTags, ApiBearerAuth, ApiQuery } from "@nestjs/swagger";
 import { UsersService } from "./users.service";
@@ -16,16 +17,19 @@ import { UpdateUserDto } from "./dto/update-user.dto";
 import { PaginationDto } from "../../common/dto/pagination.dto";
 import { Public } from "../../common/guards/jwt-auth.guard";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { RolesGuard } from "../../common/guards/roles.guard";
+import { Roles } from "../../common/decorators/roles.decorator";
 
 @ApiTags("users")
 @ApiBearerAuth()
 @Controller("users")
+@UseGuards(RolesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Public()
   @Post()
   @HttpCode(201)
+  @Roles("ADMIN", "OWNER")
   async create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }

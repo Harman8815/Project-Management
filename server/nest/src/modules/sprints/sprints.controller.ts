@@ -60,6 +60,13 @@ export class SprintsController {
     return this.sprintsService.getBurndown(Number(id), user?.userId);
   }
 
+  @Get(":id/lifecycle")
+  @UseGuards(ProjectAccessGuard)
+  @RequireProjectAccess("projectId")
+  async getLifecycle(@Param("id") id: string, @CurrentUser() user: any) {
+    return this.sprintsService.getLifecycle(Number(id), user?.userId);
+  }
+
   @Patch(":id")
   @UseGuards(ProjectAccessGuard)
   @RequireProjectAccess("projectId")

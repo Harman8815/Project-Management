@@ -273,15 +273,103 @@ export class SprintsService {
 
   private validateSprintStatusTransition(currentStatus: string, newStatus: string): boolean {
     const validTransitions: Record<string, string[]> = {
-      PLANNED: ["ACTIVE", "CANCELLED"],
-      ACTIVE: ["COMPLETED", "CANCELLED"],
-      COMPLETED: [], // Cannot transition from completed
-      CANCELLED: ["PLANNED"], // Can reactivate cancelled sprints
+      PLANNED: ["UPCOMING", "ACTIVE", "CANCELLED"],
+      UPCOMING: ["ACTIVE", "CANCELLED", "PLANNED"],
+      ACTIVE: ["NEAR_COMPLETION", "COMPLETED", "CANCELLED"],
+      NEAR_COMPLETION: ["COMPLETED", "ACTIVE", "CANCELLED"],
+      COMPLETED: ["CLOSED"],
+      CLOSED: [],
+      CANCELLED: ["PLANNED", "UPCOMING"],
     };
 
     const allowedTransitions = validTransitions[currentStatus] || [];
     return allowedTransitions.includes(newStatus);
   }
+
+  async getLifecycle(sprintId: number, userId?: number) {
+    const sprint = await this.findOne(sprintId, userId);
+    
+    const now = new Date();
+    const startDate = sprint.startDate ? new Date(sprint.startDate) : null;
+    const endDate = sprint.endDate ? new Date(sprint.endDate) : null;
+    
+    let calculatedStatus = sprint.status;
+    
+    // Auto-calculate status based on dates
+    if (startDate && endDate) {
+      if (startDate > now) {
+        calculatedStatus = "UPCOMING";
+      } else if (startDate <= now && endDate >= now) {
+        const daysRemaining = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        if (daysRemaining <= 7 && daysRemaining > 0) {
+          calculatedStatus = "NEAR_COMPLETION";
+        } else {
+          calculatedStatus = "ACTIVE";
+        }
+      } else if (endDate < now) {
+        if (sprint.status === "ACTIVE" || sprint.status === "NEAR_COMPLETION") {
+          calculatedStatus = "COMPLETED";
+        }
+      }
+    }
+
+    const stages = [
+      { key: "PLANNED", label: "Planned", order: 1 },
+      { key: "UPCOMING", label: "Upcoming", order: 2 },
+      { key: "ACTIVE", label: "Active", order: 3 },
+      { key: "NEAR_COMPLETION", label: "Near Completion", order: 4 },
+      { key: "COMPLETED", label: "Completed", order: 5 },
+      { key: "CLOSED", label: "Closed", order: 6 },
+    ];
+
+    const currentIndex = stages.findIndex((s) => s.key === calculatedStatus);
+    const progress = currentIndex >= 0 ? ((currentIndex + 1) / stages.length) * 100 : 0;
+
+    // Get task statistics
+    const tasks = await this.prisma.task.findMany({
+      where: { sprintId },
+      select: { status: true, points: true },
+    });
+
+    const totalPoints = tasks.reduce((sum, t) => sum + (t.points || 0), 0);
+    const completedPoints = tasks
+      .filter((t) => t.status === "Completed" || t.status === "Done")
+      .reduce((sum, t) => sum + (t.points || 0), 0);
+
+    const daysRemaining = sprint.endDate 
+      ? Math.ceil((new Date(sprint.endDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+      : null;
+
+    return {
+      sprintId: sprint.id,
+      sprintName: sprint.name,
+      currentStatus: calculatedStatus,
+      calculatedStatus,
+      progress,
+      stages: stages.map((stage) => ({
+        ...stage,
+        isCurrent: stage.key === calculatedStatus,
+        isCompleted: stage.order <= currentIndex + 1,
+        isFuture: stage.order > currentIndex + 1,
+      })),
+      startDate: sprint.startDate,
+      endDate: sprint.endDate,
+      daysRemaining,
+      isNearCompletion: daysRemaining !== null && daysRemaining <= 7 && daysRemaining > 0 && calculatedStatus === "ACTIVE",
+      isOverdue: daysRemaining !== null && daysRemaining < 0 && calculatedStatus !== "COMPLETED" && calculatedStatus !== "CLOSED",
+      taskStats: {
+        total: tasks.length,
+        completed: tasks.filter((t) => t.status === "Completed" || t.status === "Done").length,
+        inProgress: tasks.filter((t) => t.status === "In Progress").length,
+        totalPoints,
+        completedPoints,
+        completionRate: totalPoints > 0 ? Math.round((completedPoints / totalPoints) * 100) : 0,
+      },
+      goal: sprint.goal,
+    };
+  }
+
+  private validateSprintStatusTransition(currentStatus: string, newStatus: string): boolean {
 
   private async checkUserAccess(userId: number, projectId: number, requiredRoles: string[] = []): Promise<boolean> {
     const membership = await this.prisma.projectMembership.findFirst({

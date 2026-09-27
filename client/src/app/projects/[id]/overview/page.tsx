@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import { useGetProjectsQuery, useGetTasksQuery, Status } from "@/state/api";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { Button } from "@/components/ui";
+import { Button, CardSkeleton, StatGridSkeleton, TableSkeleton } from "@/components/ui";
 import ProjectHeader from "../../ProjectHeader";
 
 type TabType = "overview" | "tasks" | "milestones" | "activity" | "settings";
@@ -13,8 +13,8 @@ const ProjectOverview = () => {
   const params = useParams<{ id: string }>();
   const { id } = params;
   const [activeTab, setActiveTab] = useState<TabType>("overview");
-  const { data: projects } = useGetProjectsQuery();
-  const { data: tasks } = useGetTasksQuery({ projectId: Number(id) });
+  const { data: projects, isLoading: projectsLoading } = useGetProjectsQuery();
+  const { data: tasks, isLoading: tasksLoading } = useGetTasksQuery({ projectId: Number(id) });
   
   const projectName =
     projects?.find((p) => p.id === Number(id))?.name ?? "Project";
@@ -42,33 +42,39 @@ const ProjectOverview = () => {
           setActiveTab={() => {}}
           projectName={projectName}
         />
-        
-        {/* Tab Navigation */}
-        <div className="flex border-b mb-6">
-          {[
-            { id: "overview", label: "Overview" },
-            { id: "tasks", label: "Tasks" },
-            { id: "milestones", label: "Milestones" },
-            { id: "activity", label: "Activity" },
-            { id: "settings", label: "Settings" },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as TabType)}
-              className={`px-4 py-2 font-medium transition-colors ${
-                activeTab === tab.id
-                  ? "border-b-2 border-blue-600 text-blue-600"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
 
-        {/* Tab Content */}
-        <div className="space-y-6">
-          {activeTab === "overview" && (
+        {projectsLoading || tasksLoading ? (
+          <div className="space-y-6">
+            <StatGridSkeleton count={4} />
+            <CardSkeleton count={2} />
+          </div>
+        ) : (
+          <>
+            {/* Tab Navigation */}
+            <div className="flex border-b mb-6">
+              {[
+                { id: "overview", label: "Overview" },
+                { id: "tasks", label: "Tasks" },
+                { id: "milestones", label: "Milestones" },
+                { id: "activity", label: "Activity" },
+                { id: "settings", label: "Settings" },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as TabType)}
+                  className={`px-4 py-2 font-medium transition-colors ${
+                    activeTab === tab.id
+                      ? "border-b-2 border-blue-600 text-blue-600"
+                      : "text-gray-600 hover:text-gray-900"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Tab Content */}
+            <div className="space-y-6">
             <div className="space-y-6">
               {/* Project Stats */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -173,8 +179,10 @@ const ProjectOverview = () => {
                 </div>
               </div>
             </div>
-          )}
-        </div>
+            )}
+          </div>
+          </>
+        )}
       </div>
     </div>
   );

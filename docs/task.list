@@ -1,3 +1,5 @@
+never run a build or lint untill all task are completed to save time 
+
 # ProjeX — New Implementation & Refinement Tasks
 
 ## Task 1 — Authentication & Internal User Management

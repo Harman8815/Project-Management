@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import ProjectHeader from "@/app/projects/ProjectHeader";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { CardSkeleton } from "@/components/ui";
 import Board from "../BoardView";
 import List from "../ListView";
 import Timeline from "../TimelineView";
@@ -18,7 +19,7 @@ const Project = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("Board");
   const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false);
-  const { data: projects } = useGetProjectsQuery();
+  const { data: projects, isLoading } = useGetProjectsQuery();
   const projectName =
     projects?.find((p) => p.id === Number(id))?.name ?? "Project";
 
@@ -35,6 +36,15 @@ const Project = () => {
       setActiveTab(tab);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="p-4">
+        <Breadcrumbs items={breadcrumbItems} />
+        <CardSkeleton count={3} />
+      </div>
+    );
+  }
 
   return (
     <div>

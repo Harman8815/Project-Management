@@ -131,6 +131,15 @@ export interface CustomFieldDefinition {
   required: boolean;
 }
 
+export interface CustomFieldValue {
+  id: number;
+  definitionId: number;
+  projectId?: number;
+  taskId?: number;
+  value: string;
+  definition?: CustomFieldDefinition;
+}
+
 export interface TimelineProject extends Project {
   sprints?: Sprint[];
   delayed?: boolean;
@@ -175,6 +184,102 @@ export interface Milestone {
   ownerId?: number;
 }
 
+export interface ResourceOverview {
+  totalEmployees: number;
+  allocatedEmployees: number;
+  availableEmployees: number;
+  benchEmployees: number;
+  vacantProjectSeats: number;
+  overallUtilization: number;
+  skillDistribution: Array<{ skill: string; count: number }>;
+}
+
+export interface Employee {
+  userId: number;
+  username: string;
+  email: string;
+  experienceLevel?: string;
+  availability?: string;
+  benchDate?: string;
+  currentProjectId?: number;
+  skills: Array<{ skillId: number; skillName: string; skillCategory?: string; level: string; yearsExp?: number }>;
+  projects: Array<{ projectId: number; projectName: string; projectKey?: string; role: string }>;
+}
+
+export interface ProjectResource {
+  projectId: number;
+  projectName: string;
+  projectKey?: string;
+  status?: string;
+  capacity: number;
+  allocatedResources: number;
+  vacantSeats: number;
+  utilizationPercentage: number;
+  requiredSkills: string[];
+  employees: Array<{ userId: number; username: string; role: string; skills: Array<{ skillId: number; skillName: string; level: string }>; availability?: string }>;
+}
+
+export interface SkillResource {
+  skill: string;
+  total: number;
+  allocated: number;
+  available: number;
+  bench: number;
+}
+
+export interface BenchCandidate {
+  userId: number;
+  username: string;
+  email: string;
+  role: string;
+  skills: Array<{ skillId: number; skillName: string; skillCategory?: string; level: string; yearsExp?: number }>;
+  experienceLevel?: string;
+  availability?: string;
+  benchDate?: string;
+  previousProject?: string;
+  potentialMatches: Array<{ projectId: number; matchReason: string }>;
+}
+
+export interface SavedView {
+  id: number;
+  userId: number;
+  viewName: string;
+  viewType: string;
+  filters: any;
+  sortConfig?: any;
+  columnConfig?: any;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SavedViewInput {
+  viewName: string;
+  viewType: string;
+  filters: any;
+  sortConfig?: any;
+  columnConfig?: any;
+  isDefault?: boolean;
+}
+
+export interface MethodologyConfig {
+  id: number;
+  name: string;
+  key: "KANBAN" | "WATERFALL" | "SCRUM";
+  config: {
+    workflowStates?: string[];
+    phases?: string[];
+    showBoard?: boolean;
+    showSprints?: boolean;
+    showMilestones?: boolean;
+    showGantt?: boolean;
+    requiredFields?: string[];
+  };
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const baseQuery = fetchBaseQuery({
   baseUrl: `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1`,
   prepareHeaders: async (headers) => {
@@ -200,6 +305,22 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 
   if (result.error) {
     const endpointName = typeof args === "string" ? args : (args as FetchArgs).url || "unknown";
+    
+    // Handle 401 - token expired/revoked/invalid
+    if (result.error.status === 401) {
+      const errorData = result.error.data as { errorCode?: string; message?: string } | undefined;
+      const errorCode = errorData?.errorCode;
+      
+      // Clear cache and redirect to login for auth errors
+      if (errorCode === "AUTH_TOKEN_EXPIRED" || errorCode === "AUTH_TOKEN_REVOKED" || errorCode === "AUTH_TOKEN_INVALID") {
+        api.dispatch({ type: "api/util/resetApiState" });
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+        return result;
+      }
+    }
+    
     handleApiError(result.error, endpointName);
   }
 
@@ -225,18 +346,21 @@ export const api = createApi({
 
           return { data: { user, userSub, userDetails } };
         } catch {
-          const usersResponse = await fetchWithBQ("users");
-          const usersData = usersResponse.data as { data: User[]; meta: any };
-          const users = usersData?.data;
-          if (users && users.length > 0) {
-            const devUser = users[0];
-            return {
-              data: {
-                user: { username: devUser.username, userId: String(devUser.userId ?? "") },
-                userSub: devUser.cognitoId || "dev-user",
-                userDetails: devUser,
-              },
-            };
+          // Only allow dev fallback when AUTH_DISABLED=true
+          if (process.env.NEXT_PUBLIC_AUTH_DISABLED === "true") {
+            const usersResponse = await fetchWithBQ("users");
+            const usersData = usersResponse.data as { data: User[]; meta: any };
+            const users = usersData?.data;
+            if (users && users.length > 0) {
+              const devUser = users[0];
+              return {
+                data: {
+                  user: { username: devUser.username, userId: String(devUser.userId ?? "") },
+                  userSub: devUser.cognitoId || "dev-user",
+                  userDetails: devUser,
+                },
+              };
+            }
           }
           return { error: { status: 500, data: "Could not fetch user data" } };
         }
@@ -258,6 +382,146 @@ export const api = createApi({
       query: () => "projects",
       transformResponse: (response: { data: Project[]; meta: any }) => response.data,
       providesTags: ["Projects"],
+    }),
+    getArchivedProjects: build.query<Project[], void>({
+      query: () => "projects?archived=true",
+      transformResponse: (response: { data: Project[]; meta: any }) => response.data,
+      providesTags: ["Projects"],
+    }),
+    getAllProjectsDashboard: build.query<{
+      totalProjects: number;
+      activeProjects: number;
+      totalTasks: number;
+      completedTasks: number;
+      inProgressTasks: number;
+      overdueTasks: number;
+      upcomingDeadlines: Array<{ id: number; title: string; dueDate: string; projectId: number; project: { name: string; key?: string } }>;
+      activeSprints: Array<{ id: number; name: string; projectId: number; project: { name: string; key?: string } }>;
+      recentActivity: Array<{ id: number; eventType: string; message: string; createdAt: string; user?: { username: string }; project?: { name: string; key?: string } }>;
+      teamWorkload: Array<{ userId: number; username: string; activeTaskCount: number; totalStoryPoints: number; totalEstimatedHours: number; hoursUtilization: number }>;
+    }, void>({
+      query: () => "dashboard/all-projects",
+      providesTags: ["Projects"],
+    }),
+    getResourceOverview: build.query<ResourceOverview, void>({
+      query: () => "resources/overview",
+      providesTags: ["Resources"],
+    }),
+    getEmployees: build.query<Employee[], void>({
+      query: () => "resources/employees",
+      providesTags: ["Resources"],
+    }),
+    getResourcesByProject: build.query<ProjectResource[], void>({
+      query: () => "resources/by-project",
+      providesTags: ["Resources"],
+    }),
+    getResourcesBySkill: build.query<SkillResource[], void>({
+      query: () => "resources/by-skill",
+      providesTags: ["Resources"],
+    }),
+    getBenchCandidates: build.query<BenchCandidate[], void>({
+      query: () => "resources/bench",
+      providesTags: ["Resources"],
+    }),
+    transferResource: build.mutation<{ success: boolean; message: string; previousProjectId?: number; newProjectId?: number }, { userId: number; targetProjectId: number; role?: string }>({
+      query: (body) => ({ url: "project-memberships/transfer", method: "POST", body }),
+      invalidatesTags: ["Resources", "Projects"],
+    }),
+    getResourceTransferHistory: build.query<Array<{ id: number; employeeId: number; fromProjectId: number; toProjectId: number; actorName?: string; projectName?: string; projectKey?: string; date: string; role?: string }>, number>({
+      query: (userId) => `project-memberships/transfer-history/${userId}`,
+      providesTags: ["Resources"],
+    }),
+    validateBulkImport: build.mutation<{
+      valid: boolean;
+      errors: Array<{ row: number; field: string; message: string; value: any }>;
+      warnings: Array<{ row: number; field: string; message: string; value: any }>;
+      totalRows: number;
+      validRows: number;
+      preview: Array<{ row: number; data: any }>;
+    }, { entity: string; file: File }>({
+      query: ({ entity, file }) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("entity", entity);
+        return { url: "bulk/import/validate", method: "POST", body: formData };
+      },
+    }),
+    confirmBulkImport: build.mutation<{
+      created: number;
+      updated: number;
+      skipped: number;
+      errors: Array<{ row: number; field: string; message: string; value: any }>;
+    }, { entity: string; data: any[] }>({
+      query: ({ entity, data }) => ({ url: "bulk/import/confirm", method: "POST", body: { entity, data } }),
+      invalidatesTags: ["Resources", "Projects", "Users"],
+    }),
+    getBulkTemplate: build.query<Blob, { entity: string }>({
+      query: ({ entity }) => ({ url: `bulk/templates/${entity}`, responseHandler: "blob" }),
+    }),
+    exportBulkData: build.query<Blob, { entity: string; format?: "csv" | "xlsx" }>({
+      query: ({ entity, format }) => ({ 
+        url: `bulk/export/${entity}?format=${format || "xlsx"}`, 
+        responseHandler: "blob" 
+      }),
+    }),
+    getSavedViews: build.query<SavedView[], { viewType?: string }>({
+      query: ({ viewType }) => `saved-views${viewType ? `?viewType=${viewType}` : ""}`,
+      providesTags: ["SavedViews"],
+    }),
+    getDefaultSavedView: build.query<SavedView, string>({
+      query: (viewType) => `saved-views/default/${viewType}`,
+      providesTags: ["SavedViews"],
+    }),
+    getSavedView: build.query<SavedView, number>({
+      query: (id) => `saved-views/${id}`,
+      providesTags: ["SavedViews"],
+    }),
+    executeSavedView: build.query<{ view: SavedView; filters: any; sortConfig?: any; columnConfig?: any }, { id: number; projectId?: number }>({
+      query: ({ id, projectId }) => `saved-views/${id}/execute${projectId ? `?projectId=${projectId}` : ""}`,
+    }),
+    createSavedView: build.mutation<SavedView, SavedViewInput>({
+      query: (data) => ({ url: "saved-views", method: "POST", body: data }),
+      invalidatesTags: ["SavedViews"],
+    }),
+    updateSavedView: build.mutation<SavedView, { id: number; data: Partial<SavedViewInput> }>({
+      query: ({ id, data }) => ({ url: `saved-views/${id}`, method: "PATCH", body: data }),
+      invalidatesTags: ["SavedViews"],
+    }),
+    deleteSavedView: build.mutation<void, number>({
+      query: (id) => ({ url: `saved-views/${id}`, method: "DELETE" }),
+      invalidatesTags: ["SavedViews"],
+    }),
+    duplicateProject: build.mutation<Project, { id: number; name: string; key: string; include?: { includeTasks?: boolean; includeTaskStructure?: boolean; includeSprints?: boolean; includeMilestones?: boolean; includeWorkflows?: boolean; includeCustomFields?: boolean } }>({
+      query: ({ id, ...body }) => ({ url: `projects/${id}/duplicate`, method: "POST", body }),
+      invalidatesTags: ["Projects"],
+    }),
+    getMethodologies: build.query<MethodologyConfig[], void>({
+      query: () => "methodology",
+      providesTags: ["Methodology"],
+    }),
+    getDefaultMethodology: build.query<MethodologyConfig, void>({
+      query: () => "methodology/default",
+      providesTags: ["Methodology"],
+    }),
+    getMethodology: build.query<MethodologyConfig, string>({
+      query: (key) => `methodology/${key}`,
+      providesTags: ["Methodology"],
+    }),
+    getProjectMethodology: build.query<MethodologyConfig, number>({
+      query: (projectId) => `methodology/project/${projectId}`,
+      providesTags: ["Methodology"],
+    }),
+    setProjectMethodology: build.mutation<any, { projectId: number; methodologyKey: "KANBAN" | "WATERFALL" | "SCRUM" }>({
+      query: ({ projectId, methodologyKey }) => ({ url: `methodology/project/${projectId}`, method: "POST", body: { methodologyKey } }),
+      invalidatesTags: ["Methodology", "Projects"],
+    }),
+    getSprintLifecycle: build.query<any, number>({
+      query: (sprintId) => `sprints/${sprintId}/lifecycle`,
+      providesTags: ["Sprints"],
+    }),
+    updateSprintStatus: build.mutation<any, { sprintId: number; status: string }>({
+      query: ({ sprintId, status }) => ({ url: `sprints/${sprintId}/status`, method: "PATCH", body: { status } }),
+      invalidatesTags: ["Sprints", "Projects"],
     }),
     getTimeline: build.query<TimelineProject[], void>({
       query: () => "timeline",
@@ -374,14 +638,33 @@ export const api = createApi({
       query: ({ organizationId, ...body }) => ({ url: `organizations/${organizationId}/custom-fields`, method: "POST", body }),
       invalidatesTags: ["CustomFields"],
     }),
+    setCustomFieldValue: build.mutation<CustomFieldValue, { organizationId: number; definitionId: number; projectId?: number; taskId?: number; value: string }>({
+      query: ({ organizationId, ...body }) => ({ url: `organizations/${organizationId}/custom-fields/values`, method: "POST", body }),
+      invalidatesTags: ["CustomFields"],
+    }),
+    getCustomFieldValues: build.query<CustomFieldValue[], { organizationId: number; projectId?: number; taskId?: number; key?: string }>({
+      query: ({ organizationId, ...params }) => {
+        const searchParams = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined) searchParams.set(key, String(value));
+        });
+        return `organizations/${organizationId}/custom-fields/values?${searchParams.toString()}`;
+      },
+      providesTags: ["CustomFields"],
+    }),
     createIntegration: build.mutation<unknown, { organizationId: number; provider: string; name: string; config?: Record<string, unknown> }>({
       query: ({ organizationId, ...body }) => ({ url: `organizations/${organizationId}/integrations`, method: "POST", body }),
     }),
     askAi: build.mutation<{ requestId: number; answer: string; sources: Array<{ type: string; id: number }> }, { organizationId: number; projectId?: number; prompt: string }>({
       query: ({ organizationId, ...body }) => ({ url: `organizations/${organizationId}/ai/answer`, method: "POST", body }),
     }),
-    getNotifications: build.query<{ data: Notification[]; meta: { total: number } }, { userId: number; unreadOnly?: boolean }>({
-      query: ({ userId, unreadOnly }) => `notifications?userId=${userId}${unreadOnly ? "&unreadOnly=true" : ""}`,
+    getNotifications: build.query<{ data: Notification[]; meta: { total: number } }, { userId: number; unreadOnly?: boolean; type?: string }>({
+      query: ({ userId, unreadOnly, type }) => {
+        let url = `notifications?userId=${userId}`;
+        if (unreadOnly) url += `&unreadOnly=true`;
+        if (type) url += `&type=${type}`;
+        return url;
+      },
       providesTags: ["Notifications"],
     }),
     markNotificationRead: build.mutation<Notification, number>({
@@ -457,6 +740,34 @@ export const api = createApi({
 
 export const {
   useGetProjectsQuery,
+  useGetArchivedProjectsQuery,
+  useGetAllProjectsDashboardQuery,
+  useGetResourceOverviewQuery,
+  useGetEmployeesQuery,
+  useGetResourcesByProjectQuery,
+  useGetResourcesBySkillQuery,
+  useGetBenchCandidatesQuery,
+  useTransferResourceMutation,
+  useGetResourceTransferHistoryQuery,
+  useValidateBulkImportMutation,
+  useConfirmBulkImportMutation,
+  useGetBulkTemplateQuery,
+  useExportBulkDataQuery,
+  useGetSavedViewsQuery,
+  useGetDefaultSavedViewQuery,
+  useGetSavedViewQuery,
+  useExecuteSavedViewQuery,
+  useCreateSavedViewMutation,
+  useUpdateSavedViewMutation,
+  useDeleteSavedViewMutation,
+  useDuplicateProjectMutation,
+  useGetMethodologiesQuery,
+  useGetDefaultMethodologyQuery,
+  useGetMethodologyQuery,
+  useGetProjectMethodologyQuery,
+  useSetProjectMethodologyMutation,
+  useGetSprintLifecycleQuery,
+  useUpdateSprintStatusMutation,
   useGetTimelineQuery,
   useCreateProjectMutation,
   useUpdateProjectMutation,
@@ -480,6 +791,8 @@ export const {
   useAddOrganizationMemberMutation,
   useGetCustomFieldsQuery,
   useCreateCustomFieldMutation,
+  useSetCustomFieldValueMutation,
+  useGetCustomFieldValuesQuery,
   useCreateIntegrationMutation,
   useAskAiMutation,
   useGetNotificationsQuery,
