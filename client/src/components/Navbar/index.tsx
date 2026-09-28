@@ -5,6 +5,7 @@ import { setIsDarkMode, setIsSidebarCollapsed } from "@/state";
 import { useGetAuthUserQuery } from "@/state/api";
 import ProjectSwitcher from "@/components/ProjectSwitcher";
 import NotificationPopover from "@/components/NotificationPopover";
+import { profilePictureSrc } from "@/lib/utils";
 import { signOut } from "aws-amplify/auth";
 import { Menu, Moon, Search, Settings, Sun, User } from "lucide-react";
 import Link from "next/link";
@@ -36,6 +37,7 @@ const Navbar = () => {
   }
 
   const currentUserDetails = currentUser?.userDetails;
+  const navbarAvatarSrc = profilePictureSrc(currentUserDetails?.profilePictureUrl);
 
   return (
     <nav className="flex items-center justify-between bg-white px-4 py-3 dark:bg-black">
@@ -87,12 +89,13 @@ const Navbar = () => {
         <div className="mx-5 hidden min-h-[2em] w-[0.1rem] bg-gray-200 md:inline-block"></div>
         <div className="hidden items-center justify-between md:flex">
           <div className="align-center flex h-9 w-9 justify-center">
-            {!!currentUserDetails?.profilePictureUrl ? (
+            {navbarAvatarSrc ? (
               <Image
-                src={`/${currentUserDetails?.profilePictureUrl}`}
+                src={navbarAvatarSrc}
                 alt={currentUserDetails?.username || "User Profile Picture"}
                 width={36}
                 height={36}
+                unoptimized
                 className="rounded-full object-cover"
               />
             ) : (

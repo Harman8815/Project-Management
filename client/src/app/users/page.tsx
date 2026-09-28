@@ -11,7 +11,7 @@ import {
 } from "@mui/x-data-grid";
 import { useGetUsersQuery } from "@/state/api";
 import { useAppSelector } from "@/app/redux";
-import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
+import { dataGridClassNames, dataGridSxStyles, profilePictureSrc } from "@/lib/utils";
 import Image from "next/image";
 import React from "react";
 
@@ -29,19 +29,29 @@ const columns: GridColDef[] = [
     field: "profilePictureUrl",
     headerName: "Profile Picture",
     width: 100,
-    renderCell: (params) => (
-      <div className="flex h-full w-full items-center justify-center">
-        <div className="h-9 w-9">
-          <Image
-            src={`/${params.value}`}
-            alt={params.row.username}
-            width={100}
-            height={50}
-            className="h-full rounded-full object-cover"
-          />
+    renderCell: (params) => {
+      const avatarSrc = profilePictureSrc(params.value as string | undefined);
+      return (
+        <div className="flex h-full w-full items-center justify-center">
+          <div className="h-9 w-9">
+            {avatarSrc ? (
+              <Image
+                src={avatarSrc}
+                alt={params.row.username}
+                width={100}
+                height={50}
+                unoptimized
+                className="h-full rounded-full object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center rounded-full bg-gray-200 text-xs text-gray-500 dark:bg-gray-700">
+                {params.row.username?.charAt(0)?.toUpperCase() ?? "?"}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    ),
+      );
+    },
   },
 ];
 

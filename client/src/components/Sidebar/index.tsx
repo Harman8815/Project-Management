@@ -3,6 +3,7 @@
 import { useAppDispatch, useAppSelector } from "@/app/redux";
 import { setIsSidebarCollapsed } from "@/state";
 import { useGetAuthUserQuery, useGetProjectsQuery } from "@/state/api";
+import { profilePictureSrc } from "@/lib/utils";
 import {
   AlertCircle,
   AlertOctagon,
@@ -73,6 +74,7 @@ const Sidebar = () => {
     }
   };
   const currentUserDetails = currentUser?.userDetails;
+  const avatarSrc = profilePictureSrc(currentUserDetails?.profilePictureUrl);
 
   const sidebarClassNames = `fixed flex flex-col h-screen shadow-xl
     transition-all duration-300 z-40 dark:bg-black bg-white
@@ -195,12 +197,13 @@ const Sidebar = () => {
           {!isSidebarCollapsed ? (
             <div className="flex w-full items-center">
               <div className="align-center flex h-9 w-9 justify-center">
-                {!!currentUserDetails?.profilePictureUrl ? (
+                {avatarSrc ? (
                   <Image
-                    src={`/${currentUserDetails?.profilePictureUrl}`}
+                    src={avatarSrc}
                     alt={currentUserDetails?.username || "User Profile Picture"}
                     width={100}
                     height={50}
+                    unoptimized
                     className="h-full rounded-full object-cover"
                   />
                 ) : (
@@ -219,12 +222,13 @@ const Sidebar = () => {
             </div>
           ) : (
             <div className="flex h-9 w-9 justify-center">
-              {!!currentUserDetails?.profilePictureUrl ? (
+              {avatarSrc ? (
                 <Image
-                  src={`/${currentUserDetails?.profilePictureUrl}`}
+                  src={avatarSrc}
                   alt={currentUserDetails?.username || "User Profile Picture"}
                   width={100}
                   height={50}
+                  unoptimized
                   className="h-full rounded-full object-cover"
                 />
               ) : (

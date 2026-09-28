@@ -9,6 +9,7 @@ import { ChevronDown, User, Shield, Bell, Moon, Sun, Copy, Settings as SettingsI
 import React, { useState } from "react";
 import Image from "next/image";
 import { toast } from "@/components/ui/toast";
+import { profilePictureSrc } from "@/lib/utils";
 
 const Settings = () => {
   const dispatch = useAppDispatch();
@@ -43,6 +44,8 @@ const Settings = () => {
   const assignedTaskCount = assignedTasks.length;
   const authoredTaskCount = authoredTasks.length;
 
+  const avatarSrc = profilePictureSrc(userDetails?.profilePictureUrl);
+
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     toast.success(`${label} copied`);
@@ -59,12 +62,13 @@ const Settings = () => {
         >
           <div className="space-y-3">
             <div className="flex items-center gap-4">
-              {userDetails?.profilePictureUrl ? (
+              {avatarSrc ? (
                 <Image
-                  src={userDetails.profilePictureUrl}
-                  alt={userDetails.username}
+                  src={avatarSrc}
+                  alt={userDetails?.username || "Profile picture"}
                   width={64}
                   height={64}
+                  unoptimized
                   className="h-16 w-16 rounded-full object-cover"
                 />
               ) : (
