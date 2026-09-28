@@ -9,8 +9,9 @@ import {
   useGetTasksQuery,
   useGetTasksByUserQuery,
 } from "@/state/api";
-import React from "react";
-import { useAppSelector } from "../redux";
+import React, { useMemo } from "react";
+import { useAppDispatch, useAppSelector } from "../redux";
+import { setActiveProjectId, setAllProjectsSelected } from "@/state";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Header from "@/components/Header";
 import { Card, LoadingState, EmptyState, ErrorState, ChartSkeleton, TableSkeleton } from "@/components/ui";
@@ -35,6 +36,52 @@ const taskColumns: GridColDef[] = [
   { field: "priority", headerName: "Priority", width: 150 },
   { field: "dueDate", headerName: "Due Date", width: 150 },
 ];
+
+const ProjectScopeToggle = () => {
+  const dispatch = useAppDispatch();
+  const activeProjectId = useAppSelector((state) => state.global.activeProjectId);
+  const allProjectsSelected = useAppSelector(
+    (state) => state.global.allProjectsSelected,
+  );
+
+  const selectAllProjects = () => {
+    dispatch(setAllProjectsSelected(true));
+    dispatch(setActiveProjectId(null));
+  };
+
+  const selectActiveProject = () => {
+    if (activeProjectId === null) return;
+    dispatch(setAllProjectsSelected(false));
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        onClick={selectAllProjects}
+        aria-pressed={allProjectsSelected}
+        className={`rounded px-3 py-1.5 text-sm font-medium ${
+          allProjectsSelected
+            ? "bg-slate-900 text-white"
+            : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200"
+        }`}
+      >
+        All projects
+      </button>
+      <button
+        onClick={selectActiveProject}
+        disabled={activeProjectId === null}
+        aria-pressed={!allProjectsSelected && activeProjectId !== null}
+        className={`rounded px-3 py-1.5 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50 ${
+          !allProjectsSelected && activeProjectId !== null
+            ? "bg-slate-900 text-white"
+            : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200"
+        }`}
+      >
+        Current project
+      </button>
+    </div>
+  );
+};
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
@@ -74,13 +121,26 @@ const HomePage = () => {
 
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
 
+  const projectsList = useMemo(() => projects || [], [projects]);
+  const scopedProjects = useMemo(() => {
+    if (allProjectsSelected) return projectsList;
+    if (projectId === null) return [];
+    return projectsList.filter((project) => project.id === projectId);
+  }, [allProjectsSelected, projectId, projectsList]);
+
   const tasksLoadingAll = allProjectsSelected ? userTasksLoading : tasksLoading;
-  const tasksList = (allProjectsSelected ? userTasks : tasks) || [];
+  const tasksList = useMemo(
+    () => (allProjectsSelected ? userTasks : tasks) || [],
+    [allProjectsSelected, userTasks, tasks],
+  );
 
   if (tasksLoadingAll || isProjectsLoading) {
     return (
       <div className="container mx-auto w-full min-w-0 bg-gray-100 p-8 dark:bg-dark-bg">
-        <Header name="Project Management Dashboard" />
+        <Header
+          name="Project Management Dashboard"
+          buttonComponent={<ProjectScopeToggle />}
+        />
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Card title="Task Priority Distribution" className="shadow dark:border-gray-700">
             <ChartSkeleton />
@@ -103,8 +163,6 @@ const HomePage = () => {
       />
     );
 
-  const projectsList = projects || [];
-
   const priorityCount = tasksList.reduce(
     (acc: Record<string, number>, task: Task) => {
       const { priority } = task;
@@ -119,7 +177,7 @@ const HomePage = () => {
     count: priorityCount[key],
   }));
 
-  const statusCount = (allProjectsSelected ? projectsList : projectsList).reduce(
+  const statusCount = scopedProjects.reduce(
     (acc: Record<string, number>, project: Project) => {
       const status = project.endDate ? "Completed" : "Active";
       acc[status] = (acc[status] || 0) + 1;
@@ -159,7 +217,10 @@ const HomePage = () => {
 
   return (
     <div className="container mx-auto w-full min-w-0 bg-gray-100 p-8 dark:bg-dark-bg">
-      <Header name={dashboardTitle} />
+      <Header
+        name={dashboardTitle}
+        buttonComponent={<ProjectScopeToggle />}
+      />
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Card
           title="Task Priority Distribution"

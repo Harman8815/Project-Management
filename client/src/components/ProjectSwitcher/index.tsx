@@ -84,11 +84,8 @@ const ProjectSwitcher = () => {
   const activeProject = allProjects.find((p) => p.id === activeProjectId);
 
   const projectsForDisplay = useMemo(() => {
-    if (allProjectsSelected) {
-      return [{ id: 0, key: "", name: "All Projects", status: "ACTIVE" } as Project, ...allProjects];
-    }
-    return allProjects;
-  }, [allProjectsSelected, allProjects]);
+    return [{ id: 0, key: "", name: "All Projects", status: "ACTIVE" } as Project, ...allProjects];
+  }, [allProjects]);
 
   const filteredProjects = searchTerm
     ? projectsForDisplay.filter(
