@@ -39,7 +39,14 @@ const defaultFilters: TimelineFilters = {
 
 const Timeline = () => {
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
-  const { data: timelineProjects, isLoading, isError } = useGetTimelineQuery();
+  const activeProjectId = useAppSelector((state) => state.global.activeProjectId);
+  const allProjectsSelected = useAppSelector((state) => state.global.allProjectsSelected);
+  const selectedProjectId = allProjectsSelected ? null : activeProjectId;
+  const timelineQuerySkipped = !allProjectsSelected && !activeProjectId;
+  const { data: timelineProjects, isLoading, isError } = useGetTimelineQuery(
+    { projectId: selectedProjectId },
+    { skip: timelineQuerySkipped },
+  );
   const [displayOptions, setDisplayOptions] = useState<DisplayOption>({
     viewMode: ViewMode.Month,
     locale: "en-US",
@@ -267,7 +274,7 @@ const Timeline = () => {
     );
   };
 
-  if (isLoading) {
+  if (isLoading || (timelineQuerySkipped && !timelineProjects)) {
     return (
       <div className="max-w-full p-8">
         <header className="mb-4 flex items-center justify-between">

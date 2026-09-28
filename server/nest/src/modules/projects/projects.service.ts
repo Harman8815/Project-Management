@@ -210,9 +210,11 @@ export class ProjectsService {
     });
   }
 
-  async getTimeline(userId?: number) {
+  async getTimeline(userId?: number, projectId?: number) {
     const whereClause: any = {};
-    if (userId) {
+    if (projectId) {
+      whereClause.id = projectId;
+    } else if (userId) {
       const userMemberships = await this.prisma.projectMembership.findMany({
         where: { userId, status: "ACTIVE" },
         select: { projectId: true },

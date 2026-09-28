@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ProjectHeader from "@/app/projects/ProjectHeader";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { CardSkeleton } from "@/components/ui";
@@ -10,6 +10,8 @@ import Timeline from "../TimelineView";
 import Table from "../TableView";
 import TaskForm from "@/components/TaskForm";
 import { useGetProjectsQuery } from "@/state/api";
+import { setActiveProjectId, setAllProjectsSelected } from "@/state";
+import { useAppDispatch } from "@/app/redux";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 
@@ -17,11 +19,19 @@ const Project = () => {
   const params = useParams<{ id: string }>();
   const { id } = params;
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const [activeTab, setActiveTab] = useState("Board");
   const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false);
   const { data: projects, isLoading } = useGetProjectsQuery();
+  const routeProjectId = Number(id);
   const projectName =
-    projects?.find((p) => p.id === Number(id))?.name ?? "Project";
+    projects?.find((p) => p.id === routeProjectId)?.name ?? "Project";
+
+  useEffect(() => {
+    if (!Number.isInteger(routeProjectId)) return;
+    dispatch(setAllProjectsSelected(false));
+    dispatch(setActiveProjectId(routeProjectId));
+  }, [dispatch, routeProjectId]);
 
   const breadcrumbItems = [
     { label: "Home", href: "/" },
