@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, LoadingState, ErrorState, Skeleton } from "@/components/ui";
-import { useGetResourceOverviewQuery, useGetEmployeesQuery, useGetResourcesByProjectQuery, useGetResourcesBySkillQuery, useGetBenchCandidatesQuery, useValidateBulkImportMutation, useConfirmBulkImportMutation, useGetBulkTemplateQuery, useExportBulkDataQuery } from "@/state/api";
+import { useGetResourceOverviewQuery, useGetEmployeesQuery, useGetResourcesByProjectQuery, useGetResourcesBySkillQuery, useGetBenchCandidatesQuery, useValidateBulkImportMutation, useConfirmBulkImportMutation, useLazyGetBulkTemplateQuery, useLazyExportBulkDataQuery } from "@/state/api";
 import { Users, UserCheck, UserPlus, UserMinus, Target, BarChart3, Briefcase, GraduationCap, Zap, AlertCircle, ChevronRight, Upload, Download, FileText, AlertTriangle, CheckCircle, X, Loader2, Plus } from "lucide-react";
 import React, { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
@@ -19,8 +19,8 @@ const ResourceManagement = () => {
   const { data: bench, isLoading: benchLoading } = useGetBenchCandidatesQuery();
   const [validateImport, { isLoading: validating }] = useValidateBulkImportMutation();
   const [confirmImport, { isLoading: importing }] = useConfirmBulkImportMutation();
-  const [downloadTemplate, { isLoading: downloadingTemplate }] = useGetBulkTemplateQuery();
-  const [exportData, { isLoading: exporting }] = useExportBulkDataQuery();
+  const [downloadTemplate, { isLoading: downloadingTemplate }] = useLazyGetBulkTemplateQuery();
+  const [exportData, { isLoading: exporting }] = useLazyExportBulkDataQuery();
   
   const [importEntity, setImportEntity] = useState<"employees" | "projects" | "skills" | "projectMemberships" | "employeeSkills">("employees");
   const [importFile, setImportFile] = useState<File | null>(null);
@@ -277,9 +277,9 @@ function ImportExportTab({
               <select
                 className="w-full rounded border border-gray-300 p-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 value={importEntity}
-                onChange={(e) => setImportEntity(e.target.value as any)}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setImportEntity(e.target.value as any)}
               >
-                {entities.map((e) => (
+                {entities.map((e: { value: string; label: string }) => (
                   <option key={e.value} value={e.value}>{e.label}</option>
                 ))}
               </select>
@@ -446,9 +446,9 @@ function ImportExportTab({
               <select
                 className="w-full rounded border border-gray-300 p-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 value={exportEntity}
-                onChange={(e) => setExportEntity(e.target.value as any)}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setExportEntity(e.target.value as any)}
               >
-                {entities.map((e) => (
+                {entities.map((e: { value: string; label: string }) => (
                   <option key={e.value} value={e.value}>{e.label}</option>
                 ))}
               </select>
@@ -490,7 +490,7 @@ function ImportExportTab({
   );
 }
 
-function OverviewTab({ data, employees }: { data: any; employees?: any[] }) {
+function OverviewTab({ data, employees }: { data: any; employees?: any[]; onTransfer?: (employeeId: number) => void }) {
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
@@ -551,7 +551,7 @@ function OverviewTab({ data, employees }: { data: any; employees?: any[] }) {
             ))}
             {(employees?.length || 0) > 20 && (
               <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
-                +{employees.length - 20} more employees
+                +{(employees?.length ?? 0) - 20} more employees
               </p>
             )}
           </div>
@@ -561,7 +561,7 @@ function OverviewTab({ data, employees }: { data: any; employees?: any[] }) {
   );
 }
 
-function ByProjectTab({ data }: { data: any[] }) {
+function ByProjectTab({ data, onTransfer }: { data: any[]; onTransfer?: (employeeId: number) => void }) {
   return (
     <div className="space-y-6">
       {data.length === 0 ? (
@@ -665,7 +665,7 @@ function BySkillTab({ data }: { data: any[] }) {
   );
 }
 
-function BenchTab({ data }: { data: any[] }) {
+function BenchTab({ data, onTransfer }: { data: any[]; onTransfer?: (employeeId: number) => void }) {
   return (
     <div className="space-y-6">
       {data.length === 0 ? (

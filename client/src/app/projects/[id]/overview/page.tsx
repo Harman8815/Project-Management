@@ -74,7 +74,7 @@ const ProjectOverview = () => {
             </div>
 
             {/* Tab Content */}
-            <div className="space-y-6">
+            {activeTab === "overview" && (
             <div className="space-y-6">
               {/* Project Stats */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -180,7 +180,6 @@ const ProjectOverview = () => {
               </div>
             </div>
             )}
-          </div>
           </>
         )}
       </div>

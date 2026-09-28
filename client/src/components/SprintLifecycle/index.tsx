@@ -142,7 +142,7 @@ const SprintLifecycle = ({ sprint, compact = false, onStatusChange }: SprintLife
                         )}
                       </p>
                     )}
-                    {sprint.goal && <p className="text-gray-600 dark:text-gray-400 italic">"{sprint.goal}"</p>}
+                    {sprint.goal && <p className="text-gray-600 dark:text-gray-400 italic">&quot;{sprint.goal}&quot;</p>}
                     {onStatusChange && index < LIFECYCLE_STAGES.length - 1 && (
                       <button
                         onClick={() => onStatusChange(sprint.id, LIFECYCLE_STAGES[index + 1].key)}
@@ -152,7 +152,7 @@ const SprintLifecycle = ({ sprint, compact = false, onStatusChange }: SprintLife
                       </button>
                     )}
                   </div>
-                }
+                )}
                 {isCompleted && sprint.endDate && (
                   <div className="text-sm text-gray-500 dark:text-gray-400">
                     Completed on {new Date(sprint.endDate).toLocaleDateString()}
@@ -173,9 +173,9 @@ const SprintLifecycle = ({ sprint, compact = false, onStatusChange }: SprintLife
                   <CheckCircle className="h-5 w-5 text-green-500" />
                 )}
               </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
       </div>
 
       {/* Status Override */}

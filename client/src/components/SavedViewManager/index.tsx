@@ -219,7 +219,7 @@ function SavedViewCard({ view, isDefault, expanded, onToggleExpand, onApply, onS
               <div className="flex items-center gap-2">
                 <h4 className="font-medium dark:text-white truncate">{view.viewName}</h4>
                 {isDefault && (
-                  <Star className="h-4 w-4 text-amber-500 fill-current" title="Default view" />
+                  <Star className="h-4 w-4 text-amber-500 fill-current" aria-label="Default view" />
                 )}
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-3">
@@ -302,7 +302,8 @@ function SavedViewCard({ view, isDefault, expanded, onToggleExpand, onApply, onS
             </div>
           </div>
         )}
-      </Card>
+      </div>
+    </Card>
   );
 }
 

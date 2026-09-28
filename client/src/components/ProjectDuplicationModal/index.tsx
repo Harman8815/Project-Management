@@ -304,7 +304,7 @@ const ProjectDuplicationModal = ({ isOpen, onClose, projectId, projectName, proj
             </div>
             <h3 className="text-xl font-semibold dark:text-white mb-2">Project Duplicated Successfully</h3>
             <p className="text-gray-500 dark:text-gray-400 mb-6">
-              "{name}" has been created. Redirecting to the new project...
+              &quot;{name}&quot; has been created. Redirecting to the new project...
             </p>
             <div className="flex justify-center gap-3">
               <button

@@ -275,9 +275,9 @@ function StatCard({
   );
 }
 
-function CardSkeleton() {
+function CardSkeleton({ className = "" }: { className?: string }) {
   return (
-    <Card className="shadow dark:border-gray-700 animate-pulse">
+    <Card className={`shadow dark:border-gray-700 animate-pulse ${className}`}>
       <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-2" />
       <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-1" />
       <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />

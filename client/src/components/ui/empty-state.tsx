@@ -5,16 +5,18 @@ interface EmptyStateProps {
   message?: string;
   actionLabel?: string;
   onAction?: () => void;
+  icon?: React.ReactNode;
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
   message = "No data available",
   actionLabel,
   onAction,
+  icon,
 }) => {
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-8">
-      <Inbox className="h-12 w-12 text-gray-400 dark:text-gray-500" />
+      {icon ?? <Inbox className="h-12 w-12 text-gray-400 dark:text-gray-500" />}
       <p className="text-sm text-gray-500 dark:text-gray-400">{message}</p>
       {actionLabel && onAction && (
         <button

@@ -3,7 +3,7 @@
 import { Card, LoadingState, ErrorState, Skeleton } from "@/components/ui";
 import { useGetCalendarEventsQuery, useGetProjectsQuery, useGetAuthUserQuery, useGetOrganizationQuery } from "@/state/api";
 import { useAppDispatch, useAppSelector } from "@/app/redux";
-import { ChevronLeft, ChevronRight, Today, Filter, Calendar as CalendarIcon, ChevronDown, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Filter, Calendar as CalendarIcon, ChevronDown, Search } from "lucide-react";
 import React, { useState, useEffect, useMemo } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -36,7 +36,7 @@ const CalendarPage = () => {
   // Fetch all event types on mount
   useEffect(() => {
     if (events.length > 0) {
-      const types = [...new Set(events.map((e: any) => e.type).filter(Boolean))];
+      const types = Array.from(new Set<string>(events.map((e: any) => e.type).filter(Boolean)));
       setEventTypes(types);
     }
   }, [events]);

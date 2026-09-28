@@ -59,6 +59,8 @@ export interface User {
     inAppEnabled: boolean;
     updatedAt: string;
   };
+  assignedTasks?: Task[];
+  authoredTasks?: Task[];
   createdAt?: string;
 }
 
@@ -339,7 +341,7 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 export const api = createApi({
   baseQuery: baseQueryWithReauth,
   reducerPath: "api",
-  tagTypes: ["Projects", "Tasks", "Users", "Teams", "Organization", "CustomFields", "Notifications", "Calendar"],
+  tagTypes: ["Projects", "Tasks", "Users", "Teams", "Organization", "CustomFields", "Notifications", "Calendar", "Resources", "SavedViews", "Methodology", "Sprints"],
   endpoints: (build) => ({
      getAuthUser: build.query({
       queryFn: async (_, _queryApi, _extraoptions, fetchWithBQ) => {
@@ -473,12 +475,12 @@ export const api = createApi({
       invalidatesTags: ["Resources", "Projects", "Users"],
     }),
     getBulkTemplate: build.query<Blob, { entity: string }>({
-      query: ({ entity }) => ({ url: `bulk/templates/${entity}`, responseHandler: "blob" }),
+      query: ({ entity }) => ({ url: `bulk/templates/${entity}`, responseType: "blob" }),
     }),
     exportBulkData: build.query<Blob, { entity: string; format?: "csv" | "xlsx" }>({
       query: ({ entity, format }) => ({ 
         url: `bulk/export/${entity}?format=${format || "xlsx"}`, 
-        responseHandler: "blob" 
+        responseType: "blob" 
       }),
     }),
     getSavedViews: build.query<SavedView[], { viewType?: string }>({
@@ -540,8 +542,11 @@ export const api = createApi({
       query: ({ sprintId, status }) => ({ url: `sprints/${sprintId}/status`, method: "PATCH", body: { status } }),
       invalidatesTags: ["Sprints", "Projects"],
     }),
-    getTimeline: build.query<TimelineProject[], void>({
-      query: () => "timeline",
+    getTimeline: build.query<TimelineProject[], { projectId?: number | null } | void>({
+      query: (params) => {
+        const projectId = params?.projectId;
+        return projectId ? `timeline?projectId=${projectId}` : "timeline";
+      },
       providesTags: ["Projects"],
     }),
     createProject: build.mutation<Project, Partial<Project>>({
@@ -619,7 +624,7 @@ export const api = createApi({
           : [{ type: "Tasks" as const }],
     }),
     search: build.query<SearchResults, string>({
-      query: (query) => `search?query=${query}`,
+      query: (query) => `search?query=${encodeURIComponent(query)}`,
     }),
     getRecentSearches: build.query<string[], number>({
       query: (userId) => `search/recent?userId=${userId}`,
@@ -651,7 +656,7 @@ export const api = createApi({
       query: (organizationId) => `organizations/${organizationId}/custom-fields`,
       providesTags: ["CustomFields"],
     }),
-    createCustomField: build.mutation<CustomFieldDefinition, { organizationId: number; name: string; key: string; fieldType: string; required?: boolean }>({
+    createCustomField: build.mutation<CustomFieldDefinition, { organizationId: number; name: string; key: string; fieldType: string; required?: boolean; options?: string }>({
       query: ({ organizationId, ...body }) => ({ url: `organizations/${organizationId}/custom-fields`, method: "POST", body }),
       invalidatesTags: ["CustomFields"],
     }),
@@ -700,16 +705,18 @@ export const api = createApi({
       query: (userId) => `notifications/user/${userId}/unread-count`,
       providesTags: ["Notifications"],
     }),
-    getCalendarEvents: build.query<any, { organizationId: number; calendarId?: string; startDate?: string; endDate?: string; page?: number; limit?: number }>({
-      query: ({ organizationId, calendarId, startDate, endDate, page, limit }) => {
+    getCalendarEvents: build.query<any, { organizationId: number; calendarId?: string; startDate?: string; endDate?: string; projectId?: number; page?: number; limit?: number }>({
+      query: ({ organizationId, calendarId, startDate, endDate, projectId, page, limit }) => {
         const params = new URLSearchParams();
         if (calendarId) params.set("calendarId", calendarId);
         if (startDate) params.set("startDate", startDate);
         if (endDate) params.set("endDate", endDate);
+        if (projectId) params.set("projectId", String(projectId));
         if (page) params.set("page", String(page));
         if (limit) params.set("limit", String(limit));
         return `organizations/${organizationId}/calendar/events?${params.toString()}`;
       },
+      providesTags: ["Calendar"],
     }),
     createCalendarEvent: build.mutation<any, { organizationId: number; calendarId: string; title: string; startDate: string; endDate: string; description?: string; taskId?: number }>({
       query: ({ organizationId, ...body }) => ({ url: `organizations/${organizationId}/calendar/events`, method: "POST", body }),
@@ -768,8 +775,8 @@ export const {
   useGetResourceTransferHistoryQuery,
   useValidateBulkImportMutation,
   useConfirmBulkImportMutation,
-  useGetBulkTemplateQuery,
-  useExportBulkDataQuery,
+  useLazyGetBulkTemplateQuery,
+  useLazyExportBulkDataQuery,
   useGetSavedViewsQuery,
   useGetDefaultSavedViewQuery,
   useGetSavedViewQuery,
