@@ -31,6 +31,8 @@ export const handleApiError = (error: unknown, context?: string) => {
     "status" in error &&
     "data" in error;
 
+  console.log('[ErrorHandler] Error received:', error, 'context:', context);
+
   if (isFetchError) {
     const fetchError = error as { status: number; data: unknown };
     const status = fetchError.status;
@@ -77,6 +79,8 @@ export const handleApiError = (error: unknown, context?: string) => {
       err.message.includes("NetworkError") ||
       err.message.includes("ECONNREFUSED") ||
       err.message.includes("timeout");
+
+    console.log('[ErrorHandler] Network error check:', err.message, 'isNetworkError:', isNetworkError);
 
     if (isNetworkError) {
       toast.error("Unable to connect. Check your network and try again");

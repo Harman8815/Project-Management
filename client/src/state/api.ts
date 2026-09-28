@@ -290,6 +290,15 @@ export const baseQuery = fetchBaseQuery({
     }
     return headers;
   },
+  // Add debug logging
+  fetchFn: async (input, init) => {
+    const url = typeof input === 'string' ? input : input.url;
+    console.log('[API] Request:', url, 'init:', init);
+    console.log('[API] Base URL from env:', process.env.NEXT_PUBLIC_API_BASE_URL);
+    const response = await fetch(input, init);
+    console.log('[API] Response:', response.status, response.statusText, url);
+    return response;
+  },
 });
 
 const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
@@ -334,9 +343,15 @@ export const api = createApi({
   endpoints: (build) => ({
      getAuthUser: build.query({
       queryFn: async (_, _queryApi, _extraoptions, fetchWithBQ) => {
+        console.log('[getAuthUser] Starting auth check...');
+        console.log('[getAuthUser] NEXT_PUBLIC_AUTH_DISABLED:', process.env.NEXT_PUBLIC_AUTH_DISABLED);
         try {
-          const user = await getCurrentUser();
-          const session = await fetchAuthSession();
+          console.log('[getAuthUser] Calling getCurrentUser...');
+          const user = await getCurrentUser().catch(e => { console.log('[getAuthUser] getCurrentUser failed:', e); return null; });
+          console.log('[getAuthUser] getCurrentUser result:', user);
+          if (!user) throw new Error("No user from getCurrentUser");
+          const session = await fetchAuthSession().catch(e => { console.log('[getAuthUser] fetchAuthSession failed:', e); return null; });
+          console.log('[getAuthUser] fetchAuthSession result:', session);
           if (!session) throw new Error("No session found");
           const { userSub } = session;
           const { accessToken } = session.tokens ?? {};
@@ -345,9 +360,11 @@ export const api = createApi({
           const userDetails = userDetailsResponse.data as User;
 
           return { data: { user, userSub, userDetails } };
-        } catch {
+        } catch (err) {
+          console.error('[getAuthUser] Error caught:', err);
           // Only allow dev fallback when AUTH_DISABLED=true
           if (process.env.NEXT_PUBLIC_AUTH_DISABLED === "true") {
+            console.log('[getAuthUser] Using dev fallback...');
             const usersResponse = await fetchWithBQ("users");
             const usersData = usersResponse.data as { data: User[]; meta: any };
             const users = usersData?.data;
