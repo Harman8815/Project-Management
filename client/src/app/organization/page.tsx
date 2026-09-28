@@ -1,7 +1,7 @@
 "use client";
 
 import Header from "@/components/Header";
-import { Card, ErrorState, LoadingState, Skeleton } from "@/components/ui";
+import { CardSkeleton, EmptyState, ErrorState, LoadingState } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
 import {
   useCreateCustomFieldMutation,
@@ -28,15 +28,32 @@ const FIELD_TYPE_OPTIONS = [
 ];
 
 export default function OrganizationPage() {
-  const { data: currentUser, isLoading: userLoading } = useGetAuthUserQuery({});
-  const orgId = currentUser?.userDetails?.organizationMemberships?.[0]?.organizationId ?? 0;
-  const userRole = currentUser?.userDetails?.organizationMemberships?.[0]?.role ?? "";
+  const {
+    data: currentUser,
+    isLoading: userLoading,
+    isError: userError,
+  } = useGetAuthUserQuery({});
+  const membership = currentUser?.userDetails?.organizationMemberships?.find(
+    (m) => Boolean(m?.organizationId),
+  );
+  const orgId = membership?.organizationId ?? 0;
+  const userRole = membership?.role ?? "";
   const isAdminOrOwner = ["ADMIN", "OWNER"].includes(userRole);
-  
-  const { data: organization, isLoading, isError } = useGetOrganizationQuery(orgId, {
+
+  const {
+    data: organization,
+    isLoading,
+    isError,
+  } = useGetOrganizationQuery(orgId, {
     skip: !orgId,
   });
-  const { data: fields = [] } = useGetCustomFieldsQuery(orgId);
+  const {
+    data: fields = [],
+    isLoading: fieldsLoading,
+    isError: fieldsError,
+  } = useGetCustomFieldsQuery(orgId, {
+    skip: !orgId,
+  });
   const [updateSettings, settingsState] = useUpdateOrganizationSettingsMutation();
   const [createField, fieldState] = useCreateCustomFieldMutation();
   const [setFieldValue, setFieldValueState] = useSetCustomFieldValueMutation();
@@ -53,11 +70,30 @@ export default function OrganizationPage() {
   const [editForm, setEditForm] = useState<{ name: string; key: string; fieldType: string; options: string; required: boolean } | null>(null);
   const [showFieldModal, setShowFieldModal] = useState(false);
 
-  if (userLoading || !orgId) {
+  if (userLoading) {
     return (
       <main className="space-y-6 p-8">
         <Header name="Organization admin" />
         <CardSkeleton count={2} />
+      </main>
+    );
+  }
+  if (userError) {
+    return (
+      <main className="space-y-6 p-8">
+        <Header name="Organization admin" />
+        <ErrorState
+          message="Failed to load your account"
+          onRetry={() => window.location.reload()}
+        />
+      </main>
+    );
+  }
+  if (!orgId) {
+    return (
+      <main className="space-y-6 p-8">
+        <Header name="Organization admin" />
+        <EmptyState message="You are not a member of any organization." />
       </main>
     );
   }
@@ -214,13 +250,20 @@ export default function OrganizationPage() {
               className="flex items-center gap-2 rounded bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
             >
               <Plus size={16} /> Add Custom Field
-            )}
+            </button>
           )}
         </div>
 
         {/* Field Definition List */}
         <div className="divide-y">
-          {fields.length === 0 ? (
+          {fieldsLoading ? (
+            <LoadingState message="Loading custom fields..." size="sm" />
+          ) : fieldsError ? (
+            <ErrorState
+              message="Failed to load custom fields"
+              onRetry={() => window.location.reload()}
+            />
+          ) : fields.length === 0 ? (
             <div className="py-8 text-center">
               <Database className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="font-semibold dark:text-white mb-2">No custom fields configured</h3>
