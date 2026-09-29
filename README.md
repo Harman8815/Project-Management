@@ -1,146 +1,184 @@
 # ProjeX
 
-Full-stack project management platform with task tracking, sprint planning, resource allocation, and an AI assistant — built with Next.js 14, NestJS, Prisma, and SQLite.
+<p align="center">
+  <strong>Enterprise Project Management Platform</strong>
+  <br />
+  Plan projects, manage tasks, coordinate teams, track resources, and analyze progress from one platform.
+</p>
 
-![Next.js](https://img.shields.io/badge/Next.js-14.2.5-000000?style=flat&logo=next.js)
-![React](https://img.shields.io/badge/React-18-087ea4?style=flat&logo=react&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat&logo=typescript&logoColor=white)
-![NestJS](https://img.shields.io/badge/NestJS-10-E0234E?style=flat&logo=nestjs&logoColor=white)
-![Prisma](https://img.shields.io/badge/Prisma-5-2D3748?style=flat&logo=prisma&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?style=flat&logo=tailwindcss&logoColor=white)
-![Redux Toolkit](https://img.shields.io/badge/Redux_Toolkit-2.2-764ABC?style=flat&logo=redux&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-3-003B57?style=flat&logo=sqlite&logoColor=white)
-![Jest](https://img.shields.io/badge/Jest-30-C21325?style=flat&logo=jest&logoColor=white)
-![GitHub Actions](https://img.shields.io/badge/CI-GitHub_Actions-2088FF?style=flat&logo=githubactions&logoColor=white)
+<p align="center">
 
-## Features
+![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)
+![NestJS](https://img.shields.io/badge/NestJS-10-E0234E?logo=nestjs)
+![Prisma](https://img.shields.io/badge/Prisma-5-2D3748?logo=prisma)
+![SQLite](https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite)
+![Jest](https://img.shields.io/badge/Tested-Jest-C21325?logo=jest)
 
-- **Projects & tasks** — create projects, track tasks with priority, status, tags, story points, watchers, dependencies, and due dates
-- **Multiple views** — board (drag & drop), list, table, and Gantt-style timeline per project
-- **Sprints & milestones** — time-boxed sprints with lifecycle tracking and project milestones
-- **Organizations & roles** — organization membership, roles, settings, and custom field definitions
-- **Resource management** — employee skills, bench tracking, project allocation, and employee transfers
-- **Analytics & reporting** — dashboard charts, activity logs, portfolio views, and generated reports
-- **Saved views** — persist filter, sort, and column configurations per view type
-- **Methodology** — per-project Kanban / Waterfall / Scrum configuration
-- **Calendar** — Google / Microsoft / CalDAV sync, iCal parsing, and event-to-task linking
-- **Integrations** — GitHub / GitLab activity, project import & export, HMAC-verified webhooks
-- **AI assistant** — natural-language task search, report generation, task breakdowns, and planning help
-- **Search** — cross-entity search with recent and top-search history
-- **Notifications** — in-app notifications with per-user preferences
-- **Auth** — AWS Cognito sign-in via Amplify, JWT-guarded API, plus a development auth bypass
+</p>
 
-## Tech Stack
+---
 
-| Layer | Technology |
-|-------|------------|
-| Frontend | Next.js 14 (App Router), React 18, TypeScript 5 |
-| Styling | Tailwind CSS 3, Material UI 5 + MUI X Data Grid, Lucide icons |
-| State | Redux Toolkit 2, RTK Query, redux-persist |
-| Charts | Recharts, gantt-task-react, FullCalendar 6 |
-| Drag & drop | react-dnd 16 |
-| Auth (client) | AWS Amplify 6, `@aws-amplify/ui-react` |
-| Backend | NestJS 10, TypeScript 5 |
-| Validation | class-validator, class-transformer, Joi |
-| ORM | Prisma 5 |
-| Database | SQLite |
-| Auth (server) | jsonwebtoken, JWT guard |
-| Docs | Swagger (`/api/docs`) |
-| Testing | Jest 30, ts-jest, supertest (30 server spec files) |
-| CI | GitHub Actions |
+## Overview
+
+**ProjeX** is a full-stack project management system designed around projects, tasks, teams, resources, workflows, analytics, and collaboration.
+
+The platform combines multiple project-management workflows into a single system:
+
+* Project & task management
+* Kanban, list, table & timeline views
+* Sprint & milestone tracking
+* Team & resource management
+* Organizations, roles & permissions
+* Calendar & integrations
+* Analytics & reporting
+* Search & saved views
+* Notifications
+* AI-assisted project workflows
+
+---
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    U["Browser"] -->|HTTP| C["Next.js Client<br/>App Router :3000"]
-    C -->|RTK Query| A["NestJS API<br/>/api/v1 :8000"]
-    A --> G["JwtAuthGuard"]
-    A --> M["Feature Modules"]
-    M --> P["PrismaService"]
-    P --> D[("SQLite<br/>dev.db")]
-    C <-->|Amplify / Cognito| ID["AWS Cognito"]
-    ID -.->|issues JWT| A
+    U[User] --> C[Next.js Frontend]
+    C --> API[NestJS API]
+    API --> AUTH[JWT / Cognito]
+    API --> S[Feature Modules]
+    S --> P[Prisma]
+    P --> DB[(SQLite)]
 ```
 
-```mermaid
-flowchart TB
-    subgraph server["server/nest/src"]
-        AM["app.module.ts"]
-        subgraph mods["modules/ — 29 feature modules"]
-            DOM["projects, tasks, sprints,<br/>milestones, teams, users"]
-            ORG["organizations, custom-fields,<br/>workflows, search, comments"]
-            DATA["analytics, reports, portfolio,<br/>activity-log, notifications"]
-            EXT["calendar, integrations, ai,<br/>export, bulk-import"]
-            CFG["resources, methodology,<br/>saved-views, project-templates"]
-        end
-        CM["common<br/>guards, filters, interceptors"]
-        PR["prisma"]
-    end
-    AM --> mods
-    AM --> CM
-    mods --> PR
-```
+### Stack
+
+| Layer          | Technology                        |
+| -------------- | --------------------------------- |
+| Frontend       | Next.js, React, TypeScript        |
+| UI             | Tailwind CSS, Material UI, Lucide |
+| State          | Redux Toolkit, RTK Query          |
+| Backend        | NestJS, TypeScript                |
+| Database       | Prisma + SQLite                   |
+| Authentication | AWS Cognito + JWT                 |
+| Testing        | Jest, Supertest                   |
+| API Docs       | Swagger                           |
+| CI             | GitHub Actions                    |
+
+---
+
+## Features
+
+### Project Management
+
+* Projects, tasks, dependencies and assignments
+* Priorities, tags, watchers and due dates
+* Kanban, List, Table and Timeline views
+* Sprints and milestones
+* Project templates
+* Saved views
+
+### Teams & Resources
+
+* Organizations and memberships
+* Teams and user management
+* Skills and employee allocation
+* Resource / bench tracking
+* Project assignments
+
+### Collaboration
+
+* Comments and mentions
+* Activity history
+* Notifications and preferences
+* Calendar integration
+* GitHub / GitLab integrations
+
+### Analytics
+
+* Project dashboards
+* Portfolio overview
+* Activity analytics
+* Reports
+* Search history and frequently used searches
+
+### AI
+
+* Natural-language project search
+* Task breakdown
+* Report generation
+* Planning assistance
+
+---
 
 ## Project Structure
 
-```
-.
-├── client/                         # Next.js 14 frontend
-│   ├── public/                     # static assets, avatars, logos
+```text
+ProjeX/
+├── client/
 │   └── src/
-│       ├── app/                    # App Router routes & layouts
-│       │   ├── home/               # dashboard with charts
-│       │   ├── projects/           # [id] board/list/table/timeline + all/
-│       │   ├── timeline/           # Gantt timeline
-│       │   ├── organization/       # org admin, custom fields, integrations
-│               │   ├── resource-management/  # skills, bench, allocation
-│       │   ├── calendar/           # FullCalendar views
-│       │   ├── search/             # search + history
-│       │   ├── priority/           # per-priority task views
-│       │   └── settings|users|teams|notifications|assistant
-│       ├── components/             # shared UI (Navbar, Sidebar, cards, modals)
-│       ├── state/                  # Redux slice + RTK Query API
-│       ├── lib/                    # helpers (dataGrid styles, API errors)
-│       └── styles/                 # design tokens
-└── server/                         # NestJS 10 backend
-    ├── prisma/
-    │   ├── schema.prisma           # 36 models, SQLite datasource
-    │   ├── migrations/
-    │   └── seed.ts                 # sample data seeder
-    └── nest/src/
-        ├── modules/                # 29 feature modules
-        ├── common/                 # guards, filters, interceptors, decorators, DTOs
-        ├── config/                 # Joi env validation
-        ├── prisma/                 # PrismaService / PrismaModule
-        ├── docs/                   # Swagger setup
-        ├── services/               # shared services (dev seeding)
-        └── app.module.ts
+│       ├── app/              # Routes & pages
+│       ├── components/       # Shared UI
+│       ├── state/            # Redux & RTK Query
+│       ├── lib/              # Utilities
+│       └── styles/           # Design tokens
+│
+├── server/
+│   ├── prisma/               # Schema, migrations & seed
+│   └── nest/
+│       └── src/
+│           ├── modules/      # Feature modules
+│           ├── common/       # Guards, filters & shared logic
+│           ├── config/       # Environment configuration
+│           ├── prisma/       # Prisma service
+│           └── docs/         # API documentation
+│
+└── .github/
+    └── workflows/             # CI
 ```
+
+---
 
 ## Getting Started
 
-**Prerequisites:** Node.js 20+ and npm.
+### Requirements
+
+* Node.js 20+
+* npm
+* Git
+
+### Clone
 
 ```bash
 git clone https://github.com/Harman8815/Project-Management.git
 cd Project-Management
 ```
 
-### 1. Backend
+### Backend
 
 ```bash
 cd server
 npm install
-cp .env.example .env        # then edit if needed
-npx prisma migrate dev      # create dev.db and apply migrations
-npm run seed                # optional: sample data
+cp .env.example .env
+
+npx prisma migrate dev
+npm run seed
 npm run dev
 ```
 
-API listens on `http://localhost:8000` (Swagger UI at `/api/docs`).
+API:
 
-### 2. Frontend
+```text
+http://localhost:8000
+```
+
+Swagger:
+
+```text
+http://localhost:8000/api/docs
+```
+
+### Frontend
 
 ```bash
 cd client
@@ -149,112 +187,132 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Application:
 
-## Environment Variables
+```text
+http://localhost:3000
+```
 
-**`server/.env`** — validated by `nest/src/config/env.validation.ts`
+---
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `DATABASE_URL` | yes | — | Prisma connection string, e.g. `file:./dev.db` |
-| `PORT` | no | `3000` in code, `8000` in `.env.example` | API port |
-| `JWT_SECRET` | no | insecure fallback | Token signing secret — **set in production** |
-| `AUTH_DISABLED` | no | `false` | `true` bypasses the JWT guard for local dev |
-| `DEV_KEY` | no | — | Key required to use dev endpoints when auth is enabled |
-| `CORS_ORIGIN` | no | `*` | Allowed origin |
-| `NODE_ENV` | no | `development` | Runtime environment |
-| `AWS_REGION` | no | — | AWS region for Cognito |
-| `COGNITO_USER_POOL_ID` | no | — | Cognito user pool |
-| `COGNITO_CLIENT_ID` | no | — | Cognito app client |
+## Development
 
-**`client/.env.local`**
+### Backend
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `NEXT_PUBLIC_API_BASE_URL` | yes | — | API origin, e.g. `http://localhost:8000` |
-| `NEXT_PUBLIC_COGNITO_USER_POOL_ID` | no | `""` | Amplify Cognito user pool |
-| `NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID` | no | `""` | Amplify app client id |
-| `NEXT_PUBLIC_AUTH_DISABLED` | no | — | `true` enables the client-side dev auth fallback |
+```bash
+npm run dev
+npm run build
+npm run typecheck
+npm run lint
+npm test
+```
 
-> Never commit real values for `JWT_SECRET` or the Cognito ids. Both `.env` files are gitignored; commit `.env.example` only.
+### Frontend
 
-## Commands
+```bash
+npm run dev
+npm run build
+npm run lint
+```
 
-### Server (`server/`)
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start NestJS in watch mode |
-| `npm run build` | Compile TypeScript to `server/dist/` |
-| `npm start` | Build, then run the compiled server |
-| `npm run typecheck` | `tsc --noEmit` |
-| `npm run lint` / `lint:fix` | ESLint |
-| `npm run format` / `format:check` | Prettier |
-| `npm run test` / `test:watch` / `test:coverage` | Jest suites |
-| `npm run seed` | Seed the database from `prisma/seed.ts` |
-| `npx prisma studio` | Browse the database in a GUI |
-
-### Client (`client/`)
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Next.js dev server on :3000 |
-| `npm run build` | Production build |
-| `npm start` | Serve the production build |
-| `npm run lint` | ESLint via `next lint` |
-
-> Stop `npm run dev` before running `npm run build` in the same directory — they share `.next/`, and building while the dev server is running corrupts its chunk manifest.
+---
 
 ## API
 
-All routes are prefixed with `/api/v1` and require `Authorization: Bearer <token>` unless `AUTH_DISABLED=true`.
+The backend API is versioned under:
 
-```http
-GET /api/v1/tasks?projectId=1
-Authorization: Bearer <jwt>
+```text
+/api/v1
 ```
 
-Swagger UI is served at `http://localhost:8000/api/docs`.
+Core areas include:
 
-| Area | Base path |
-|------|-----------|
-| Projects | `/projects` |
-| Tasks | `/tasks` |
-| Sprints & milestones | `/sprints`, `/milestones` |
-| Teams & users | `/teams`, `/users` |
-| Search | `/search` |
-| Timeline | `/timeline` |
-| Comments | `/comments` |
-| Notifications | `/notifications` |
-| Analytics & reports | `/analytics`, `/reports`, `/activity-log`, `/dashboard`, `/portfolio` |
-| Resources | `/resources` |
-| Methodology | `/methodology` |
-| Saved views | `/saved-views` |
-| Project templates | `/project-templates` |
-| Project memberships | `/project-memberships` |
-| Bulk import / export | `/bulk` |
-| Organizations | `/organizations/:organizationId/…` — members, settings, custom fields, integrations, workflows |
-| Calendar | `/organizations/:organizationId/calendar` |
-| AI assistant | `/organizations/:organizationId/ai` |
+```text
+/projects
+/tasks
+/sprints
+/milestones
+/teams
+/users
+/search
+/timeline
+/comments
+/notifications
+/resources
+/analytics
+/reports
+/organizations
+/calendar
+/ai
+```
+
+Detailed API documentation is available through Swagger.
+
+---
 
 ## Database
 
-Prisma with a **SQLite** datasource (`server/prisma/schema.prisma`), 36 models covering the core domain:
+ProjeX uses **Prisma with SQLite** for development.
 
-`User` · `Team` · `Project` · `ProjectTeam` · `ProjectMembership` · `ProjectTemplate` · `Task` · `TaskAssignment` · `TaskDependency` · `TaskWatcher` · `TaskHistory` · `Milestone` · `Sprint` · `Comment` · `CommentMention` · `Attachment` · `ActivityLog` · `Notification` · `NotificationPreference` · `Organization` · `OrganizationMembership` · `OrganizationSetting` · `CustomFieldDefinition` · `CustomFieldValue` · `Integration` · `IntegrationEvent` · `CalendarEvent` · `CalendarSync` · `AiRequestLog` · `AiFeedback` · `SearchQuery` · `UserSearchHistory` · `Skill` · `EmployeeSkill` · `MethodologyConfig` · `SavedView`
+The database contains models for:
 
-The datasource provider is pinned to `sqlite` in the schema, so switching to PostgreSQL requires changing the provider and re-running migrations.
+```text
+Users
+Organizations
+Projects
+Tasks
+Sprints
+Milestones
+Teams
+Resources
+Comments
+Notifications
+Calendar
+Integrations
+Analytics
+Search
+AI
+```
+
+---
 
 ## CI
 
-`.github/workflows/ci.yml` runs on pushes and pull requests to `main` and `develop`: server lint, server typecheck, server tests, and client lint + build.
+GitHub Actions runs automated checks for:
+
+* Server linting
+* Type checking
+* Backend tests
+* Client linting
+* Production build
+
+---
+
+## Roadmap
+
+ProjeX is being evolved toward a complete enterprise project-management platform.
+
+Planned areas include:
+
+* Advanced workflow automation
+* Deeper resource planning
+* Portfolio management
+* Advanced analytics
+* Improved integrations
+* AI-powered project workflows
+
+---
+
+## Repository
+
+**GitHub:**
+https://github.com/Harman8815/Project-Management
+
+**Issues:**
+https://github.com/Harman8815/Project-Management/issues
+
+---
 
 ## License
 
-ISC — see `server/package.json`.
-
-## Links
-
-- Repository: https://github.com/Harman8815/Project-Management
-- Issues: https://github.com/Harman8815/Project-Management/issues
+ISC
