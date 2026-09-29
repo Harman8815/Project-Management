@@ -1,357 +1,260 @@
-# ProjeX - Project Management System
+# ProjeX
 
-A full-stack project management application built with Next.js (frontend) and NestJS + Prisma (backend). Supports SQLite for local development and PostgreSQL for production. The application helps teams manage projects, tasks, teams, and users with priority-based task tracking, board/list/table/timeline views, and JWT-based authentication.
+Full-stack project management platform with task tracking, sprint planning, resource allocation, and an AI assistant — built with Next.js 14, NestJS, Prisma, and SQLite.
+
+![Next.js](https://img.shields.io/badge/Next.js-14.2.5-000000?style=flat&logo=next.js)
+![React](https://img.shields.io/badge/React-18-087ea4?style=flat&logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat&logo=typescript&logoColor=white)
+![NestJS](https://img.shields.io/badge/NestJS-10-E0234E?style=flat&logo=nestjs&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-5-2D3748?style=flat&logo=prisma&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?style=flat&logo=tailwindcss&logoColor=white)
+![Redux Toolkit](https://img.shields.io/badge/Redux_Toolkit-2.2-764ABC?style=flat&logo=redux&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-3-003B57?style=flat&logo=sqlite&logoColor=white)
+![Jest](https://img.shields.io/badge/Jest-30-C21325?style=flat&logo=jest&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/CI-GitHub_Actions-2088FF?style=flat&logo=githubactions&logoColor=white)
 
 ## Features
 
-- **Project Management**: Create, view, and manage projects with multiple views (Board, List, Table, Timeline)
-- **Task Management**: Create tasks with priorities (Urgent, High, Medium, Low, Backlog), statuses, tags, points, and due dates
-- **Team & User Management**: Assign users to teams, roles (Product Owner, Project Manager)
-- **Priority Views**: Filter tasks by priority level
-- **Search**: Search across tasks, projects, and users
-- **Authentication**: JWT-based authentication with role-based authorization
-- **State Management**: Redux Toolkit with RTK Query for API calls and redux-persist for state persistence
-- **Database**: SQLite (local dev) / PostgreSQL (production) via Prisma ORM
-- **Responsive UI**: Tailwind CSS + Material-UI components
-- **Customizable Workflows**: Configurable workflow definitions per organization
-- **Calendar Synchronization**: Sync with Google/Microsoft/Caldav providers, manage calendar events, link events to tasks
-- **External Integrations**: GitHub/GitLab activity sync, structured project import/export, webhook verification
-- **AI Assistant**: Natural-language task search, report generation, task breakdown suggestions, planning assistance
-- **AI Safety**: Fallback behavior for model failures, authorization boundaries, prompt injection protection, daily rate limiting
-- **Comments**: Comment system with mentions and replies
+- **Projects & tasks** — create projects, track tasks with priority, status, tags, story points, watchers, dependencies, and due dates
+- **Multiple views** — board (drag & drop), list, table, and Gantt-style timeline per project
+- **Sprints & milestones** — time-boxed sprints with lifecycle tracking and project milestones
+- **Organizations & roles** — organization membership, roles, settings, and custom field definitions
+- **Resource management** — employee skills, bench tracking, project allocation, and employee transfers
+- **Analytics & reporting** — dashboard charts, activity logs, portfolio views, and generated reports
+- **Saved views** — persist filter, sort, and column configurations per view type
+- **Methodology** — per-project Kanban / Waterfall / Scrum configuration
+- **Calendar** — Google / Microsoft / CalDAV sync, iCal parsing, and event-to-task linking
+- **Integrations** — GitHub / GitLab activity, project import & export, HMAC-verified webhooks
+- **AI assistant** — natural-language task search, report generation, task breakdowns, and planning help
+- **Search** — cross-entity search with recent and top-search history
+- **Notifications** — in-app notifications with per-user preferences
+- **Auth** — AWS Cognito sign-in via Amplify, JWT-guarded API, plus a development auth bypass
 
 ## Tech Stack
 
-### Frontend (Client)
-- **Next.js** 14 (React framework)
-- **TypeScript**
-- **Tailwind CSS** + **Material-UI** (@mui/material, @mui/x-data-grid)
-- **Redux Toolkit** & **RTK Query** for state management and API calls
-- **redux-persist** for state persistence
-- **AWS Amplify** for authentication
-- **react-dnd** for drag-and-drop board
-- **gantt-task-react** for timeline/Gantt charts
-- **recharts** for charts
+| Layer | Technology |
+|-------|------------|
+| Frontend | Next.js 14 (App Router), React 18, TypeScript 5 |
+| Styling | Tailwind CSS 3, Material UI 5 + MUI X Data Grid, Lucide icons |
+| State | Redux Toolkit 2, RTK Query, redux-persist |
+| Charts | Recharts, gantt-task-react, FullCalendar 6 |
+| Drag & drop | react-dnd 16 |
+| Auth (client) | AWS Amplify 6, `@aws-amplify/ui-react` |
+| Backend | NestJS 10, TypeScript 5 |
+| Validation | class-validator, class-transformer, Joi |
+| ORM | Prisma 5 |
+| Database | SQLite |
+| Auth (server) | jsonwebtoken, JWT guard |
+| Docs | Swagger (`/api/docs`) |
+| Testing | Jest 30, ts-jest, supertest (30 server spec files) |
+| CI | GitHub Actions |
 
-### Backend (Server)
-- **NestJS** framework with modular architecture
-- **TypeScript**
-- **Prisma ORM** with SQLite (local) / PostgreSQL (production)
-- **JWT** authentication
-- **Calendar sync** (Google, Microsoft, CalDAV)
-- **Webhook verification** with HMAC signature validation
-- **iCal parsing** for calendar events
+## Architecture
+
+```mermaid
+flowchart LR
+    U["Browser"] -->|HTTP| C["Next.js Client<br/>App Router :3000"]
+    C -->|RTK Query| A["NestJS API<br/>/api/v1 :8000"]
+    A --> G["JwtAuthGuard"]
+    A --> M["Feature Modules"]
+    M --> P["PrismaService"]
+    P --> D[("SQLite<br/>dev.db")]
+    C <-->|Amplify / Cognito| ID["AWS Cognito"]
+    ID -.->|issues JWT| A
+```
+
+```mermaid
+flowchart TB
+    subgraph server["server/nest/src"]
+        AM["app.module.ts"]
+        subgraph mods["modules/ — 29 feature modules"]
+            DOM["projects, tasks, sprints,<br/>milestones, teams, users"]
+            ORG["organizations, custom-fields,<br/>workflows, search, comments"]
+            DATA["analytics, reports, portfolio,<br/>activity-log, notifications"]
+            EXT["calendar, integrations, ai,<br/>export, bulk-import"]
+            CFG["resources, methodology,<br/>saved-views, project-templates"]
+        end
+        CM["common<br/>guards, filters, interceptors"]
+        PR["prisma"]
+    end
+    AM --> mods
+    AM --> CM
+    mods --> PR
+```
 
 ## Project Structure
 
 ```
 .
-├── client/                 # Next.js frontend
-│   ├── public/             # Static assets
-│   ├── src/
-│   │   ├── app/            # Next.js App Router pages
-│   │   ├── components/     # Reusable UI components
-│   │   ├── state/          # Redux state & API hooks
-│   │   └── lib/            # Utilities
-│   └── package.json
-├── server/                 # NestJS backend
-│   ├── nest/
-│   │   ├── src/            # Source code
-│   │   │   ├── modules/    # Feature modules (tasks, projects, users, etc.)
-│   │   │   ├── prisma/     # PrismaService & PrismaModule
-│   │   │   ├── common/     # Guards, interceptors, filters, decorators
-│   │   │   ├── config/     # Environment validation
-│   │   │   └── app.module.ts
-│   │   ├── prisma/         # Prisma schema, migrations, seed data
-│   │   ├── dist/           # Compiled output (generated)
-│   │   └── package.json
-│   └── package.json        # Backend root package.json
-└── README.md
+├── client/                         # Next.js 14 frontend
+│   ├── public/                     # static assets, avatars, logos
+│   └── src/
+│       ├── app/                    # App Router routes & layouts
+│       │   ├── home/               # dashboard with charts
+│       │   ├── projects/           # [id] board/list/table/timeline + all/
+│       │   ├── timeline/           # Gantt timeline
+│       │   ├── organization/       # org admin, custom fields, integrations
+│               │   ├── resource-management/  # skills, bench, allocation
+│       │   ├── calendar/           # FullCalendar views
+│       │   ├── search/             # search + history
+│       │   ├── priority/           # per-priority task views
+│       │   └── settings|users|teams|notifications|assistant
+│       ├── components/             # shared UI (Navbar, Sidebar, cards, modals)
+│       ├── state/                  # Redux slice + RTK Query API
+│       ├── lib/                    # helpers (dataGrid styles, API errors)
+│       └── styles/                 # design tokens
+└── server/                         # NestJS 10 backend
+    ├── prisma/
+    │   ├── schema.prisma           # 36 models, SQLite datasource
+    │   ├── migrations/
+    │   └── seed.ts                 # sample data seeder
+    └── nest/src/
+        ├── modules/                # 29 feature modules
+        ├── common/                 # guards, filters, interceptors, decorators, DTOs
+        ├── config/                 # Joi env validation
+        ├── prisma/                 # PrismaService / PrismaModule
+        ├── docs/                   # Swagger setup
+        ├── services/               # shared services (dev seeding)
+        └── app.module.ts
 ```
 
 ## Getting Started
 
-### Prerequisites
+**Prerequisites:** Node.js 20+ and npm.
 
-- **Node.js** v18+ (recommended)
-- **npm** (comes with Node.js)
+```bash
+git clone https://github.com/Harman8815/Project-Management.git
+cd Project-Management
+```
 
-### Step 1: Backend Setup
+### 1. Backend
 
 ```bash
 cd server
 npm install
-```
-
-### Step 2: Configure Backend Environment
-
-Create a `.env` file in the `server/` directory:
-
-```env
-PORT=8000
-DATABASE_URL="file:./dev.db"
-JWT_SECRET="fallback-secret-change-me"
-```
-
-> **Note:** If `JWT_SECRET` is not set, the server defaults to `"fallback-secret-change-me"`.
-
-### Step 3: Set Up the Database
-
-```bash
-cd server
-npx prisma migrate dev --name init
-```
-
-This creates a SQLite database (`dev.db`) and runs migrations.
-
-### Step 4: Seed Sample Data (Optional)
-
-```bash
-npm run seed
-```
-
-This seeds Teams, Projects, Users, Tasks, Comments, Calendar Events, and related data.
-
-### Step 5: Start the Backend
-
-**Development mode (auto-restart on file changes):**
-```bash
+cp .env.example .env        # then edit if needed
+npx prisma migrate dev      # create dev.db and apply migrations
+npm run seed                # optional: sample data
 npm run dev
 ```
 
-**Production build and start:**
-```bash
-npm run build && node nest/dist/src/main.js
-```
+API listens on `http://localhost:8000` (Swagger UI at `/api/docs`).
 
-By default, the server runs on `http://localhost:8000`.
-
-**API is available at:** `http://localhost:8000/api/v1/`
-
-### Step 6: Frontend Setup
-
-Open a new terminal window:
+### 2. Frontend
 
 ```bash
 cd client
 npm install
-```
-
-### Step 7: Configure Frontend Environment
-
-Create a `.env.local` file in the `client/` directory:
-
-```env
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
-```
-
-> **Important:** Set `NEXT_PUBLIC_API_BASE_URL` to the backend server URL (port 8000 by default, not 3000).
-
-### Step 8: Start the Frontend
-
-```bash
+cp .env.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000).
 
-## API Documentation
+## Environment Variables
 
-All API endpoints are prefixed with `/api/v1` and require a valid JWT token in the `Authorization` header:
+**`server/.env`** — validated by `nest/src/config/env.validation.ts`
 
-```
-Authorization: Bearer <your-jwt-token>
-```
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `DATABASE_URL` | yes | — | Prisma connection string, e.g. `file:./dev.db` |
+| `PORT` | no | `3000` in code, `8000` in `.env.example` | API port |
+| `JWT_SECRET` | no | insecure fallback | Token signing secret — **set in production** |
+| `AUTH_DISABLED` | no | `false` | `true` bypasses the JWT guard for local dev |
+| `DEV_KEY` | no | — | Key required to use dev endpoints when auth is enabled |
+| `CORS_ORIGIN` | no | `*` | Allowed origin |
+| `NODE_ENV` | no | `development` | Runtime environment |
+| `AWS_REGION` | no | — | AWS region for Cognito |
+| `COGNITO_USER_POOL_ID` | no | — | Cognito user pool |
+| `COGNITO_CLIENT_ID` | no | — | Cognito app client |
 
-### Generating a Test JWT Token
+**`client/.env.local`**
 
-For testing purposes, generate a token using Node.js:
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `NEXT_PUBLIC_API_BASE_URL` | yes | — | API origin, e.g. `http://localhost:8000` |
+| `NEXT_PUBLIC_COGNITO_USER_POOL_ID` | no | `""` | Amplify Cognito user pool |
+| `NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID` | no | `""` | Amplify app client id |
+| `NEXT_PUBLIC_AUTH_DISABLED` | no | — | `true` enables the client-side dev auth fallback |
 
-```bash
-cd server
-node -e "const jwt=require('jsonwebtoken'); console.log(jwt.sign({userId:1, cognitoId:'test-user', username:'testuser'}, 'fallback-secret-change-me', {expiresIn:'1h'}))"
-```
+> Never commit real values for `JWT_SECRET` or the Cognito ids. Both `.env` files are gitignored; commit `.env.example` only.
 
-### Testing the API with curl
+## Commands
 
-```bash
-# Test tasks endpoint (replace TOKEN with the generated JWT)
-curl http://localhost:8000/api/v1/tasks?projectId=1 \
-  -H "Authorization: Bearer TOKEN"
-
-# Health check (if available)
-curl http://localhost:8000/api/v1/projects \
-  -H "Authorization: Bearer TOKEN"
-```
-
-### Available API Endpoints
-
-- `GET /api/v1/projects` - Get all projects
-- `POST /api/v1/projects` - Create a new project
-- `GET /api/v1/projects/:id` - Get a project by ID
-- `PATCH /api/v1/projects/:id` - Update a project
-- `DELETE /api/v1/projects/:id` - Delete a project
-- `POST /api/v1/projects/:id/archive` - Archive a project
-- `POST /api/v1/projects/:id/restore` - Restore a project
-- `GET /api/v1/tasks?projectId={id}` - Get tasks for a project
-- `POST /api/v1/tasks` - Create a new task
-- `GET /api/v1/tasks/:id` - Get a task by ID
-- `PATCH /api/v1/tasks/:id` - Update a task
-- `DELETE /api/v1/tasks/:id` - Delete a task
-- `PATCH /api/v1/tasks/:id/status` - Update task status
-- `POST /api/v1/tasks/:id/dependencies` - Add task dependency
-- `DELETE /api/v1/tasks/:id/dependencies/:blockedById` - Remove task dependency
-- `GET /api/v1/tasks/:id/dependencies` - Get task dependencies
-- `GET /api/v1/tasks/:id/children` - Get child tasks
-- `POST /api/v1/tasks/:id/watchers` - Add watcher to task
-- `DELETE /api/v1/tasks/:id/watchers/:userId` - Remove watcher from task
-- `GET /api/v1/tasks/:id/watchers` - Get task watchers
-- `GET /api/v1/users` - Get all users
-- `GET /api/v1/users/:cognitoId` - Get a user by Cognito ID
-- `PATCH /api/v1/users/:cognitoId` - Update a user
-- `DELETE /api/v1/users/:cognitoId` - Delete a user
-- `GET /api/v1/projects/:projectId/tasks/user/:userId` - Get tasks for a user in a project
-- `POST /api/v1/projects/:projectId/tasks` - Create a task in a project
-- `GET /api/v1/projects/:projectId/tasks` - Get all tasks in a project
-- `PATCH /api/v1/projects/:projectId/tasks/:id` - Update a task in a project
-- `DELETE /api/v1/projects/:projectId/tasks/:id` - Delete a task from a project
-- `GET /api/v1/projects/:projectId/tasks/:id` - Get a task in a project
-- `GET /api/v1/projects/:projectId/tasks/:id/subtasks` - Get subtasks of a task in a project
-- `POST /api/v1/projects/:projectId/tasks/:id/subtasks` - Create a subtask for a task in a project
-- `PATCH /api/v1/projects/:projectId/tasks/:id/subtasks/:subtaskId` - Update a subtask
-- `DELETE /api/v1/projects/:projectId/tasks/:id/subtasks/:subtaskId` - Delete a subtask
-- `POST /api/v1/projects/:projectId/tasks/:id/move` - Move a task to a different status
-- `POST /api/v1/projects/:projectId/backlog` - Create a backlog
-- `GET /api/v1/projects/:projectId/backlog` - Get backlog
-- `PATCH /api/v1/projects/:projectId/backlog` - Update backlog
-- `POST /api/v1/projects/:projectId/backlog/tasks` - Add task to backlog
-- `DELETE /api/v1/projects/:projectId/backlog/tasks/:taskId` - Remove task from backlog
-- `GET /api/v1/teams` - Get all teams
-- `POST /api/v1/teams` - Create a team
-- `GET /api/v1/teams/:id` - Get a team by ID
-- `PATCH /api/v1/teams/:id` - Update a team
-- `DELETE /api/v1/teams/:id` - Delete a team
-- `POST /api/v1/teams/:id/members` - Add member to team
-- `GET /api/v1/teams/:id/members` - Get team members
-- `DELETE /api/v1/teams/:id/members/:userId` - Remove member from team
-- `GET /api/v1/search?query={query}` - Search tasks, projects, and users
-- `GET/POST /api/v1/organizations/:orgId/calendar/events` - Calendar event CRUD
-- `POST /api/v1/organizations/:orgId/calendar/sync` - Sync calendar from provider
-- `POST /api/v1/organizations/:orgId/calendar/parse-ical` - Parse iCal data
-- `POST /api/v1/organizations/:orgId/calendar/events/:eventId/link-task` - Link event to task
-- `GET/PUT /api/v1/organizations/:orgId/ai/model-config` - AI model configuration
-- `POST /api/v1/organizations/:orgId/ai/answer` - AI assistant query
-- `POST /api/v1/organizations/:orgId/ai/search` - Natural language task search
-- `POST /api/v1/organizations/:orgId/ai/report` - Generate project report
-- `POST /api/v1/organizations/:orgId/ai/task-breakdown` - Get task breakdown suggestions
-- `POST /api/v1/organizations/:orgId/ai/planning` - Get planning assistance
-- `POST/GET /api/v1/organizations/:orgId/integrations/:id/credential` - Manage credentials
-- `POST /api/v1/organizations/:orgId/integrations/activity/link` - Link external activity to task
-- `POST /api/v1/organizations/:orgId/integrations/project/export` - Export project
-- `POST /api/v1/organizations/:orgId/integrations/project/import` - Import project
-- `POST /api/v1/organizations/:orgId/integrations/webhook/verify` - Verify webhook signature
-- `POST/GET/DELETE /api/v1/organizations/:orgId/workflows/:type` - Workflow definition CRUD
-- `POST /api/v1/organizations/:orgId/workflows/:type/validate-transition` - Validate workflow transition
-
-## Development Commands
-
-### Backend (from `server/` directory)
+### Server (`server/`)
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start development server with hot-reload (NestJS CLI) |
-| `npm run build` | Compile TypeScript to `nest/dist/` |
-| `npm start` | Build and run production server |
-| `npm run seed` | Seed the database with sample data |
-| `npm run test` | Run all tests |
-| `npm run test:watch` | Run tests in watch mode |
-| `npm run test:coverage` | Run tests with coverage report |
-| `npm run lint` | Lint source files |
-| `npm run lint:fix` | Auto-fix lint errors |
-| `npm run typecheck` | TypeScript type-check without emitting |
-| `npm run format` | Format source files with Prettier |
-| `npm run format:check` | Check formatting |
-| `npx prisma studio` | Open Prisma Studio (GUI for DB) |
+| `npm run dev` | Start NestJS in watch mode |
+| `npm run build` | Compile TypeScript to `server/dist/` |
+| `npm start` | Build, then run the compiled server |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run lint` / `lint:fix` | ESLint |
+| `npm run format` / `format:check` | Prettier |
+| `npm run test` / `test:watch` / `test:coverage` | Jest suites |
+| `npm run seed` | Seed the database from `prisma/seed.ts` |
+| `npx prisma studio` | Browse the database in a GUI |
 
-### Frontend (from `client/` directory)
+### Client (`client/`)
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start Next.js dev server |
-| `npm run build` | Build for production |
-| `npm start` | Start production server |
-| `npm run lint` | Lint source files |
+| `npm run dev` | Next.js dev server on :3000 |
+| `npm run build` | Production build |
+| `npm start` | Serve the production build |
+| `npm run lint` | ESLint via `next lint` |
 
-## Database Schema
+> Stop `npm run dev` before running `npm run build` in the same directory — they share `.next/`, and building while the dev server is running corrupts its chunk manifest.
 
-The database uses Prisma with the following models:
+## API
 
-- **User**: User accounts
-- **Team**: Teams that users belong to
-- **Project**: Projects managed by teams
-- **Task**: Tasks within projects
-- **TaskAssignment**: Many-to-many relationship between users and tasks
-- **Attachment**: Files attached to tasks
-- **Comments**: Comments on tasks
-- **CalendarEvent**: Calendar events with optional task linking
-- **CalendarSync**: Calendar provider sync configuration
-- **Integration**: External service integrations (GitHub, GitLab)
-- **IntegrationEvent**: Queued integration events
-- **Organization**: Organization/company entity
-- **OrganizationMembership**: User roles within organizations
-- **OrganizationSetting**: Key-value org settings (workflows, AI config)
-- **ActivityLog**: Audit trail of system events
-- **Sprint**: Time-boxed work iterations
-- **Milestone**: Project milestones
-- **ProjectMembership**: User roles within projects
-- **ProjectTeam**: Team-project associations
-- **ProjectTemplate**: Reusable project templates
-- **CustomFieldDefinition**: Custom field schemas
-- **CustomFieldValue**: Custom field values
-- **Notification**: User notifications
-- **NotificationPreference**: User notification preferences
-- **TaskDependency**: Task dependencies
-- **TaskWatcher**: Task watchers
-- **TaskHistory**: Task field change history
-- **AiRequestLog**: AI usage tracking
-- **AiFeedback**: AI response ratings
+All routes are prefixed with `/api/v1` and require `Authorization: Bearer <token>` unless `AUTH_DISABLED=true`.
 
-## Troubleshooting
-
-### "CANNOT FIND MODULE" error when running `npm start`
-
-The build output goes to `nest/dist/src/`. Use `npm run dev` for development, or if running production:
-
-```bash
-npm run build && node nest/dist/src/main.js
+```http
+GET /api/v1/tasks?projectId=1
+Authorization: Bearer <jwt>
 ```
 
-### Database connection issues
+Swagger UI is served at `http://localhost:8000/api/docs`.
 
-Ensure SQLite file exists and is writable:
-```bash
-npx prisma migrate dev --name init
-```
+| Area | Base path |
+|------|-----------|
+| Projects | `/projects` |
+| Tasks | `/tasks` |
+| Sprints & milestones | `/sprints`, `/milestones` |
+| Teams & users | `/teams`, `/users` |
+| Search | `/search` |
+| Timeline | `/timeline` |
+| Comments | `/comments` |
+| Notifications | `/notifications` |
+| Analytics & reports | `/analytics`, `/reports`, `/activity-log`, `/dashboard`, `/portfolio` |
+| Resources | `/resources` |
+| Methodology | `/methodology` |
+| Saved views | `/saved-views` |
+| Project templates | `/project-templates` |
+| Project memberships | `/project-memberships` |
+| Bulk import / export | `/bulk` |
+| Organizations | `/organizations/:organizationId/…` — members, settings, custom fields, integrations, workflows |
+| Calendar | `/organizations/:organizationId/calendar` |
+| AI assistant | `/organizations/:organizationId/ai` |
 
-### Port 8000 already in use
+## Database
 
-The server reads `PORT` from `.env`. Change it if needed:
-```env
-PORT=8001
-```
+Prisma with a **SQLite** datasource (`server/prisma/schema.prisma`), 36 models covering the core domain:
 
-### API returns 401 Unauthorized
+`User` · `Team` · `Project` · `ProjectTeam` · `ProjectMembership` · `ProjectTemplate` · `Task` · `TaskAssignment` · `TaskDependency` · `TaskWatcher` · `TaskHistory` · `Milestone` · `Sprint` · `Comment` · `CommentMention` · `Attachment` · `ActivityLog` · `Notification` · `NotificationPreference` · `Organization` · `OrganizationMembership` · `OrganizationSetting` · `CustomFieldDefinition` · `CustomFieldValue` · `Integration` · `IntegrationEvent` · `CalendarEvent` · `CalendarSync` · `AiRequestLog` · `AiFeedback` · `SearchQuery` · `UserSearchHistory` · `Skill` · `EmployeeSkill` · `MethodologyConfig` · `SavedView`
 
-Ensure you're sending a valid JWT token:
-```bash
-# Generate a test token
-cd server && node -e "console.log(require('jsonwebtoken').sign({userId:1, cognitoId:'test-user', username:'testuser'}, 'fallback-secret-change-me', {expiresIn:'1h'}))"
-```
+The datasource provider is pinned to `sqlite` in the schema, so switching to PostgreSQL requires changing the provider and re-running migrations.
 
-### API returns 403 Project Access Denied
+## CI
 
-This means the JWT is valid but the user doesn't have access to the requested project. Seed data or adjust project memberships in the database.
+`.github/workflows/ci.yml` runs on pushes and pull requests to `main` and `develop`: server lint, server typecheck, server tests, and client lint + build.
 
 ## License
 
-ISC
+ISC — see `server/package.json`.
+
+## Links
+
+- Repository: https://github.com/Harman8815/Project-Management
+- Issues: https://github.com/Harman8815/Project-Management/issues
